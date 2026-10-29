@@ -1,0 +1,1502 @@
+<!doctype html><html lang="es"><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#d2400f"><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon-192.png"><link rel="apple-touch-icon" href="icon-192.png"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Inventario DC Racing</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+/* Layout: barra fija con pestañas (Productos / Inventarios) + lista densa agrupada por tipo; ficha en panel lateral u hoja completa en celular */
+:root{
+  --bg:#eef0f3; --surface:#ffffff; --surface-2:#f6f7f9; --line:#d9dde3; --ink:#161b24; --muted:#5d6675;
+  --accent:#d2400f; --accent-ink:#ffffff; --accent-soft:#fbe6dc;
+  --ok:#1f7a45; --ok-soft:#dcf1e4; --warn:#9a6a00; --warn-soft:#fbefc9; --rev:#2f5fa8; --rev-soft:#dde8f8;
+  --shadow:0 10px 30px rgba(22,27,36,.14);
+  --f-display:"Barlow Condensed","Arial Narrow",system-ui,sans-serif;
+  --f-body:"Barlow",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,"Cascadia Mono",Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#101318; --surface:#181c23; --surface-2:#1f242d; --line:#2e3541; --ink:#e8ebf0; --muted:#98a1b0;
+  --accent:#ff6a33; --accent-ink:#1a0d06; --accent-soft:#3a2015;
+  --ok:#5fcf8c; --ok-soft:#173826; --warn:#f0c14b; --warn-soft:#3a3013; --rev:#7fa8ec; --rev-soft:#1c2a42;
+  --shadow:0 10px 30px rgba(0,0,0,.5); color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#101318; --surface:#181c23; --surface-2:#1f242d; --line:#2e3541; --ink:#e8ebf0; --muted:#98a1b0;
+  --accent:#ff6a33; --accent-ink:#1a0d06; --accent-soft:#3a2015;
+  --ok:#5fcf8c; --ok-soft:#173826; --warn:#f0c14b; --warn-soft:#3a3013; --rev:#7fa8ec; --rev-soft:#1c2a42;
+  --shadow:0 10px 30px rgba(0,0,0,.5); color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font:15px/1.45 var(--f-body)}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:30;background:var(--surface)}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.wrap{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--surface);border-bottom:1px solid var(--line)}
+.top-in{display:grid;grid-template-columns:minmax(0,1fr);gap:10px;padding-block:12px;max-width:1280px;margin:0 auto}
+.brand{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.brand h1{margin:0;font:700 1.55rem/1 var(--f-display);letter-spacing:.02em;text-transform:uppercase}
+.brand h1 span{color:var(--accent)}
+.tabs{display:flex;gap:4px;background:var(--surface-2);border:1px solid var(--line);border-radius:9px;padding:3px}
+.tabs a{padding:6px 12px;border-radius:7px;font:700 .95rem/1 var(--f-display);text-transform:uppercase;letter-spacing:.05em;color:var(--muted);text-decoration:none}
+.tabs a[aria-current="page"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.tabs a .n{display:inline-block;min-width:18px;margin-left:6px;padding:1px 5px;border-radius:9px;background:var(--accent);color:var(--accent-ink);font:600 .7rem/1.3 var(--f-body);text-align:center}
+.stats{display:flex;gap:14px;flex-wrap:wrap;color:var(--muted);font-size:.86rem;font-variant-numeric:tabular-nums}
+.stats b{color:var(--ink);font-weight:600}
+.meter{height:6px;border-radius:3px;background:var(--surface-2);overflow:hidden;border:1px solid var(--line)}
+.meter i{display:block;height:100%;background:var(--ok);width:0;transition:width .3s}
+.search{display:flex;gap:8px}
+.search input{flex:1;min-width:0;padding:11px 12px;border:1.5px solid var(--line);border-radius:8px;background:var(--surface-2);font-size:1rem}
+.search input:focus{border-color:var(--accent);outline:none}
+.btn{border:1.5px solid var(--line);background:var(--surface);border-radius:8px;padding:9px 14px;font-weight:600;white-space:nowrap;color:var(--ink)}
+.btn:hover{border-color:var(--muted)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.ok{background:var(--ok);border-color:var(--ok);color:var(--surface)}
+.btn.sm{padding:5px 10px;font-size:.85rem}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.filters{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.filters select{padding:7px 8px;border:1.5px solid var(--line);border-radius:8px;background:var(--surface);max-width:100%;min-width:0}
+#btnFilt{display:none}
+@media (max-width:620px){#btnFilt{display:inline-block}.filters.collapsible:not(.open){display:none}#btnScan span{display:none}.search .btn{padding:9px 10px}}
+.chk{display:inline-flex;gap:6px;align-items:center;font-size:.9rem;color:var(--muted);padding:6px 4px}
+main{max-width:1280px;margin:0 auto;padding-block:14px 40px}
+.catbar{display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:10px}
+.catbar h2{margin:0;font:700 1.3rem/1.1 var(--f-display);text-transform:uppercase;letter-spacing:.03em;text-wrap:balance}
+.catbar .meta{color:var(--muted);font-size:.88rem;font-variant-numeric:tabular-nums}
+.list{display:grid;gap:6px}
+.ghead{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap;margin-top:12px;padding:6px 2px 4px;border-bottom:2px solid var(--ink)}
+.ghead:first-child{margin-top:0}
+.ghead h3{margin:0;font:700 1.05rem/1 var(--f-display);text-transform:uppercase;letter-spacing:.05em}
+.ghead span{color:var(--muted);font-size:.82rem;font-variant-numeric:tabular-nums}
+.row{display:grid;grid-template-columns:56px minmax(0,1fr) auto;gap:12px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:8px 12px 8px 8px;text-align:left;width:100%;color:var(--ink)}
+.row:hover{border-color:var(--muted)}
+.row.ver{border-left:4px solid var(--ok)}
+.thumb{width:56px;height:56px;border-radius:7px;background:var(--surface-2);border:1px solid var(--line);display:grid;place-items:center;color:var(--muted);font-size:.65rem;text-transform:uppercase;letter-spacing:.06em;overflow:hidden}
+.thumb img{width:100%;height:100%;object-fit:cover}
+.r-main{min-width:0;display:grid;gap:3px}
+.r-top{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.code{font:500 .8rem/1 var(--f-mono);letter-spacing:.02em}
+.name{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sub{color:var(--muted);font-size:.82rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.r-side{display:grid;justify-items:end;gap:4px;font-variant-numeric:tabular-nums}
+.qty{font:700 1.15rem/1 var(--f-display)}
+.qty small{font:500 .7rem var(--f-body);color:var(--muted);margin-left:2px}
+.price{font-size:.85rem;color:var(--muted)}
+.pill{display:inline-block;padding:2px 8px;border-radius:999px;font-size:.72rem;font-weight:600;letter-spacing:.02em}
+.pill.I{background:var(--ok-soft);color:var(--ok)}
+.pill.P{background:var(--warn-soft);color:var(--warn)}
+.pill.R{background:var(--rev-soft);color:var(--rev)}
+.pill.v{background:var(--ok);color:var(--surface)}
+.pill.dup{background:var(--accent-soft);color:var(--accent)}
+.pill.new{background:var(--accent);color:var(--accent-ink)}
+.comp{width:64px;height:5px;border-radius:3px;background:var(--surface-2);overflow:hidden;border:1px solid var(--line)}
+.comp i{display:block;height:100%;background:var(--accent)}
+.more{margin:14px auto 0;display:block}
+/* Vista mosaico */
+.catbar .right{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.vsw{display:flex;border:1.5px solid var(--line);border-radius:8px;overflow:hidden}
+.vsw button{border:0;background:var(--surface);padding:6px 12px;font-weight:600;font-size:.85rem;color:var(--muted)}
+.vsw button+button{border-left:1.5px solid var(--line)}
+.vsw button[aria-pressed="true"]{background:var(--ink);color:var(--surface)}
+.list.mosaic{grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px}
+.list.mosaic .ghead,.list.mosaic .empty{grid-column:1 / -1}
+.tile{display:flex;flex-direction:column;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:0;overflow:hidden;text-align:left;color:var(--ink);min-width:0}
+.tile:hover{border-color:var(--muted)}
+.tile.ver{box-shadow:inset 0 4px 0 var(--ok);border-left-width:1px}
+.tile .thumb{width:100%;height:auto;aspect-ratio:1;border:0;border-bottom:1px solid var(--line);border-radius:0;font-size:.75rem}
+.tile .t-body{display:grid;gap:4px;padding:8px 10px 10px;min-width:0}
+.tile .name{white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;font-size:.9rem;line-height:1.25;min-height:2.5em}
+.tile .t-foot{display:flex;justify-content:space-between;align-items:baseline;gap:6px;font-variant-numeric:tabular-nums}
+.tile .pill{font-size:.68rem;padding:1px 6px}
+@media (max-width:620px){.list.mosaic{grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px}}
+.empty{padding:40px 16px;text-align:center;color:var(--muted)}
+.notice{background:var(--rev-soft);color:var(--rev);border-radius:8px;padding:8px 12px;font-size:.88rem}
+/* Inventarios */
+.inv-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px;display:grid;gap:8px;min-width:0;text-align:left;color:var(--ink)}
+.card h4{margin:0;font:700 1.15rem/1.1 var(--f-display);text-transform:uppercase;letter-spacing:.03em}
+.card .sub{white-space:normal}
+.newinv{background:var(--surface);border:1.5px solid var(--ink);border-radius:12px;padding:16px;display:grid;gap:12px;margin-bottom:18px}
+.newinv h3{margin:0;font:700 1.2rem/1 var(--f-display);text-transform:uppercase;letter-spacing:.04em}
+.pick{display:grid;gap:6px;max-height:240px;overflow:auto;border:1px solid var(--line);border-radius:8px;padding:6px}
+.pick label{display:flex;gap:8px;align-items:center;font-size:.9rem;min-width:0}
+.pick label span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.count-row{display:grid;grid-template-columns:48px minmax(0,1fr) auto;gap:10px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:8px}
+.count-row.done{border-left:4px solid var(--ok)}
+.count-row.diff{border-left:4px solid var(--accent)}
+.count-row.flash{box-shadow:0 0 0 3px var(--accent)}
+.count-row .thumb{width:48px;height:48px}
+.cnt{display:flex;gap:6px;align-items:center}
+.cnt input{width:64px;text-align:center;padding:7px 4px;border:1.5px solid var(--line);border-radius:7px;background:var(--surface);font:700 1.1rem var(--f-display)}
+.cnt button{width:36px;height:36px;border:1.5px solid var(--line);border-radius:7px;background:var(--surface-2);font-weight:700;font-size:1.1rem;color:var(--ink)}
+.sys{font-size:.78rem;color:var(--muted);font-variant-numeric:tabular-nums}
+.delta{font:700 .82rem var(--f-body);font-variant-numeric:tabular-nums}
+.delta.neg{color:var(--accent)} .delta.pos{color:var(--rev)} .delta.zero{color:var(--ok)}
+/* Ficha */
+.sheet-bg{position:fixed;inset:0;background:rgba(10,12,16,.45);z-index:40}
+.sheet{position:fixed;z-index:41;top:0;right:0;bottom:0;width:min(560px,100%);background:var(--surface);box-shadow:var(--shadow);display:flex;flex-direction:column;
+  padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);padding-right:env(safe-area-inset-right,0px)}
+.sh-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;padding:14px 16px 10px;border-bottom:1px solid var(--line)}
+.sh-head .code{font-size:1rem}
+.sh-head h3{margin:4px 0 0;font:700 1.25rem/1.15 var(--f-display);text-transform:uppercase;letter-spacing:.02em;text-wrap:balance}
+.x{border:0;background:transparent;font-size:1.6rem;line-height:1;padding:2px 8px;color:var(--muted)}
+.sh-body{flex:1;overflow:auto;padding:14px 16px;display:grid;gap:16px;align-content:start}
+.sh-foot{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;padding:12px 16px;border-top:1px solid var(--line);background:var(--surface-2)}
+.orig{font-size:.84rem;color:var(--muted);background:var(--surface-2);border:1px dashed var(--line);border-radius:8px;padding:8px 10px}
+.orig b{color:var(--ink);font-weight:600}
+.photo{display:grid;grid-template-columns:120px minmax(0,1fr);gap:12px;align-items:center}
+.photo .big{width:120px;height:120px;border-radius:10px;background:var(--surface-2);border:1px solid var(--line);display:grid;place-items:center;overflow:hidden;color:var(--muted);font-size:.75rem}
+.photo .big img{width:100%;height:100%;object-fit:cover}
+.photo .act{display:grid;gap:6px;justify-items:start}
+.hint{font-size:.8rem;color:var(--muted)}
+fieldset{border:0;padding:0;margin:0;display:grid;gap:10px;min-width:0}
+legend{font:700 .8rem/1 var(--f-display);text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:8px}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+@media (max-width:460px){.grid2{grid-template-columns:minmax(0,1fr)}}
+label.f{display:grid;gap:4px;font-size:.8rem;color:var(--muted);font-weight:500;min-width:0}
+label.f input,label.f select,label.f textarea{padding:9px 10px;border:1.5px solid var(--line);border-radius:7px;background:var(--surface);color:var(--ink);font-size:.95rem;width:100%;min-width:0}
+label.f input:focus,label.f select:focus,label.f textarea:focus{border-color:var(--accent);outline:none}
+label.f.miss input{border-color:var(--accent);background:var(--accent-soft)}
+.seg{display:flex;border:1.5px solid var(--line);border-radius:8px;overflow:hidden;flex-wrap:wrap}
+.seg button{flex:1;border:0;background:var(--surface);padding:9px 6px;font-weight:600;font-size:.88rem;color:var(--muted);min-width:0}
+.seg button+button{border-left:1.5px solid var(--line)}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--surface)}
+.seg button[aria-pressed="true"].I{background:var(--ok-soft);color:var(--ok)}
+.seg button[aria-pressed="true"].P{background:var(--warn-soft);color:var(--warn)}
+.seg button[aria-pressed="true"].R{background:var(--rev-soft);color:var(--rev)}
+.motivo{border:1.5px solid var(--accent);background:var(--accent-soft);border-radius:10px;padding:10px;display:grid;gap:8px}
+.motivo p{margin:0;font-size:.88rem;font-weight:600}
+.stepper{display:flex;gap:6px;align-items:stretch}
+.stepper input{text-align:center;font:700 1.2rem var(--f-display)!important}
+.stepper button{width:44px;border:1.5px solid var(--line);border-radius:7px;background:var(--surface-2);font-size:1.2rem;font-weight:700;color:var(--ink)}
+.namebox{border:1.5px solid var(--ink);border-radius:10px;padding:10px 12px;display:grid;gap:4px}
+.namebox .lab{font:700 .72rem/1 var(--f-display);text-transform:uppercase;letter-spacing:.1em;color:var(--muted)}
+.namebox .val{font:600 1.08rem/1.3 var(--f-body)}
+.namebox .val.empty{color:var(--muted);font-weight:400;font-style:italic}
+.kpi{display:flex;gap:16px;flex-wrap:wrap;font-size:.85rem;color:var(--muted);font-variant-numeric:tabular-nums}
+.kpi b{color:var(--ink)}
+.hist{display:grid;gap:0;font-size:.84rem;font-variant-numeric:tabular-nums}
+.hist div{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:10px;padding:6px 0;border-bottom:1px solid var(--line)}
+.hist time{color:var(--muted)}
+.hist .m{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.brg{display:grid;gap:8px}
+.brg .hist div{grid-template-columns:minmax(0,1fr) auto}
+.brg .ref{font:500 .78rem/1.2 var(--f-mono);color:var(--muted)}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(18px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:8px;z-index:60;font-weight:600;box-shadow:var(--shadow);max-width:calc(100% - 32px)}
+@media (max-width:620px){
+  .row{grid-template-columns:48px minmax(0,1fr) auto;gap:10px}
+  .thumb{width:48px;height:48px}
+  .stats{gap:10px}
+  .count-row{grid-template-columns:40px minmax(0,1fr);}
+  .count-row .thumb{width:40px;height:40px}
+  .count-row .cnt{grid-column:1 / -1;justify-content:flex-end}
+}
+/* Escáner */
+.btn.icon{display:inline-flex;align-items:center;gap:6px}
+.btn.icon svg{width:18px;height:18px;flex:none}
+.inrow{display:flex;gap:6px;min-width:0}
+.inrow input{flex:1}
+.inrow .btn{padding:7px 10px}
+.assign{display:grid;gap:8px;background:var(--accent-soft);border:1.5px solid var(--accent);border-radius:10px;padding:10px 12px;margin-bottom:12px}
+.assign p{margin:0;font-weight:600}
+.assign .code{font-size:.95rem}
+.scan-bg{position:fixed;inset:0;background:rgba(10,12,16,.75);z-index:70;display:grid;place-items:center;padding:16px}
+.scan{width:min(480px,100%);max-height:100%;overflow:auto;background:var(--surface);border-radius:14px;box-shadow:var(--shadow);display:grid}
+.scan-head{display:flex;justify-content:space-between;align-items:center;padding:10px 12px 10px 16px;border-bottom:1px solid var(--line)}
+.scan-head b{font:700 1.15rem/1 var(--f-display);text-transform:uppercase;letter-spacing:.04em}
+.scan-view{position:relative;background:#000;aspect-ratio:4/3;overflow:hidden}
+.scan-view video{width:100%;height:100%;object-fit:cover;display:block}
+.scan-frame{position:absolute;left:10%;right:10%;top:30%;bottom:30%;border:3px solid rgba(255,255,255,.85);border-radius:10px;box-shadow:0 0 0 999px rgba(0,0,0,.25)}
+.scan-frame::after{content:"";position:absolute;left:4%;right:4%;top:50%;height:2px;background:#ff3b1f;box-shadow:0 0 8px #ff3b1f}
+/* el input de archivo cubre el botón: se toca directamente (algunas apps no abren inputs ocultos) */
+.filebtn{position:relative;overflow:hidden;display:inline-flex;align-items:center}
+.filebtn input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;font-size:0}
+.scan-view.nolive{aspect-ratio:auto;background:var(--surface-2)}
+.scan-view.nolive video,.scan-view.nolive .scan-frame{display:none}
+.scan-view.nolive .scan-msg{position:static;background:transparent;color:var(--ink);text-align:left;padding:14px 16px 0}
+.scan-msg{position:absolute;left:0;right:0;bottom:0;margin:0;padding:8px 12px;background:rgba(0,0,0,.6);color:#fff;font-size:.88rem;text-align:center}
+.scan-last{padding:10px 16px;font-weight:600;background:var(--ok-soft);color:var(--ok)}
+.scan-last.bad{background:var(--accent-soft);color:var(--accent)}
+.scan-actions{display:grid;gap:10px;padding:12px 16px 16px}
+.scan-actions .btn{justify-self:start}
+/* Vender */
+.sale{background:var(--surface);border:1.5px solid var(--ink);border-radius:12px;padding:14px;display:grid;gap:12px;margin-bottom:18px}
+.sale h3{margin:0;font:700 1.2rem/1 var(--f-display);text-transform:uppercase;letter-spacing:.04em}
+.hits{display:grid;gap:4px;border:1px solid var(--line);border-radius:8px;padding:4px;max-height:300px;overflow:auto}
+.hits button{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;text-align:left;border:0;background:transparent;padding:8px;border-radius:6px;color:var(--ink)}
+.hits button:hover{background:var(--surface-2)}
+.hits .name{font-weight:500}
+.cart-row{display:grid;grid-template-columns:48px minmax(0,1fr) auto;gap:10px;align-items:center;border:1px solid var(--line);border-radius:10px;padding:8px}
+.cart-row .thumb{width:48px;height:48px}
+.cart-row.warn{border-left:4px solid var(--accent)}
+.cart-ctl{display:flex;gap:6px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+.cart-ctl input{width:84px;padding:7px 6px;border:1.5px solid var(--line);border-radius:7px;background:var(--surface);text-align:right;font-variant-numeric:tabular-nums}
+.cart-ctl .qn{width:52px;text-align:center;font:700 1.05rem var(--f-display)}
+.cart-ctl button{width:36px;height:36px;border:1.5px solid var(--line);border-radius:7px;background:var(--surface-2);font-weight:700;font-size:1.1rem;color:var(--ink)}
+.sale-foot{display:grid;gap:10px;border-top:2px solid var(--ink);padding-top:12px}
+.total{display:flex;justify-content:space-between;align-items:baseline;font:700 1.5rem/1 var(--f-display);text-transform:uppercase;font-variant-numeric:tabular-nums}
+.sale-acts{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
+.sale-acts .btn.ok{padding:12px 22px;font-size:1.05rem}
+.venta{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:12px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-variant-numeric:tabular-nums}
+.venta.anulada{opacity:.6}
+.venta.anulada b{text-decoration:line-through}
+.venta .sub{white-space:normal}
+.venta .r-side{justify-items:end}
+@media (max-width:620px){
+  .cart-row{grid-template-columns:40px minmax(0,1fr)}
+  .cart-row .thumb{width:40px;height:40px}
+  .cart-row .cart-ctl{grid-column:1 / -1}
+  .venta{grid-template-columns:minmax(0,1fr) auto}
+  .venta time{grid-column:1 / -1}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<header class="top">
+  <div class="top-in wrap">
+    <div class="brand">
+      <h1>DC Racing <span>·</span> Inventario</h1>
+      <nav class="tabs" aria-label="Secciones"><a href="#productos" id="tabP">Productos</a><a href="#vender" id="tabV">Vender</a><a href="#inventarios" id="tabI">Inventarios<span class="n" id="invOpenN" hidden></span></a></nav>
+    </div>
+    <div class="stats" id="stats">Cargando catálogo…</div>
+    <div class="meter" title="Productos verificados"><i id="meter"></i></div>
+    <div id="prodBar" class="top-in" style="padding:0;gap:10px">
+      <div class="search">
+        <input id="q" type="search" placeholder="Buscar o escanear: código, descripción, marca, código de barras" autocomplete="off" enterkeyhint="search">
+        <button class="btn icon" id="btnScan" type="button" aria-label="Escanear código de barras"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 7V4h3M18 4h3v3M21 17v3h-3M6 20H3v-3M7 8v8M10 8v8M13 8v8M17 8v8"/></svg><span>Escanear</span></button>
+        <button class="btn" id="btnFilt" type="button" aria-expanded="false">Filtros</button>
+        <button class="btn primary" id="btnNew" type="button">+ Nuevo</button>
+      </div>
+      <div class="filters collapsible" id="filtersBox">
+        <select id="fCat" aria-label="Categoría"><option value="">Todas las categorías</option></select>
+        <select id="fTipo" aria-label="Tipo de producto"><option value="">Todos los tipos</option></select>
+        <select id="fMarca" aria-label="Marca"><option value="">Todas las marcas</option></select>
+        <select id="fMat" aria-label="Material"><option value="">Todo material</option></select>
+        <select id="fColor" aria-label="Color"><option value="">Todo color</option></select>
+        <select id="fEst" aria-label="Estado">
+          <option value="">Todos los estados</option><option value="I">Inventariado</option><option value="P">Por pedir</option><option value="R">Por revisar</option>
+        </select>
+        <select id="fVer" aria-label="Verificación">
+          <option value="">Verificados y pendientes</option><option value="no">Pendientes de verificar</option><option value="si">Ya verificados</option>
+        </select>
+        <label class="chk"><input type="checkbox" id="fInc"> Ficha incompleta</label>
+        <label class="chk"><input type="checkbox" id="fDup"> Posible duplicado</label>
+        <label class="chk"><input type="checkbox" id="fStock"> Con stock</label>
+        <label class="chk"><input type="checkbox" id="fBrg"> Comprado a BRG</label>
+        <label class="chk"><input type="checkbox" id="fGroup" checked> Agrupar por tipo</label>
+        <button class="btn sm" id="btnClear" type="button">Limpiar filtros</button>
+        <button class="btn sm" id="btnExport" type="button" hidden>Exportar CSV</button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <p class="notice" id="notice" hidden></p>
+
+  <section id="viewP">
+    <div class="assign" id="assignBox" hidden>
+      <p id="assignTxt"></p>
+      <div class="filters" id="assignActs">
+        <button class="btn primary sm" type="button" id="assignPick">Asignarlo a un producto</button>
+        <button class="btn sm" type="button" id="assignNew">Crear producto nuevo</button>
+        <button class="btn sm" type="button" id="assignCancel">Cancelar</button>
+      </div>
+    </div>
+    <div class="catbar">
+      <h2 id="catTitle">Todas las categorías</h2>
+      <div class="right">
+        <div class="meta" id="catMeta"></div>
+        <div class="vsw" role="group" aria-label="Vista"><button type="button" data-v="lista">Lista</button><button type="button" data-v="mosaico">Mosaico</button></div>
+      </div>
+    </div>
+    <div class="list" id="list"><div class="empty">Cargando productos…</div></div>
+    <button class="btn more" id="more" type="button" hidden>Mostrar más</button>
+  </section>
+
+  <section id="viewV" hidden>
+    <div class="sale">
+      <h3>Nueva venta</h3>
+      <div class="search">
+        <input id="vScan" type="search" placeholder="Escanea o busca el producto" autocomplete="off" enterkeyhint="search">
+        <button class="btn primary icon" id="vCam" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 7V4h3M18 4h3v3M21 17v3h-3M6 20H3v-3M7 8v8M10 8v8M13 8v8M17 8v8"/></svg><span>Escanear</span></button>
+      </div>
+      <div class="hits" id="vHits" hidden></div>
+      <div class="list" id="cart"></div>
+      <div class="sale-foot">
+        <div class="total"><span>Total</span><b id="vTotal">$0,00</b></div>
+        <div class="kpi" id="vInfo"></div>
+        <div class="seg" role="group" aria-label="Forma de pago" id="vPago">
+          <button type="button" data-p="Efectivo" aria-pressed="true">Efectivo</button>
+          <button type="button" data-p="Transferencia">Transferencia</button>
+          <button type="button" data-p="Tarjeta">Tarjeta</button>
+        </div>
+        <label class="f">Nota (opcional) <input id="vNota" placeholder="Cliente, factura, descuento…"></label>
+        <div class="sale-acts"><button class="btn" type="button" id="vClear">Vaciar</button><button class="btn ok" type="button" id="vSell">Registrar venta</button></div>
+      </div>
+    </div>
+    <div class="catbar"><h2>Ventas de hoy</h2><div class="meta" id="vHoyMeta"></div></div>
+    <div class="list" id="vHoy"></div>
+  </section>
+
+  <section id="viewI" hidden>
+    <div id="invList">
+      <form class="newinv" id="invForm">
+        <h3>Nuevo inventario parcial</h3>
+        <div class="seg" role="group" aria-label="Alcance">
+          <button type="button" data-a="marca" aria-pressed="true">Por marca</button>
+          <button type="button" data-a="tipo">Por tipo de producto</button>
+          <button type="button" data-a="individual">Productos sueltos</button>
+        </div>
+        <div class="grid2">
+          <label class="f" id="aMarcaW">Marca <select id="aMarca"></select></label>
+          <label class="f" id="aCatW" hidden>Categoría <select id="aCat"></select></label>
+          <label class="f" id="aTipoW" hidden>Tipo de producto <select id="aTipo"></select></label>
+          <label class="f" id="aBuscaW" hidden>Buscar productos para agregar <input id="aBusca" type="search" placeholder="Código, nombre o código de barras"></label>
+          <label class="f">Nombre del inventario <input id="aNombre" placeholder="Se completa solo"></label>
+        </div>
+        <div class="pick" id="aPick" hidden></div>
+        <div class="kpi" id="aResumen"></div>
+        <div><button class="btn primary" type="submit" id="aCrear">Crear inventario</button></div>
+      </form>
+      <div class="catbar"><h2>Inventarios abiertos</h2></div>
+      <div class="inv-grid" id="invOpen"></div>
+      <div class="catbar" style="margin-top:20px"><h2>Inventarios cerrados</h2></div>
+      <div class="inv-grid" id="invClosed"></div>
+    </div>
+
+    <div id="invCount" hidden>
+      <div class="catbar">
+        <div style="min-width:0">
+          <a href="#inventarios" class="hint">← Todos los inventarios</a>
+          <h2 id="icTitle"></h2>
+          <div class="meta" id="icMeta"></div>
+        </div>
+        <div class="filters">
+          <button class="btn ok" type="button" id="icClose">Cerrar y aplicar al stock</button>
+        </div>
+      </div>
+      <div class="meter" style="margin-bottom:12px"><i id="icMeter"></i></div>
+      <div class="search" style="margin-bottom:10px">
+        <input id="icScan" type="search" placeholder="Escanea o escribe el código: cada lectura suma 1 unidad" autocomplete="off" enterkeyhint="done">
+        <button class="btn primary icon" id="icCam" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 7V4h3M18 4h3v3M21 17v3h-3M6 20H3v-3M7 8v8M10 8v8M13 8v8M17 8v8"/></svg><span>Escanear</span></button>
+      </div>
+      <div class="filters" style="margin-bottom:10px">
+        <select id="icFilter" aria-label="Mostrar">
+          <option value="">Todos</option><option value="pend">Sin contar</option><option value="diff">Con diferencia</option><option value="ok">Contados sin diferencia</option>
+        </select>
+      </div>
+      <div class="motivo" id="icConfirm" hidden>
+        <p id="icConfirmTxt"></p>
+        <div class="filters"><button class="btn ok" type="button" id="icConfirmYes">Sí, aplicar</button><button class="btn" type="button" id="icConfirmNo">Volver</button></div>
+      </div>
+      <div class="list" id="icList"></div>
+    </div>
+  </section>
+</main>
+
+<div class="sheet-bg" id="bg" hidden></div>
+<aside class="sheet" id="sheet" hidden aria-modal="true" role="dialog" aria-labelledby="shName">
+  <div class="sh-head">
+    <div style="min-width:0">
+      <div class="r-top"><span class="code" id="shCode"></span><span id="shPills"></span></div>
+      <h3 id="shName"></h3>
+    </div>
+    <button class="x" id="shClose" type="button" aria-label="Cerrar">×</button>
+  </div>
+  <form class="sh-body" id="form" autocomplete="off">
+    <div class="orig" id="shOrig"></div>
+
+    <div class="photo">
+      <div class="big" id="phBig">Sin foto</div>
+      <div class="act">
+        <label class="btn filebtn" id="phBtn"><span id="phBtnTxt">Tomar o subir foto</span><input id="phFile" type="file" accept="image/*"></label>
+        <span class="hint" id="phHint">Se comprime antes de subir (máx. 1200 px).</span>
+      </div>
+    </div>
+
+    <fieldset>
+      <legend>Conteo físico</legend>
+      <div class="seg" role="group" aria-label="Estado" id="segEst">
+        <button type="button" class="I" data-e="I">Inventariado</button>
+        <button type="button" class="P" data-e="P">Por pedir</button>
+        <button type="button" class="R" data-e="R">Por revisar</button>
+      </div>
+      <div class="grid2">
+        <label class="f">Cantidad
+          <div class="stepper"><button type="button" id="qm" aria-label="Restar uno">−</button><input id="i_q" type="number" inputmode="numeric" min="0" step="1"><button type="button" id="qp" aria-label="Sumar uno">+</button></div>
+        </label>
+        <label class="f">Categoría <select id="i_cat"></select></label>
+      </div>
+      <div class="motivo" id="motivoBox" hidden>
+        <p id="motivoTxt">El stock cambió. ¿Por qué?</p>
+        <div class="seg" role="group" aria-label="Motivo del cambio de stock" id="segMot">
+          <button type="button" data-m="Conteo">Nuevo conteo</button>
+          <button type="button" data-m="Ingreso">Ingreso</button>
+          <button type="button" data-m="Venta">Venta</button>
+          <button type="button" data-m="Ajuste">Ajuste</button>
+        </div>
+      </div>
+      <span class="hint" id="qInfo"></span>
+    </fieldset>
+
+    <fieldset>
+      <legend>Constructor de nombre</legend>
+      <div class="namebox"><span class="lab">Nombre del producto</span><span class="val" id="nameOut"></span></div>
+      <div class="grid2">
+        <label class="f" data-k="t">Tipo de producto <input id="i_t" list="dl_t"></label>
+        <label class="f" data-k="m">Marca <input id="i_m" list="dl_m"></label>
+        <label class="f" data-k="mo">Modelo <input id="i_mo"></label>
+        <label class="f" data-k="me">Medida <input id="i_me" placeholder="ej. 20x1 1/8, 31,8mm, M"></label>
+        <label class="f" data-k="ma">Material <input id="i_ma" list="dl_ma"></label>
+        <label class="f" data-k="co">Color <input id="i_co" list="dl_co"></label>
+        <label class="f" data-k="d2">Detalle 2 <input id="i_d2"></label>
+        <label class="f" data-k="d5">Detalle extra <input id="i_d5" placeholder="ej. kit (3pcs), delantero"></label>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Precios</legend>
+      <div class="grid2">
+        <label class="f" data-k="k">Costo (USD) <input id="i_k" type="number" inputmode="decimal" step="0.01" min="0"></label>
+        <label class="f" data-k="v">Precio de venta (USD) <input id="i_v" type="number" inputmode="decimal" step="0.01" min="0"></label>
+      </div>
+      <div class="kpi" id="kpi"></div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Códigos</legend>
+      <div class="grid2">
+        <label class="f" data-k="b">Código de barras <span class="inrow"><input id="i_b" inputmode="numeric"><button class="btn icon" type="button" id="bScan" aria-label="Escanear código de barras"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 7V4h3M18 4h3v3M21 17v3h-3M6 20H3v-3M7 8v8M10 8v8M13 8v8M17 8v8"/></svg></button></span><span class="hint" id="bWarn" hidden></span></label>
+        <label class="f" data-k="p">Código proveedor <input id="i_p"></label>
+        <label class="f" data-k="sku">SKU <input id="i_sku"></label>
+      </div>
+    </fieldset>
+
+    <fieldset id="brgBox" hidden>
+      <legend>Compras a BRG Store</legend>
+      <div class="brg" id="brg"></div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Notas</legend>
+      <label class="f"><textarea id="i_nota" rows="2" placeholder="Ej. revisar duplicado con PEDA-014, falta número de huecos"></textarea></label>
+    </fieldset>
+
+    <fieldset>
+      <legend>Historial de stock</legend>
+      <div class="hist" id="hist"><span class="hint">Sin movimientos registrados.</span></div>
+    </fieldset>
+  </form>
+  <div class="sh-foot">
+    <span class="hint" id="shWho" style="margin-right:auto;align-self:center"></span>
+    <button class="btn" type="button" id="shSave">Guardar</button>
+    <button class="btn ok" type="button" id="shVerify">Guardar y verificar</button>
+  </div>
+</aside>
+
+<datalist id="dl_t"></datalist><datalist id="dl_m"></datalist><datalist id="dl_ma"></datalist><datalist id="dl_co"></datalist>
+<div class="toast" id="toast" hidden></div>
+
+<div class="scan-bg" id="scanBg" hidden>
+  <div class="scan" role="dialog" aria-modal="true" aria-labelledby="scanTitle">
+    <div class="scan-head"><b id="scanTitle">Escanear código</b><button class="x" id="scanClose" type="button" aria-label="Cerrar escáner">×</button></div>
+    <div class="scan-view" id="scanView"><video id="scanVideo" playsinline muted autoplay poster="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw=="></video><div class="scan-frame"></div><p class="scan-msg" id="scanMsg">Abriendo la cámara…</p></div>
+    <div class="scan-last" id="scanLast" hidden></div>
+    <div class="scan-actions">
+      <div class="filters">
+        <label class="btn filebtn" id="scanFileBtn"><span id="scanFileTxt">Tomar foto del código</span><input id="scanFile" type="file" accept="image/*" capture="environment"></label>
+        <label class="btn filebtn"><span>Elegir de la galería</span><input id="scanFile2" type="file" accept="image/*"></label>
+      </div>
+      <form class="search" id="scanManual"><input id="scanInput" type="search" placeholder="O escribe el código" autocomplete="off" enterkeyhint="done"><button class="btn" type="submit">OK</button></form>
+    </div>
+  </div>
+</div>
+
+<script src="config.js"></script>
+<script src="fb.js"></script>
+<script>
+(() => {
+const $ = id => document.getElementById(id);
+const EST = {I:'Inventariado', P:'Por pedir', R:'Por revisar'};
+const MOT = {Conteo:'Nuevo conteo', Ingreso:'Ingreso de mercadería', Venta:'Venta', Ajuste:'Ajuste', Inventario:'Inventario', Alta:'Producto nuevo', Anulacion:'Venta anulada'};
+const NAME_KEYS = ['t','m','mo','me','d2','ma','co','d5'];
+const COMP = [['cat','Categoría'],['m','Marca'],['me','Medida/modelo'],['ma','Material'],['co','Color'],['b','Código de barras'],['k','Costo'],['v','Venta'],['foto','Foto']];
+const PAGE = 150;
+
+let CATS = {}, BASE = [], baseByCode = new Map();
+let BRG = {};                // código -> historial de compras a BRG Store (compras_brg.json)
+let changes = {};            // prefijo -> {codigo: patch}
+let docExists = new Set();   // prefijos con documento en db
+let INVS = [];               // inventarios (db)
+let db = null, user = null, assets = null, downloads = null, canWrite = true;
+let vista = 'lista'; try{ if(localStorage.getItem('dcr-vista')==='mosaico') vista='mosaico'; }catch(_){}
+let shown = PAGE, current = null, draft = null, motivo = null, histUnsub = null;
+const queues = {};
+
+const fmt = n => (n == null || n === '' || isNaN(n)) ? '—' : Number(n).toLocaleString('es-EC',{minimumFractionDigits:2,maximumFractionDigits:2});
+const int = n => Number(n||0).toLocaleString('es-EC');
+const pref = code => code.split('-')[0];
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const norm = s => String(s ?? '').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().trim();
+const cap = s => s ? s[0].toUpperCase()+s.slice(1) : s;
+const fdate = iso => { if(!iso) return ''; const d=new Date(iso); return d.toLocaleDateString('es-EC',{day:'2-digit',month:'short',year:'2-digit'})+' '+d.toLocaleTimeString('es-EC',{hour:'2-digit',minute:'2-digit'}); };
+const ago = iso => { if(!iso) return ''; const s=(Date.now()-new Date(iso))/1000; if(s<3600) return `hace ${Math.max(1,Math.round(s/60))} min`; if(s<86400) return `hace ${Math.round(s/3600)} h`; return `hace ${Math.round(s/86400)} d`; };
+
+function toast(msg){ const t=$('toast'); t.textContent=msg; t.hidden=false; clearTimeout(toast._t); toast._t=setTimeout(()=>t.hidden=true,2800); }
+
+// ---------- códigos de barras ----------
+// UPC-A (12) y EAN-13 (13 con 0 delante) son el mismo código: se comparan sin ceros a la izquierda
+const sameCode = (a, b) => { a=String(a??'').trim(); b=String(b??'').trim(); if(!a||!b) return false; if(a===b) return true; return /^\d+$/.test(a) && /^\d+$/.test(b) && a.replace(/^0+/,'')===b.replace(/^0+/,''); };
+function findByCode(v){
+  v = String(v).trim(); if (!v) return null;
+  return ALL.find(p => sameCode(p.b, v)) || ALL.find(p => p.c.toLowerCase()===v.toLowerCase() || (p.p && p.p===v) || (p.sku && p.sku===v))
+    || ALL.find(p => BRG[p.c] && BRG[p.c].r.some(r=>r.ref.toLowerCase()===v.toLowerCase())) || null;
+}
+
+// Escáner con la cámara: BarcodeDetector cuando el navegador lo trae (Android), ZXing en los demás (iPhone).
+// Si la cámara en vivo no se puede abrir, queda la foto del código y la escritura a mano.
+const Scan = (() => {
+  const ZX_URL = 'https://cdn.jsdelivr.net/npm/@zxing/library@0.21.3/umd/index.min.js';
+  const FORMATS = ['ean_13','ean_8','upc_a','upc_e','code_128','code_39','code_93','itf','codabar','qr_code'];
+  let stream=null, timer=null, onCode=null, continuous=false, last='', lastT=0, decode=null, busy=false, audio=null;
+  const cv = document.createElement('canvas'), ctx = cv.getContext('2d', {willReadFrequently:true});
+  function loadZX(){
+    if (window.ZXing) return Promise.resolve();
+    return new Promise((ok, ko) => { const s=document.createElement('script'); s.src=ZX_URL; s.onload=ok; s.onerror=ko; document.head.appendChild(s); });
+  }
+  async function getDecoder(){
+    if (decode) return decode;
+    if ('BarcodeDetector' in window){
+      try{
+        const sup = await BarcodeDetector.getSupportedFormats(); const f = FORMATS.filter(x=>sup.includes(x));
+        if (f.length){ const d = new BarcodeDetector({formats:f}); decode = async src => { const r = await d.detect(src); return r[0] ? r[0].rawValue : null; }; return decode; }
+      }catch(_){}
+    }
+    await loadZX();
+    const Z = window.ZXing, F = Z.BarcodeFormat, hints = new Map();
+    hints.set(Z.DecodeHintType.POSSIBLE_FORMATS, [F.EAN_13,F.EAN_8,F.UPC_A,F.UPC_E,F.CODE_128,F.CODE_39,F.CODE_93,F.ITF,F.CODABAR,F.QR_CODE]);
+    hints.set(Z.DecodeHintType.TRY_HARDER, true);
+    const reader = new Z.MultiFormatReader(); reader.setHints(hints);
+    decode = async canvas => { try{ return reader.decodeWithState(new Z.BinaryBitmap(new Z.HybridBinarizer(new Z.HTMLCanvasElementLuminanceSource(canvas)))).getText(); }catch(_){ return null; } };
+    return decode;
+  }
+  function beep(ok){
+    try{ navigator.vibrate && navigator.vibrate(ok?60:[40,60,40]); }catch(_){}
+    try{
+      audio = audio || new (window.AudioContext||window.webkitAudioContext)();
+      const o=audio.createOscillator(), g=audio.createGain(); o.frequency.value = ok?1400:300; g.gain.value=.08;
+      o.connect(g); g.connect(audio.destination); o.start(); o.stop(audio.currentTime+(ok?.09:.25));
+    }catch(_){}
+  }
+  function showLast(text, ok){ const l=$('scanLast'); l.hidden=false; l.textContent=text; l.classList.toggle('bad', !ok); }
+  function emit(code){
+    code = String(code).trim(); if (!code) return;
+    const now = Date.now();
+    // la misma etiqueta sigue frente a la cámara: no se cuenta otra vez hasta que salga del cuadro
+    if (code===last && now-lastT < 1500){ lastT = now; return; }
+    last = code; lastT = now;
+    const res = onCode ? onCode(code) : null;     // {ok, text}
+    beep(!res || res.ok !== false);
+    if (res && res.text) showLast(res.text, res.ok !== false);
+    if (!continuous) close();
+  }
+  async function frame(){
+    const v=$('scanVideo');
+    if (busy || !stream || v.readyState < 2 || !v.videoWidth) return;
+    busy = true;
+    try{
+      // recorte de la franja central, donde está el marco
+      const w=v.videoWidth, h=v.videoHeight, cw=Math.round(w*.8), ch=Math.round(h*.5);
+      const s = Math.min(1, 960/cw);
+      cv.width=Math.round(cw*s); cv.height=Math.round(ch*s);
+      ctx.drawImage(v, (w-cw)/2, (h-ch)/2, cw, ch, 0, 0, cv.width, cv.height);
+      const d = await getDecoder(); const r = await d(cv);
+      if (r) emit(r);
+    }catch(_){}
+    busy = false;
+  }
+  async function start(){
+    const msg=$('scanMsg'); msg.textContent='Abriendo la cámara…';
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){ noLive('Este navegador no deja usar la cámara en vivo. Usa "Tomar foto del código" o escríbelo.'); return; }
+    try{
+      stream = await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'}, width:{ideal:1280}, height:{ideal:720}}, audio:false});
+      if ($('scanBg').hidden){ stop(); return; }
+      const v=$('scanVideo'); v.srcObject=stream; await v.play().catch(()=>{});
+      msg.textContent = 'Apunta al código de barras dentro del marco.';
+      getDecoder().catch(()=>{ msg.textContent='No se pudo cargar el lector. Revisa la conexión a internet.'; });
+      timer = setInterval(frame, 220);
+    }catch(e){
+      noLive((e && e.name==='NotAllowedError') ? 'La cámara en vivo no está permitida aquí. Usa "Tomar foto del código": se abre la cámara, tomas la foto y se lee sola.' : 'No se pudo abrir la cámara en vivo. Usa "Tomar foto del código" o escríbelo.');
+    }
+  }
+  // sin cámara en vivo: se oculta el visor y la foto pasa a ser la acción principal
+  function noLive(text){
+    $('scanMsg').textContent = text; $('scanView').classList.add('nolive');
+    $('scanFileBtn').classList.add('primary'); $('scanFileTxt').textContent = '📷 Tomar foto del código';
+  }
+  function stop(){ clearInterval(timer); timer=null; if (stream){ stream.getTracks().forEach(t=>t.stop()); stream=null; } $('scanVideo').srcObject=null; }
+  function open(opts){
+    onCode = opts.onCode; continuous = !!opts.continuous; last=''; lastT=0;
+    $('scanTitle').textContent = opts.title || 'Escanear código';
+    $('scanLast').hidden = true; $('scanInput').value='';
+    $('scanView').classList.remove('nolive'); $('scanFileBtn').classList.remove('primary'); $('scanFileTxt').textContent = 'Tomar foto del código';
+    $('scanBg').hidden = false;
+    start();
+  }
+  function close(){ stop(); $('scanBg').hidden = true; }
+  async function fromPhoto(file){
+    $('scanMsg').textContent = 'Leyendo la foto…';
+    try{
+      const img = await createImageBitmap(file);
+      const d = await getDecoder();
+      for (const rot of [0, 90]){
+        const s = Math.min(1, 1600/Math.max(img.width, img.height));
+        const w = Math.round(img.width*s), h = Math.round(img.height*s);
+        if (rot){ cv.width=h; cv.height=w; ctx.save(); ctx.translate(h,0); ctx.rotate(Math.PI/2); ctx.drawImage(img,0,0,w,h); ctx.restore(); }
+        else { cv.width=w; cv.height=h; ctx.drawImage(img,0,0,w,h); }
+        const r = await d(cv);
+        if (r){ last=''; emit(r); $('scanMsg').textContent='Código leído.'; return; }
+      }
+      beep(false); $('scanMsg').textContent = 'No encontré un código en la foto. Acércate más y que salga nítido.';
+    }catch(_){ $('scanMsg').textContent = 'No se pudo leer la foto.'; }
+  }
+  $('scanClose').addEventListener('click', close);
+  $('scanBg').addEventListener('click', e => { if (e.target===$('scanBg')) close(); });
+  ['scanFile','scanFile2'].forEach(id => $(id).addEventListener('change', e => { const f=e.target.files[0]; e.target.value=''; if (f) fromPhoto(f); }));
+  $('scanManual').addEventListener('submit', e => { e.preventDefault(); const v=$('scanInput').value.trim(); $('scanInput').value=''; if (v){ last=''; emit(v); } });
+  document.addEventListener('keydown', e => { if (e.key==='Escape' && !$('scanBg').hidden) close(); });
+  return {open, close};
+})();
+
+// ---------- fotos del Excel ----------
+const XL = {}, XLload = {};
+function xlPhoto(code){ const b = XL[pref(code)]; return b && b[code] ? 'data:image/jpeg;base64,'+b[code] : null; }
+function loadXL(p){
+  if (!XLload[p]) XLload[p] = fetch('fotos/'+p+'.json').then(r=>r.ok?r.json():{}).catch(()=>({})).then(j=>{ XL[p]=j; return j; });
+  return XLload[p];
+}
+// Fotos tomadas en la herramienta: en el sitio propio vienen de Firestore (window.fotoGet)
+const fotoUrl = id => window.fotoPeek ? window.fotoPeek(id) : '/_blob/'+id;
+const fotoPend = p => !!(p.foto && window.fotoPeek && !window.fotoPeek(p.foto));
+function photoSrc(p){ return (p.foto && fotoUrl(p.foto)) || (p.fx ? xlPhoto(p.c) : null); }
+function thumbHtml(p){ const src=photoSrc(p); return src ? `<img loading="lazy" alt="" src="${esc(src)}">` : ((p.fx||p.foto) ? '' : 'Foto'); }
+function needXL(p){ return fotoPend(p) || (!p.foto && p.fx && !XL[pref(p.c)]); }
+function loadFor(p){ return fotoPend(p) ? window.fotoGet(p.foto) : loadXL(pref(p.c)); }
+function fillThumbs(root){
+  root.querySelectorAll('[data-xl]').forEach(r => {
+    const src = photoSrc(BY.get(r.dataset.c) || {c:r.dataset.c, fx:1}); if (!src) return;
+    r.querySelector('.thumb').innerHTML = '<img alt="" src="'+src+'">'; r.removeAttribute('data-xl');
+  });
+}
+function loadThumbs(root){
+  const need = new Map();
+  root.querySelectorAll('[data-xl]').forEach(r => { const p = BY.get(r.dataset.c) || {c:r.dataset.c, fx:1}; const k = fotoPend(p) ? 'f:'+p.foto : pref(p.c); if (!need.has(k)) need.set(k, p); });
+  if (need.size) Promise.all([...need.values()].map(loadFor)).then(()=>fillThumbs(root));
+}
+
+// ---------- datos combinados ----------
+let ALL = [], BY = new Map(), TIPOS = new Map();
+function merged(){
+  const out = [];
+  for (const b of BASE){
+    const ch = (changes[pref(b.c)]||{})[b.c];
+    if (ch && ch.movido) continue;
+    out.push(ch ? {...b, ...ch} : b);
+  }
+  for (const p in changes) for (const code in changes[p]){
+    const ch = changes[p][code];
+    if (ch.nuevo && !baseByCode.has(code) && !ch.movido) out.push({c:code, ...ch});
+  }
+  return out;
+}
+// Tipo agrupado: "Mango" y "Mangos" caen en el mismo grupo; se muestra la escritura más usada
+const tkey = t => norm(t).replace(/(es|s)$/,'');
+function buildTipos(){
+  const m = new Map();
+  for (const p of ALL){
+    const k = p.t ? tkey(p.t) : '';
+    if (!m.has(k)) m.set(k, new Map());
+    const v = m.get(k); const lab = p.t ? cap(String(p.t).trim()) : 'Sin tipo'; v.set(lab, (v.get(lab)||0)+1);
+  }
+  TIPOS = new Map([...m].map(([k,v]) => [k, [...v].sort((a,b)=>b[1]-a[1])[0][0]]));
+}
+const tipoLabel = p => TIPOS.get(p.t ? tkey(p.t) : '') || 'Sin tipo';
+function buildName(p){
+  const parts = NAME_KEYS.map(k => (p[k]||'').toString().trim()).filter(Boolean);
+  const s = parts.join(' ').replace(/\s+/g,' ').trim();
+  return cap(s);
+}
+function displayName(p){ const n = buildName(p); return (n && p.t && n.split(' ').length>=3) ? n : (p.d || n || 'Sin nombre'); }
+function missing(p){
+  return COMP.filter(([k]) => k==='cat' ? pref(p.c)==='SINC' : k==='me' ? !(p.me||p.mo) : (k==='k'||k==='v') ? !(Number(p[k])>0) : k==='foto' ? !(p.foto||p.fx) : !p[k]).map(x=>x[1]);
+}
+function completeness(p){ return 1 - missing(p).length/COMP.length; }
+
+// ---------- filtros y lista ----------
+function refresh(){
+  ALL = merged(); BY = new Map(ALL.map(p=>[p.c,p])); buildTipos();
+  renderStats(); fillFilterOptions(); renderList();
+  if (route().inv) renderCount(); else if (route().view==='I') renderInvList(); else if (route().view==='V') renderCart();
+}
+function opts(sel, values, first){
+  const cur = sel.value;
+  sel.innerHTML = `<option value="">${first}</option>` + values.map(([v,l,n]) => `<option value="${esc(v)}">${esc(l)}${n!=null?` (${n})`:''}</option>`).join('');
+  if ([...sel.options].some(o=>o.value===cur)) sel.value = cur;
+}
+function countBy(rows, fn){ const m=new Map(); for(const p of rows){ const k=fn(p); if(!k) continue; const e=m.get(k)||[k,k,0]; e[2]++; m.set(k,e); } return [...m.values()]; }
+function fillFilterOptions(){
+  const cat=$('fCat').value;
+  const base = cat ? ALL.filter(p=>pref(p.c)===cat) : ALL;
+  const tipos = countBy(base, p=>p.t?tkey(p.t):'_').map(([k,,n])=>[k, k==='_'?'Sin tipo':TIPOS.get(k), n]).sort((a,b)=>a[1].localeCompare(b[1],'es'));
+  opts($('fTipo'), tipos, 'Todos los tipos');
+  const lab = (fn) => countBy(base, p=>{const v=fn(p); return v?cap(norm(v)):'';}).sort((a,b)=>a[1].localeCompare(b[1],'es'));
+  opts($('fMarca'), lab(p=>p.m).map(([k,,n])=>[k,k.toUpperCase(),n]), 'Todas las marcas');
+  opts($('fMat'), lab(p=>p.ma), 'Todo material');
+  opts($('fColor'), lab(p=>p.co), 'Todo color');
+}
+function filtered(){
+  const q = norm($('q').value), cat=$('fCat').value, est=$('fEst').value, ver=$('fVer').value;
+  const tipo=$('fTipo').value, marca=$('fMarca').value, mat=$('fMat').value, color=$('fColor').value;
+  const inc=$('fInc').checked, dup=$('fDup').checked, stock=$('fStock').checked;
+  const terms = q ? q.split(/\s+/) : [];
+  return ALL.filter(p => {
+    if (cat && pref(p.c)!==cat) return false;
+    if (tipo && (p.t?tkey(p.t):'_')!==tipo) return false;
+    if (marca && cap(norm(p.m))!==marca) return false;
+    if (mat && cap(norm(p.ma))!==mat) return false;
+    if (color && cap(norm(p.co))!==color) return false;
+    if (est && p.e!==est) return false;
+    if (ver==='si' && !p.ver) return false;
+    if (ver==='no' && p.ver) return false;
+    if (dup && !p.dup) return false;
+    if (stock && !(p.q>0)) return false;
+    if ($('fBrg').checked && !BRG[p.c]) return false;
+    if (inc && completeness(p) >= .67) return false;
+    if (terms.length){
+      const hay = norm([p.c,p.d,buildName(p),p.m,p.b,p.p,p.sku,brgRefs(p.c)].join(' '));
+      return terms.every(t => hay.includes(t));
+    }
+    return true;
+  });
+}
+function renderStats(){
+  const tot=ALL.length, ver=ALL.filter(p=>p.ver).length;
+  const costo=ALL.reduce((s,p)=>s+(p.q||0)*(p.k||0),0), venta=ALL.reduce((s,p)=>s+(p.q||0)*(p.v||0),0);
+  const fotos=ALL.filter(p=>p.foto||p.fx).length;
+  $('stats').innerHTML = `<span><b>${int(ver)}</b> de ${int(tot)} verificados</span><span><b>${int(fotos)}</b> con foto</span><span>Costo <b>$${fmt(costo)}</b></span><span>Venta <b>$${fmt(venta)}</b></span>`;
+  $('meter').style.width = (tot? ver/tot*100 : 0)+'%';
+  const open = INVS.filter(i=>i.estado==='abierto').length;
+  $('invOpenN').hidden = !open; $('invOpenN').textContent = open;
+}
+function rowHtml(p){
+  const comp = completeness(p);
+  const stockInfo = p.qAt ? ` · stock ${ago(p.qAt)}` : '';
+  return `<button type="button" class="row${p.ver?' ver':''}" data-c="${esc(p.c)}"${needXL(p)?' data-xl="1"':''}>
+    <span class="thumb">${thumbHtml(p)}</span>
+    <span class="r-main">
+      <span class="r-top"><span class="code">${esc(p.c)}</span><span class="pill ${p.e||'R'}">${EST[p.e]||'Por revisar'}</span>${p.ver?'<span class="pill v">Verificado</span>':''}${p.dup?'<span class="pill dup">Duplicado?</span>':''}${p.nuevo?'<span class="pill new">Nuevo</span>':''}</span>
+      <span class="name">${esc(displayName(p))}</span>
+      <span class="sub">${esc([CATS[pref(p.c)], p.m, p.b].filter(Boolean).join(' · ')+stockInfo)}</span>
+    </span>
+    <span class="r-side"><span class="qty">${p.q ?? '—'}<small>und</small></span><span class="price">$${fmt(p.v)}</span><span class="comp" title="Ficha completa al ${Math.round(comp*100)}%"><i style="width:${comp*100}%"></i></span></span>
+  </button>`;
+}
+function tileHtml(p){
+  return `<button type="button" class="tile row${p.ver?' ver':''}" data-c="${esc(p.c)}"${needXL(p)?' data-xl="1"':''}>
+    <span class="thumb">${thumbHtml(p)}</span>
+    <span class="t-body">
+      <span class="r-top"><span class="code">${esc(p.c)}</span><span class="pill ${p.e||'R'}">${EST[p.e]||'Por revisar'}</span>${p.ver?'<span class="pill v">✓</span>':''}${p.dup?'<span class="pill dup">Dup?</span>':''}${p.nuevo?'<span class="pill new">Nuevo</span>':''}</span>
+      <span class="name">${esc(displayName(p))}</span>
+      <span class="t-foot"><span class="qty">${p.q ?? '—'}<small>und</small></span><span class="price">$${fmt(p.v)}</span></span>
+    </span>
+  </button>`;
+}
+function setVista(v){
+  vista = v; try{ localStorage.setItem('dcr-vista', v); }catch(_){}
+  document.querySelectorAll('.vsw button').forEach(b=>b.setAttribute('aria-pressed', b.dataset.v===v));
+  $('list').classList.toggle('mosaic', v==='mosaico');
+}
+function renderList(){
+  const item = vista==='mosaico' ? tileHtml : rowHtml;
+  let rows = filtered(); const cat=$('fCat').value, group=$('fGroup').checked;
+  $('catTitle').textContent = cat ? `${CATS[cat]||cat} · ${cat}` : 'Todas las categorías';
+  const ver = rows.filter(p=>p.ver).length, und = rows.reduce((s,p)=>s+(p.q||0),0);
+  $('catMeta').textContent = `${int(rows.length)} productos · ${int(und)} unidades · ${int(ver)} verificados (${rows.length?Math.round(ver/rows.length*100):0}%)`;
+  const list=$('list');
+  if (!rows.length){ list.innerHTML = `<div class="empty">Ningún producto coincide con la búsqueda o los filtros.</div>`; $('more').hidden=true; return; }
+  let html = '';
+  if (group){
+    const g = new Map();
+    for (const p of rows){ const k=tipoLabel(p); if(!g.has(k)) g.set(k,[]); g.get(k).push(p); }
+    const groups = [...g].sort((a,b)=> a[0]==='Sin tipo' ? 1 : b[0]==='Sin tipo' ? -1 : a[0].localeCompare(b[0],'es'));
+    let n = 0;
+    for (const [lab, ps] of groups){
+      if (n >= shown) break;
+      const u = ps.reduce((s,p)=>s+(p.q||0),0), v = ps.filter(p=>p.ver).length;
+      html += `<div class="ghead"><h3>${esc(lab)}</h3><span>${int(ps.length)} productos · ${int(u)} und · ${int(v)} verificados</span></div>`;
+      for (const p of ps){ if (n++ >= shown) break; html += item(p); }
+    }
+  } else html = rows.slice(0, shown).map(item).join('');
+  list.innerHTML = html; loadThumbs(list);
+  $('more').hidden = rows.length <= shown;
+  $('more').textContent = `Mostrar más (${int(rows.length-shown)} restantes)`;
+}
+
+// ---------- compras a BRG ----------
+const brgRefs = code => BRG[code] ? BRG[code].r.map(r=>r.ref).join(' ') : '';
+const fday = d => d ? new Date(d+'T12:00:00').toLocaleDateString('es-EC',{day:'2-digit',month:'short',year:'numeric'}) : '—';
+function renderBrg(code){
+  const h = BRG[code]; $('brgBox').hidden = !h; if (!h) return;
+  $('brg').innerHTML = `<div class="kpi"><span><b>${int(h.u)}</b> unidades compradas</span><span><b>${int(h.o)}</b> ${h.o===1?'pedido':'pedidos'}</span><span>Primera <b>${esc(fday(h.pc))}</b></span><span>Última <b>${esc(fday(h.uc))}</b></span></div>
+    <div class="hist">${h.r.map(r=>`<div><span class="m" title="${esc(r.n)}">${esc(r.n)}<br><span class="ref">${esc(r.ref)} · última ${esc(fday(r.uc))}</span></span><b>${int(r.u)} und</b></div>`).join('')}</div>
+    ${h.t!=='exacto'?'<span class="hint">Relacionado por nombre, no por código. Si no corresponde, avísale a Claude.</span>':''}${h.pa?`<span class="hint">Código proveedor anterior: ${esc(h.pa)}</span>`:''}`;
+}
+
+// ---------- ficha ----------
+function open(code){
+  const p = BY.get(code); if(!p) return;
+  current = p; draft = {...p}; motivo = null;
+  $('shCode').textContent = p.c;
+  $('shOrig').innerHTML = p.d ? `Descripción original: <b>${esc(p.d)}</b>${p.f?` · fila ${p.f} del Excel`:''}` : 'Producto creado en la herramienta.';
+  ['q','t','m','mo','me','ma','co','d2','d5','k','v','b','p','sku','nota'].forEach(k => { $('i_'+k).value = p[k] ?? ''; });
+  $('i_cat').value = pref(p.c);
+  fillDatalists(pref(p.c));
+  setEstado(p.e||'R'); setMotivo(null);
+  $('qInfo').textContent = p.qAt ? `Último cambio de stock: ${fdate(p.qAt)}${p.qMot?` (${MOT[p.qMot]||p.qMot})`:''}` : 'Sin cambios de stock registrados en la herramienta.';
+  renderPhoto(); updateSheet(); loadHistory(p.c); renderBrg(p.c);
+  $('shWho').textContent = p.ver ? `Verificado el ${new Date(p.verAt).toLocaleDateString('es-EC')}` : 'Pendiente de verificar';
+  const ro = !canWrite;
+  $('form').querySelectorAll('input,select,textarea,.seg button,.stepper button').forEach(el=>el.disabled=ro);
+  $('shSave').disabled = $('shVerify').disabled = ro;
+  $('phBtn').hidden = ro || !assets;
+  $('bScan').hidden = ro;
+  if (assignCode && !ro){
+    const prev = p.b; $('i_b').value = assignCode; endAssign(); updateSheet();
+    toast(prev && !sameCode(prev, $('i_b').value) ? `Código asignado (reemplaza ${prev}). Pulsa Guardar.` : 'Código asignado. Pulsa Guardar.');
+  }
+  $('bg').hidden=false; $('sheet').hidden=false;
+  setTimeout(()=>$('i_q').focus({preventScroll:true}), 50);
+}
+function close(){ $('bg').hidden=true; $('sheet').hidden=true; current=null; draft=null; if(histUnsub){histUnsub();histUnsub=null;} }
+function readForm(){
+  ['t','m','mo','me','ma','co','d2','d5','b','p','sku','nota'].forEach(k => draft[k] = $('i_'+k).value.trim());
+  ['q','k','v'].forEach(k => { const v=$('i_'+k).value; draft[k] = v==='' ? null : Number(v); });
+}
+function setEstado(e){ draft.e=e; $('segEst').querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed', b.dataset.e===e)); }
+function setMotivo(m){ motivo=m; $('segMot').querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed', b.dataset.m===m)); }
+function qChanged(){ return (draft.q ?? null) !== (current.q ?? null); }
+function updateSheet(){
+  readForm();
+  const n = buildName(draft);
+  const out=$('nameOut'); out.textContent = n || 'Completa tipo, marca, medida, material y color'; out.classList.toggle('empty', !n);
+  $('shName').textContent = n || draft.d || 'Sin nombre';
+  const miss = new Set(missing({...draft, c: $('i_cat').value+'-0'}));
+  document.querySelectorAll('label.f[data-k]').forEach(l => {
+    const label={m:'Marca',me:'Medida/modelo',ma:'Material',co:'Color',b:'Código de barras',k:'Costo',v:'Venta'}[l.dataset.k];
+    l.classList.toggle('miss', !!label && miss.has(label));
+  });
+  const otro = draft.b ? ALL.find(x => x.c!==current.c && sameCode(x.b, draft.b)) : null;
+  $('bWarn').hidden = !otro; if (otro) $('bWarn').textContent = `Ojo: este código ya lo tiene ${otro.c} (${displayName(otro)}).`;
+  const ch = qChanged();
+  $('motivoBox').hidden = !ch;
+  if (ch){ const d=(draft.q||0)-(current.q||0); $('motivoTxt').textContent = `El stock cambia de ${current.q ?? 0} a ${draft.q ?? 0} (${d>0?'+':''}${d}). ¿Por qué?`; }
+  const k=draft.k, v=draft.v;
+  const mg = (v>0 && k!=null) ? Math.round((v-k)/v*100) : null;
+  $('kpi').innerHTML = `<span>Margen <b>${mg==null?'—':mg+'%'}</b></span><span>Ganancia por unidad <b>$${(v!=null&&k!=null)?fmt(v-k):'—'}</b></span><span>Stock a venta <b>$${fmt((draft.q||0)*(v||0))}</b></span>`;
+  $('shPills').innerHTML = `<span class="pill ${draft.e}">${EST[draft.e]}</span>${current.ver?' <span class="pill v">Verificado</span>':''}`;
+}
+function renderPhoto(){
+  const b=$('phBig');
+  const show = () => { const src = photoSrc(draft); b.innerHTML = src ? `<img alt="Foto de ${esc(draft.c)}" src="${esc(src)}">` : 'Sin foto'; };
+  show(); if (needXL(draft)) loadFor(draft).then(show);
+  $('phBtnTxt').textContent = (draft.foto||draft.fx) ? 'Cambiar foto' : 'Tomar o subir foto';
+  $('phHint').textContent = draft.foto ? 'Foto tomada en la herramienta.' : draft.fx ? 'Foto sacada del Excel. Puedes reemplazarla.' : 'Se comprime antes de subir (máx. 1200 px).';
+}
+function fillDatalists(p){
+  const same = ALL.filter(x=>pref(x.c)===p);
+  const uniq = (arr) => [...new Set(arr.filter(Boolean).map(s=>String(s).trim()))].sort((a,b)=>a.localeCompare(b,'es')).slice(0,300);
+  const o = a => a.map(v=>`<option value="${esc(v)}"></option>`).join('');
+  $('dl_t').innerHTML = o(uniq(same.map(x=>x.t)));
+  $('dl_m').innerHTML = o(uniq(ALL.map(x=>x.m)));
+  $('dl_ma').innerHTML = o(uniq(ALL.map(x=>x.ma)));
+  $('dl_co').innerHTML = o(uniq(ALL.map(x=>x.co)));
+}
+function loadHistory(code){
+  const box=$('hist');
+  if (!db){ box.innerHTML='<span class="hint">El historial se guarda al abrir la herramienta desde Claude.</span>'; return; }
+  box.innerHTML='<span class="hint">Cargando historial…</span>';
+  if (histUnsub) histUnsub();
+  histUnsub = db.collection('movimientos').where('codes','array-contains',code).onSnapshot(snap => {
+    const rows = [];
+    snap.docs.forEach(d => { const m=d.data(); (m.items||[]).forEach(it => { if (it.c===code) rows.push({t:m.t, motivo:m.motivo, nombre:m.nombre, nota:m.nota, a:it.a, d:it.d}); }); });
+    rows.sort((a,b)=> String(b.t).localeCompare(String(a.t)));
+    box.innerHTML = rows.length ? rows.slice(0,30).map(r => {
+      const dif=(r.d||0)-(r.a||0);
+      return `<div><time>${esc(fdate(r.t))}</time><span class="m">${esc(MOT[r.motivo]||r.motivo)}${r.nombre?': '+esc(r.nombre):''}</span><b>${r.a??0} → ${r.d??0} (${dif>0?'+':''}${dif})</b></div>`;
+    }).join('') : '<span class="hint">Sin movimientos registrados.</span>';
+  }, () => { box.innerHTML='<span class="hint">No se pudo cargar el historial.</span>'; });
+}
+
+// ---------- guardar ----------
+function nextCode(p){
+  let max = 0;
+  const scan = c => { if (pref(c)===p) max = Math.max(max, parseInt(c.split('-')[1],10)||0); };
+  ALL.forEach(x=>scan(x.c)); BASE.forEach(b=>scan(b.c)); Object.keys(changes[p]||{}).forEach(scan);
+  return `${p}-${String(max+1).padStart(3,'0')}`;
+}
+async function writeItems(p, items){
+  // una escritura a la vez por documento de categoría
+  const prev = queues[p] || Promise.resolve();
+  const run = prev.catch(()=>{}).then(async () => {
+    const ref = db.collection('cambios').doc(p);
+    if (docExists.has(p)) await ref.update({items});
+    else {
+      const snap = await ref.get();
+      if (snap.exists) { docExists.add(p); await ref.update({items}); }
+      else { await ref.set({items}); docExists.add(p); }
+    }
+  });
+  queues[p] = run; return run;
+}
+function localApply(p, items){
+  changes[p] = changes[p] || {};
+  for (const c in items) changes[p][c] = {...(changes[p][c]||{}), ...items[c]};
+}
+async function logMoves(motivoKey, items, extra){
+  // items: [{c, a, d}] ; se parte en documentos de 400 para no pasar el límite
+  for (let i=0; i<items.length; i+=400){
+    const part = items.slice(i, i+400);
+    await db.collection('movimientos').add({t:new Date().toISOString(), motivo:motivoKey, items:part, codes:part.map(x=>x.c), por: await myId(), ...(extra||{})});
+  }
+}
+async function myId(){ try { return user ? await user.id() : null; } catch(_){ return null; } }
+const FIELDS = ['e','q','t','m','mo','me','ma','co','d2','d5','k','v','b','p','sku','nota','foto'];
+async function save(verify){
+  if (!db){ toast('No hay conexión con la base de datos: los cambios no se guardaron.'); return; }
+  readForm();
+  const old = current, now = new Date().toISOString(), uid = await myId();
+  const stockMove = qChanged();
+  if (stockMove && !motivo){ $('motivoBox').scrollIntoView({block:'center',behavior:'smooth'}); toast('Elige el motivo del cambio de stock.'); return; }
+  const patch = {};
+  for (const k of FIELDS) if ((draft[k] ?? '') !== (old[k] ?? '')) patch[k] = draft[k] ?? '';
+  patch.n = buildName(draft); patch.upd = now; if (uid) patch.por = uid;
+  const mot = motivo;
+  if (stockMove){ patch.qAt = now; patch.qMot = mot; }
+  if (verify){ patch.ver = true; patch.verAt = now; }
+  const newCat = $('i_cat').value, oldCat = pref(old.c);
+  const qNew = draft.q ?? 0, nota = draft.nota;
+  try {
+    let code = old.c;
+    if (newCat !== oldCat){
+      code = nextCode(newCat);
+      const full = {}; for (const k of FIELDS) if (draft[k] != null && draft[k] !== '') full[k]=draft[k];
+      ['d','f','dup','fx','qAt','qMot','ver','verAt'].forEach(k => { if (old[k] != null && full[k] == null) full[k] = old[k]; });
+      const item = {...full, ...patch, nuevo:true, origen: old.c};
+      localApply(newCat, {[code]: item}); localApply(oldCat, {[old.c]: {movido: code, upd: now}});
+      refresh(); close();
+      await writeItems(newCat, {[code]: item});
+      await writeItems(oldCat, {[old.c]: {movido: code, upd: now}});
+      toast(`Movido a ${CATS[newCat]} con el código ${code}`);
+    } else {
+      localApply(oldCat, {[old.c]: patch}); refresh(); close();
+      await writeItems(oldCat, {[old.c]: patch});
+      toast(verify ? `${old.c} verificado` : `${old.c} guardado`);
+    }
+    if (stockMove) await logMoves(mot, [{c:code, a:old.q ?? 0, d:qNew}], nota ? {nota} : null);
+  } catch(e){
+    if (e && e.code==='invalid_argument'){ canWrite=false; showReadOnly(); }
+    toast('No se pudo guardar: ' + (e && e.message || 'error desconocido'));
+  }
+}
+function newProduct(barcode){
+  const cat = $('fCat').value || 'SINC';
+  const code = nextCode(cat);
+  const item = {nuevo:true, e:'I', q:0, upd:new Date().toISOString()};
+  if (typeof barcode === 'string' && barcode) item.b = barcode;
+  localApply(cat, {[code]: item}); refresh();
+  open(code);
+  writeItems(cat, {[code]: item}).catch(e=>toast('No se pudo crear: '+(e.message||'')));
+}
+
+// ---------- fotos ----------
+async function compress(file){
+  const img = await createImageBitmap(file).catch(()=>null);
+  if (!img) return file;
+  const max=1200, s=Math.min(1, max/Math.max(img.width,img.height));
+  const cv=document.createElement('canvas'); cv.width=Math.round(img.width*s); cv.height=Math.round(img.height*s);
+  cv.getContext('2d').drawImage(img,0,0,cv.width,cv.height);
+  return await new Promise(r=>cv.toBlob(b=>r(b||file),'image/jpeg',.82));
+}
+$('phFile').addEventListener('change', async e => {
+  const f = e.target.files[0]; e.target.value=''; if(!f || !assets) return;
+  $('phHint').textContent='Subiendo foto…';
+  try{
+    const blob = await compress(f);
+    const r = await assets.upload(blob, {type: blob.type || 'image/jpeg'});
+    draft.foto = r.id; renderPhoto();
+    $('phHint').textContent = `Foto lista (${Math.round(r.sizeBytes/1024)} KB). Se guarda al pulsar Guardar.`;
+  }catch(err){
+    $('phHint').textContent = {too_large:'La foto pesa más de 20 MB.',unsupported_type:'Ese formato de imagen no se acepta; usa JPG o PNG.',rate_limited:'Demasiadas subidas seguidas; espera un momento.',quota_or_state:'Se llenó el espacio de fotos de la herramienta.'}[err.code] || 'No se pudo subir la foto.';
+  }
+});
+
+// ---------- inventarios parciales ----------
+let alcance = 'marca', picked = new Set();
+function scopeProducts(){
+  if (alcance==='marca'){ const m=$('aMarca').value; return m ? ALL.filter(p=>cap(norm(p.m))===m) : []; }
+  if (alcance==='tipo'){ const c=$('aCat').value, t=$('aTipo').value; return t ? ALL.filter(p=>(!c||pref(p.c)===c) && (p.t?tkey(p.t):'_')===t) : []; }
+  return [...picked].map(c=>BY.get(c)).filter(Boolean);
+}
+function scopeName(){
+  if (alcance==='marca') return $('aMarca').value ? 'Marca '+$('aMarca').value.toUpperCase() : '';
+  if (alcance==='tipo'){ const t=$('aTipo'); return t.value ? (t.options[t.selectedIndex].text.replace(/ \(\d+\)$/,'')) + ($('aCat').value?` · ${CATS[$('aCat').value]}`:'') : ''; }
+  return picked.size ? `${picked.size} productos sueltos` : '';
+}
+function fillInvForm(){
+  const marcas = countBy(ALL, p=>p.m?cap(norm(p.m)):'').sort((a,b)=>a[1].localeCompare(b[1],'es')).map(([k,,n])=>[k,k.toUpperCase(),n]);
+  opts($('aMarca'), marcas, 'Elige una marca');
+  const cats = Object.keys(CATS).sort((a,b)=>CATS[a].localeCompare(CATS[b],'es')).map(p=>[p,CATS[p]]);
+  opts($('aCat'), cats, 'Todas las categorías');
+  fillInvTipos(); updateInvForm();
+}
+function fillInvTipos(){
+  const c=$('aCat').value, base = c ? ALL.filter(p=>pref(p.c)===c) : ALL;
+  opts($('aTipo'), countBy(base, p=>p.t?tkey(p.t):'_').map(([k,,n])=>[k, k==='_'?'Sin tipo':TIPOS.get(k), n]).sort((a,b)=>a[1].localeCompare(b[1],'es')), 'Elige un tipo');
+}
+function updateInvForm(){
+  $('aMarcaW').hidden = alcance!=='marca';
+  $('aCatW').hidden = $('aTipoW').hidden = alcance!=='tipo';
+  $('aBuscaW').hidden = alcance!=='individual';
+  const pick=$('aPick');
+  if (alcance==='individual'){
+    const q = norm($('aBusca').value); const terms=q?q.split(/\s+/):[];
+    const hits = terms.length ? ALL.filter(p=>{const h=norm([p.c,p.d,buildName(p),p.m,p.b,p.p].join(' ')); return terms.every(t=>h.includes(t));}).slice(0,60) : [];
+    const sel = [...picked].map(c=>BY.get(c)).filter(Boolean);
+    const list = [...sel, ...hits.filter(p=>!picked.has(p.c))];
+    pick.hidden = !list.length;
+    pick.innerHTML = list.map(p=>`<label><input type="checkbox" data-c="${esc(p.c)}"${picked.has(p.c)?' checked':''}><span><b class="code">${esc(p.c)}</b> ${esc(displayName(p))}</span></label>`).join('');
+  } else pick.hidden = true;
+  const ps = scopeProducts();
+  $('aNombre').placeholder = scopeName() || 'Se completa solo';
+  $('aResumen').innerHTML = ps.length ? `<span><b>${int(ps.length)}</b> productos</span><span><b>${int(ps.reduce((s,p)=>s+(p.q||0),0))}</b> unidades en sistema</span>` : '<span>Elige qué vas a contar.</span>';
+  $('aCrear').disabled = !ps.length || !db || !canWrite;
+}
+async function createInv(e){
+  e.preventDefault();
+  const ps = scopeProducts(); if (!ps.length || !db) return;
+  const nombre = $('aNombre').value.trim() || scopeName();
+  const sistema = {}; ps.forEach(p => sistema[p.c] = p.q ?? 0);
+  const doc = {nombre, alcance:{tipo:alcance, valor: alcance==='marca'?$('aMarca').value: alcance==='tipo'?$('aTipo').value:'', cat: alcance==='tipo'?$('aCat').value:''},
+    codigos: ps.map(p=>p.c), sistema, conteos:{}, estado:'abierto', creado:new Date().toISOString(), por: await myId()};
+  try{
+    const ref = await db.collection('inventarios').add(doc);
+    picked = new Set(); $('aNombre').value=''; $('aBusca').value='';
+    location.hash = 'inv-'+ref.id;
+    toast('Inventario creado');
+  }catch(err){ toast('No se pudo crear el inventario: '+(err.message||'')); }
+}
+function invStats(inv){
+  const cods = inv.codigos||[], cn = inv.conteos||{};
+  let contados=0, dif=0, faltan=0, sobran=0;
+  for (const c of cods){ const k=cn[c]; if(!k) continue; contados++; const d=(k.q||0)-(inv.sistema?.[c]||0); if(d){dif++; if(d<0) faltan-=d; else sobran+=d;} }
+  return {total:cods.length, contados, dif, faltan, sobran};
+}
+function renderInvList(){
+  const card = inv => {
+    const s = invStats(inv);
+    const tag = inv.estado==='abierto' ? `<span class="pill R">Abierto</span>` : `<span class="pill I">Cerrado</span>`;
+    return `<a class="card" href="#inv-${esc(inv.id)}" style="text-decoration:none">
+      <div class="r-top">${tag}<span class="hint">${esc(fdate(inv.creado))}</span></div>
+      <h4>${esc(inv.nombre)}</h4>
+      <div class="meter"><i style="width:${s.total?s.contados/s.total*100:0}%"></i></div>
+      <span class="sub">${int(s.contados)} de ${int(s.total)} contados · ${int(s.dif)} con diferencia${s.faltan?` · faltan ${int(s.faltan)} und`:''}${s.sobran?` · sobran ${int(s.sobran)} und`:''}${inv.cerradoAt?` · cerrado ${esc(fdate(inv.cerradoAt))}`:''}</span>
+    </a>`;
+  };
+  const op = INVS.filter(i=>i.estado==='abierto'), cl = INVS.filter(i=>i.estado!=='abierto');
+  $('invOpen').innerHTML = op.length ? op.map(card).join('') : '<div class="empty">No hay inventarios abiertos. Crea uno arriba.</div>';
+  $('invClosed').innerHTML = cl.length ? cl.map(card).join('') : '<div class="empty">Todavía no se ha cerrado ningún inventario.</div>';
+}
+let countQueue = Promise.resolve();
+function invById(id){ return INVS.find(i=>i.id===id); }
+function setCount(id, code, q){
+  const inv = invById(id); if (!inv || inv.estado!=='abierto') return;
+  const val = Math.max(0, Number(q)||0);
+  inv.conteos = {...(inv.conteos||{}), [code]: {q: val, t: new Date().toISOString()}};
+  renderCount(code);
+  const patch = {conteos:{[code]:{q:val, t:new Date().toISOString()}}};
+  if (!(inv.codigos||[]).includes(code)){ inv.codigos=[...(inv.codigos||[]), code]; inv.sistema={...(inv.sistema||{}), [code]: BY.get(code)?.q ?? 0}; patch.codigos=inv.codigos; patch.sistema={[code]: inv.sistema[code]}; }
+  countQueue = countQueue.catch(()=>{}).then(()=>db.collection('inventarios').doc(id).update(patch)).catch(e=>toast('No se guardó el conteo: '+(e.message||'')));
+}
+function renderCount(flash){
+  const id = route().inv; const inv = invById(id);
+  if (!inv){ $('icTitle').textContent='Inventario no encontrado'; $('icList').innerHTML=''; return; }
+  const s = invStats(inv), closed = inv.estado!=='abierto';
+  $('icTitle').textContent = inv.nombre;
+  $('icMeta').textContent = `${int(s.contados)} de ${int(s.total)} contados · ${int(s.dif)} con diferencia · creado ${fdate(inv.creado)}${closed?` · cerrado ${fdate(inv.cerradoAt)}`:''}`;
+  $('icMeter').style.width = (s.total? s.contados/s.total*100 : 0)+'%';
+  $('icClose').hidden = closed || !canWrite; $('icScan').disabled = $('icCam').disabled = closed || !canWrite;
+  const f = $('icFilter').value, cn = inv.conteos||{};
+  const rows = (inv.codigos||[]).map(c => BY.get(c) || {c, d:'(producto movido o eliminado)'}).filter(p => {
+    const k=cn[p.c], d = k ? (k.q - (inv.sistema?.[p.c]||0)) : null;
+    if (f==='pend') return !k; if (f==='diff') return k && d!==0; if (f==='ok') return k && d===0; return true;
+  });
+  const list=$('icList');
+  list.innerHTML = rows.length ? rows.map(p => {
+    const k=cn[p.c], sys=inv.sistema?.[p.c] ?? 0, d = k ? k.q - sys : null;
+    const cls = !k ? '' : d===0 ? ' done' : ' diff';
+    const dl = d==null ? '<span class="sys">sin contar</span>' : `<span class="delta ${d<0?'neg':d>0?'pos':'zero'}">${d===0?'cuadra':(d>0?'+':'')+d}</span>`;
+    return `<div class="count-row${cls}${flash===p.c?' flash':''}" data-c="${esc(p.c)}"${needXL(p)?' data-xl="1"':''}>
+      <span class="thumb">${thumbHtml(p)}</span>
+      <span class="r-main"><span class="r-top"><span class="code">${esc(p.c)}</span>${dl}</span><span class="name">${esc(displayName(p))}</span><span class="sys">En sistema: ${sys} und${k?` · contado ${esc(fdate(k.t))}`:''}</span></span>
+      <span class="cnt"><button type="button" data-act="-" aria-label="Restar uno"${closed?' disabled':''}>−</button><input type="number" min="0" inputmode="numeric" value="${k?k.q:''}" placeholder="${sys}" aria-label="Cantidad contada de ${esc(p.c)}"${closed?' disabled':''}><button type="button" data-act="+" aria-label="Sumar uno"${closed?' disabled':''}>+</button><button type="button" data-act="=" class="btn sm" title="Contado igual al sistema"${closed?' disabled':''}>= ${sys}</button></span>
+    </div>`;
+  }).join('') : '<div class="empty">No hay productos en esta vista.</div>';
+  loadThumbs(list);
+  if (flash){ const el=list.querySelector(`[data-c="${CSS.escape(flash)}"]`); if (el) el.scrollIntoView({block:'center'}); }
+}
+async function closeInv(){
+  const inv = invById(route().inv); if(!inv) return;
+  const cn = inv.conteos||{};
+  const items = (inv.codigos||[]).filter(c=>cn[c] && BY.get(c)).map(c => ({c, a: BY.get(c).q ?? 0, d: cn[c].q}));
+  const changed = items.filter(x=>x.a!==x.d);
+  const sinContar = (inv.codigos||[]).length - items.length;
+  $('icConfirmTxt').textContent = `Se actualizará el stock de ${changed.length} productos con diferencia y se marcarán ${items.length} como verificados. ${sinContar?`${sinContar} productos sin contar quedan como están.`:''}`;
+  $('icConfirm').hidden = false; $('icConfirm').scrollIntoView({block:'center'});
+}
+async function applyInv(){
+  $('icConfirm').hidden = true;
+  const inv = invById(route().inv); if(!inv) return;
+  const cn = inv.conteos||{}, now = new Date().toISOString();
+  const items = (inv.codigos||[]).filter(c=>cn[c] && BY.get(c)).map(c => ({c, a: BY.get(c).q ?? 0, d: cn[c].q}));
+  const byCat = {};
+  for (const it of items){
+    const patch = {ver:true, verAt:now, upd:now};
+    if (it.a !== it.d){ patch.q = it.d; patch.qAt = now; patch.qMot = 'Inventario'; patch.e = it.d>0 ? 'I' : 'P'; }
+    (byCat[pref(it.c)] = byCat[pref(it.c)] || {})[it.c] = patch;
+  }
+  try{
+    for (const p in byCat){ localApply(p, byCat[p]); }
+    refresh();
+    for (const p in byCat){ await writeItems(p, byCat[p]); }
+    const moved = items.filter(x=>x.a!==x.d);
+    if (moved.length) await logMoves('Inventario', moved, {nombre: inv.nombre, inv: inv.id});
+    const s = invStats(inv);
+    await db.collection('inventarios').doc(inv.id).update({estado:'cerrado', cerradoAt: now, resumen:{contados:s.contados, diferencias:s.dif, faltan:s.faltan, sobran:s.sobran}});
+    toast(`Inventario cerrado: ${moved.length} productos ajustados`);
+  }catch(e){ toast('No se pudo cerrar el inventario: '+(e.message||'')); }
+}
+
+// ---------- código no registrado: asignar o crear ----------
+let assignCode = null;
+function askAssign(code){
+  assignCode = null;
+  $('assignTxt').innerHTML = `El código <span class="code">${esc(code)}</span> no está en el catálogo.`;
+  $('assignActs').hidden = false; $('assignBox').hidden = false; $('assignBox').dataset.code = code;
+  $('assignNew').hidden = $('assignPick').hidden = !canWrite;
+  if (location.hash.replace('#','') && route().view!=='P') location.hash = 'productos';
+  window.scrollTo(0,0);
+}
+function startAssign(){
+  assignCode = $('assignBox').dataset.code;
+  $('assignTxt').innerHTML = `Busca y toca el producto al que pertenece <span class="code">${esc(assignCode)}</span>.`;
+  $('assignPick').hidden = $('assignNew').hidden = true;
+  $('q').value=''; shown=PAGE; renderList(); $('q').focus();
+}
+function endAssign(){ assignCode = null; $('assignBox').hidden = true; }
+function scanProducts(){
+  Scan.open({title:'Buscar producto', onCode: v => {
+    const p = findByCode(v);
+    if (p){ endAssign(); open(p.c); return {ok:true, text:`${p.c} · ${displayName(p)}`}; }
+    askAssign(v); return {ok:false, text:`${v} no está registrado`};
+  }});
+}
+
+// ---------- inventario: lectura de un código ----------
+function countScan(v){
+  const p = findByCode(v);
+  if (!p){ toast(`No encontré "${v}" en el catálogo`); return {ok:false, text:`${v}: no está en el catálogo`}; }
+  const inv = invById(route().inv); if(!inv || inv.estado!=='abierto') return {ok:false, text:'Este inventario está cerrado'};
+  const fuera = !(inv.codigos||[]).includes(p.c);
+  setCount(inv.id, p.c, (inv.conteos?.[p.c]?.q ?? 0) + 1);
+  const n = inv.conteos[p.c].q;
+  toast(fuera ? `${p.c} no estaba en este inventario: lo agregué` : `${p.c}: ${n} contados`);
+  return {ok:true, text:`${p.c}: ${n} contados · ${displayName(p)}`};
+}
+
+// ---------- vender ----------
+let cart = []; try{ cart = JSON.parse(localStorage.getItem('dcr-carrito')||'[]') || []; }catch(_){ cart = []; }
+let pago = 'Efectivo', VENTAS = [], selling = false;
+const saveCart = () => { try{ localStorage.setItem('dcr-carrito', JSON.stringify(cart)); }catch(_){} };
+const money = n => '$'+fmt(n||0);
+function addToCart(code){
+  const p = BY.get(code); if (!p) return;
+  const line = cart.find(l=>l.c===code);
+  if (line) line.cant++; else cart.push({c:code, cant:1, precio: Number(p.v)||0});
+  saveCart(); renderCart();
+  return cart.find(l=>l.c===code).cant;
+}
+function saleScan(v){
+  const p = findByCode(v);
+  if (!p){ toast(`El código ${v} no está registrado. Asígnalo desde Productos.`); return {ok:false, text:`${v}: no está registrado`}; }
+  const n = addToCart(p.c);
+  return {ok:true, text:`${n} × ${displayName(p)} · ${money(p.v)}`};
+}
+function renderCart(){
+  const box = $('cart');
+  const warn = [];
+  box.innerHTML = cart.length ? cart.map((l,i) => {
+    const p = BY.get(l.c) || {c:l.c, d:'(producto no encontrado)'};
+    const stock = p.q ?? 0, falta = l.cant > stock;
+    if (falta) warn.push(`${l.c}: vendes ${l.cant} y el sistema tiene ${stock}`);
+    return `<div class="cart-row${falta?' warn':''}" data-i="${i}" data-c="${esc(l.c)}"${needXL(p)?' data-xl="1"':''}>
+      <span class="thumb">${thumbHtml(p)}</span>
+      <span class="r-main"><span class="r-top"><span class="code">${esc(l.c)}</span><span class="sys">stock ${stock}</span></span><span class="name">${esc(displayName(p))}</span><span class="sys">Subtotal <b>${money(l.cant*l.precio)}</b>${p.v!=null && Number(p.v)!==l.precio?` · lista ${money(p.v)}`:''}</span></span>
+      <span class="cart-ctl"><button type="button" data-act="-" aria-label="Restar uno">−</button><input class="qn" type="number" min="1" inputmode="numeric" value="${l.cant}" data-f="cant" aria-label="Cantidad"><button type="button" data-act="+" aria-label="Sumar uno">+</button><span class="sys">c/u $</span><input type="number" min="0" step="0.01" inputmode="decimal" value="${l.precio}" data-f="precio" aria-label="Precio unitario"><button type="button" data-act="x" aria-label="Quitar">×</button></span>
+    </div>`;
+  }).join('') : '<div class="empty" style="padding:20px">Escanea o busca productos para agregarlos.</div>';
+  loadThumbs(box);
+  const total = cart.reduce((s,l)=>s+l.cant*l.precio,0), und = cart.reduce((s,l)=>s+l.cant,0);
+  $('vTotal').textContent = money(total);
+  $('vInfo').innerHTML = cart.length ? `<span><b>${int(und)}</b> unidades</span>` + warn.map(w=>`<span style="color:var(--accent)">${esc(w)}</span>`).join('') : '';
+  $('vSell').disabled = !cart.length || !db || !canWrite || selling;
+  $('vClear').disabled = !cart.length;
+}
+function renderHits(){
+  const q = norm($('vScan').value), terms = q ? q.split(/\s+/) : [], box = $('vHits');
+  if (!terms.length){ box.hidden = true; return; }
+  const hits = ALL.filter(p => { const h=norm([p.c,p.d,buildName(p),p.m,p.b,p.p,p.sku].join(' ')); return terms.every(t=>h.includes(t)); }).slice(0,12);
+  box.hidden = false;
+  box.innerHTML = hits.length ? hits.map(p=>`<button type="button" data-c="${esc(p.c)}"><span class="r-main"><span class="name">${esc(displayName(p))}</span><span class="sub"><span class="code">${esc(p.c)}</span> · stock ${p.q ?? 0}</span></span><b>${money(p.v)}</b></button>`).join('') : '<div class="hint" style="padding:8px">Sin resultados.</div>';
+}
+async function sell(){
+  if (!cart.length || !db || selling) return;
+  selling = true; renderCart();
+  const now = new Date().toISOString(), uid = await myId();
+  const lines = cart.filter(l => BY.get(l.c) && l.cant > 0);
+  const total = lines.reduce((s,l)=>s+l.cant*l.precio,0);
+  try{
+    const ref = await db.collection('ventas').add({t:now, items: lines.map(l=>({c:l.c, n:displayName(BY.get(l.c)), cant:l.cant, precio:l.precio})), total, pago, nota:$('vNota').value.trim(), por:uid});
+    const moves = await applyStock(lines.map(l=>({c:l.c, delta:-l.cant})), 'Venta', now, uid);
+    if (moves.length) await logMoves('Venta', moves, {venta: ref.id, nombre: `Venta ${money(total)}`});
+    cart = []; saveCart(); $('vNota').value='';
+    toast(`Venta registrada: ${money(total)}`);
+  }catch(e){ toast('No se pudo registrar la venta: '+(e && e.message || '')); }
+  selling = false; renderCart();
+}
+// Aplica cambios de stock (delta) a varios productos; devuelve los movimientos {c,a,d}
+async function applyStock(deltas, mot, now, uid){
+  const byCat = {}, moves = [];
+  for (const {c, delta} of deltas){
+    const p = BY.get(c); if (!p) continue;
+    const a = p.q ?? 0, d = a + delta;
+    const patch = {q:d, qAt:now, qMot:mot, upd:now}; if (uid) patch.por = uid;
+    if (d <= 0) patch.e = 'P'; else if (p.e === 'P') patch.e = 'I';
+    (byCat[pref(c)] = byCat[pref(c)] || {})[c] = patch;
+    moves.push({c, a, d});
+  }
+  for (const p in byCat) localApply(p, byCat[p]);
+  refresh();
+  for (const p in byCat) await writeItems(p, byCat[p]);
+  return moves;
+}
+let armed = null;
+async function anular(id, btn){
+  const v = VENTAS.find(x=>x.id===id); if (!v || v.anulada || !db) return;
+  if (armed !== id){ armed = id; btn.textContent = '¿Seguro? Toca otra vez'; setTimeout(()=>{ if (armed===id){ armed=null; renderVentas(); } }, 4000); return; }
+  armed = null; btn.disabled = true;
+  try{
+    const now = new Date().toISOString(), uid = await myId();
+    const moves = await applyStock((v.items||[]).map(it=>({c:it.c, delta:+it.cant})), 'Anulacion', now, uid);
+    if (moves.length) await logMoves('Anulacion', moves, {venta: id, nombre: `Venta ${money(v.total)} anulada`});
+    await db.collection('ventas').doc(id).update({anulada:true, anuladaAt:now, anuladaPor:uid});
+    toast('Venta anulada: el stock se devolvió');
+  }catch(e){ toast('No se pudo anular: '+(e && e.message || '')); btn.disabled=false; }
+}
+function renderVentas(){
+  const ok = VENTAS.filter(v=>!v.anulada);
+  $('vHoyMeta').textContent = `${int(ok.length)} ${ok.length===1?'venta':'ventas'} · ${money(ok.reduce((s,v)=>s+(v.total||0),0))}`;
+  $('vHoy').innerHTML = VENTAS.length ? VENTAS.map(v => {
+    const hora = new Date(v.t).toLocaleTimeString('es-EC',{hour:'2-digit',minute:'2-digit'});
+    const det = (v.items||[]).map(it=>`${it.cant} × ${it.n||it.c}`).join(' · ');
+    return `<div class="venta${v.anulada?' anulada':''}"><time class="hint">${esc(hora)}</time>
+      <span class="r-main"><span class="sub">${esc(det)}</span><span class="hint">${esc(v.pago||'')}${v.nota?' · '+esc(v.nota):''}${v.anulada?' · anulada':''}</span></span>
+      <span class="r-side"><b>${money(v.total)}</b>${!v.anulada && canWrite ? `<button class="btn sm" type="button" data-anular="${esc(v.id)}">Anular</button>` : ''}</span></div>`;
+  }).join('') : '<div class="empty" style="padding:20px">Todavía no hay ventas hoy.</div>';
+}
+
+// ---------- exportar ----------
+async function exportCsv(){
+  const cols=[['c','Código interno'],['cat','Categoría'],['tipoG','Tipo (agrupado)'],['e','Estado'],['n','Nombre'],['t','Tipo'],['m','Marca'],['mo','Modelo'],['me','Medida'],['d2','Detalle 2'],['ma','Material'],['co','Color'],['d5','Detalle extra'],['sku','SKU'],['b','Código de barras'],['p','Código proveedor'],['q','Cantidad'],['qAt','Último cambio de stock'],['qMot','Motivo'],['k','Costo'],['v','Venta'],['ver','Verificado'],['verAt','Fecha verificación'],['foto','Foto (id)'],['nota','Notas'],['d','Descripción original'],['brgRef','Ref. BRG'],['brgU','Unid. compradas a BRG'],['brgO','Pedidos a BRG'],['brgUc','Última compra a BRG']];
+  const cell = v => { const s=String(v??''); return /[";\n]/.test(s) ? '"'+s.replace(/"/g,'""')+'"' : s; };
+  const lines=[cols.map(c=>c[1]).join(';')];
+  for (const p of ALL){
+    const r={...p, cat:CATS[pref(p.c)], tipoG:tipoLabel(p), e:EST[p.e]||'', n:buildName(p)||p.d, ver:p.ver?'Sí':'', qMot:MOT[p.qMot]||p.qMot||'', k:p.k!=null?String(p.k).replace('.',','):'', v:p.v!=null?String(p.v).replace('.',','):'', brgRef:brgRefs(p.c), brgU:BRG[p.c]?.u ?? '', brgO:BRG[p.c]?.o ?? '', brgUc:BRG[p.c]?.uc ?? ''};
+    lines.push(cols.map(([k])=>cell(r[k])).join(';'));
+  }
+  try{ await downloads.save({filename:`inventario_dc_racing_${new Date().toISOString().slice(0,10)}.csv`, data:'﻿'+lines.join('\r\n')}); }
+  catch(e){ toast('La descarga se canceló o no está disponible.'); }
+}
+
+// ---------- rutas ----------
+function route(){
+  const h = location.hash.replace('#','');
+  if (h.startsWith('inv-')) return {view:'I', inv:h.slice(4)};
+  if (h==='inventarios') return {view:'I'};
+  if (h==='vender') return {view:'V'};
+  return {view:'P'};
+}
+function applyRoute(){
+  const r = route();
+  $('viewP').hidden = r.view!=='P'; $('prodBar').hidden = r.view!=='P'; $('viewI').hidden = r.view!=='I'; $('viewV').hidden = r.view!=='V';
+  $('tabP').setAttribute('aria-current', r.view==='P'?'page':'false'); $('tabI').setAttribute('aria-current', r.view==='I'?'page':'false'); $('tabV').setAttribute('aria-current', r.view==='V'?'page':'false');
+  if (r.view==='V'){ renderCart(); renderVentas(); }
+  $('invList').hidden = !!r.inv; $('invCount').hidden = !r.inv; $('icConfirm').hidden = true;
+  if (r.view==='I' && !r.inv){ fillInvForm(); renderInvList(); }
+  if (r.inv){ renderCount(); setTimeout(()=>$('icScan').focus({preventScroll:true}),50); }
+  window.scrollTo(0,0);
+}
+window.addEventListener('hashchange', applyRoute);
+
+// ---------- eventos ----------
+let tq; $('q').addEventListener('input', ()=>{ clearTimeout(tq); tq=setTimeout(()=>{shown=PAGE; renderList();},120); });
+$('q').addEventListener('keydown', e => {
+  if (e.key!=='Enter') return;
+  const v=$('q').value.trim(); if(!v) return;
+  const hit = findByCode(v);
+  if (hit){ endAssign(); open(hit.c); $('q').select(); }
+  else if (/^\d{6,14}$/.test(v) && !filtered().length) askAssign(v);   // lectura de una pistola de códigos que no existe
+});
+$('btnScan').addEventListener('click', scanProducts);
+$('assignPick').addEventListener('click', startAssign);
+$('assignNew').addEventListener('click', ()=>{ const c=$('assignBox').dataset.code; endAssign(); newProduct(c); });
+$('assignCancel').addEventListener('click', endAssign);
+$('bScan').addEventListener('click', ()=>Scan.open({title:'Código de barras del producto', onCode: v => {
+  $('i_b').value = v; updateSheet();
+  return {ok:true, text:`Código ${v} puesto. Pulsa Guardar.`};
+}}));
+// vender
+let tv; $('vScan').addEventListener('input', ()=>{ clearTimeout(tv); tv=setTimeout(renderHits,120); });
+$('vScan').addEventListener('keydown', e => {
+  if (e.key!=='Enter') return;
+  const v=$('vScan').value.trim(); if(!v) return;
+  const p = findByCode(v);
+  if (p){ addToCart(p.c); $('vScan').value=''; renderHits(); toast(`Agregado: ${displayName(p)}`); }
+  else if (/^\d{6,14}$/.test(v)){ toast(`El código ${v} no está registrado. Asígnalo desde Productos.`); $('vScan').select(); }
+});
+$('vHits').addEventListener('click', e => { const b=e.target.closest('button[data-c]'); if(!b) return; addToCart(b.dataset.c); $('vScan').value=''; renderHits(); $('vScan').focus(); });
+$('vCam').addEventListener('click', ()=>Scan.open({title:'Vender: escanea los productos', continuous:true, onCode: saleScan}));
+$('cart').addEventListener('click', e => {
+  const b=e.target.closest('button[data-act]'); if(!b) return;
+  const i=Number(b.closest('.cart-row').dataset.i), l=cart[i]; if(!l) return;
+  if (b.dataset.act==='+') l.cant++; else if (b.dataset.act==='-') l.cant=Math.max(1,l.cant-1); else cart.splice(i,1);
+  saveCart(); renderCart();
+});
+$('cart').addEventListener('change', e => {
+  const f=e.target.dataset.f; if(!f) return;
+  const l=cart[Number(e.target.closest('.cart-row').dataset.i)]; if(!l) return;
+  const v=Number(e.target.value);
+  if (f==='cant') l.cant=Math.max(1, Math.round(v)||1); else l.precio=Math.max(0, v||0);
+  saveCart(); renderCart();
+});
+$('vPago').querySelectorAll('button').forEach(b => b.addEventListener('click', ()=>{ pago=b.dataset.p; $('vPago').querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed', x===b)); }));
+$('vClear').addEventListener('click', ()=>{ cart=[]; saveCart(); renderCart(); });
+$('vSell').addEventListener('click', sell);
+$('vHoy').addEventListener('click', e => { const b=e.target.closest('button[data-anular]'); if(b) anular(b.dataset.anular, b); });
+['fCat','fTipo','fMarca','fMat','fColor','fEst','fVer','fInc','fDup','fStock','fBrg','fGroup'].forEach(id => $(id).addEventListener('change', ()=>{
+  if (id==='fCat') { fillFilterOptions(); try{localStorage.setItem('dcr-cat',$('fCat').value)}catch(_){} }
+  shown=PAGE; renderList();
+}));
+$('btnClear').addEventListener('click', ()=>{ ['fCat','fTipo','fMarca','fMat','fColor','fEst','fVer'].forEach(id=>$(id).value=''); ['fInc','fDup','fStock','fBrg'].forEach(id=>$(id).checked=false); $('q').value=''; fillFilterOptions(); shown=PAGE; renderList(); });
+document.querySelectorAll('.vsw button').forEach(b => b.addEventListener('click', ()=>{ setVista(b.dataset.v); renderList(); }));
+setVista(vista);
+$('more').addEventListener('click', ()=>{ shown+=PAGE; renderList(); });
+$('list').addEventListener('click', e => { const r=e.target.closest('.row'); if(r) open(r.dataset.c); });
+$('bg').addEventListener('click', close); $('shClose').addEventListener('click', close);
+document.addEventListener('keydown', e => { if(e.key==='Escape' && current && $('scanBg').hidden) close(); });
+$('form').addEventListener('input', updateSheet);
+$('form').addEventListener('submit', e => e.preventDefault());
+$('i_cat').addEventListener('change', ()=>{ fillDatalists($('i_cat').value); updateSheet(); });
+$('segEst').querySelectorAll('button').forEach(b => b.addEventListener('click', ()=>{ setEstado(b.dataset.e); updateSheet(); }));
+$('segMot').querySelectorAll('button').forEach(b => b.addEventListener('click', ()=>setMotivo(b.dataset.m)));
+$('qm').addEventListener('click', ()=>{ $('i_q').value=Math.max(0,(Number($('i_q').value)||0)-1); updateSheet(); });
+$('qp').addEventListener('click', ()=>{ $('i_q').value=(Number($('i_q').value)||0)+1; updateSheet(); });
+$('shSave').addEventListener('click', ()=>save(false));
+$('shVerify').addEventListener('click', ()=>save(true));
+$('btnNew').addEventListener('click', newProduct);
+const activeFilters = () => ['fCat','fTipo','fMarca','fMat','fColor','fEst','fVer'].filter(id=>$(id).value).length + ['fInc','fDup','fStock','fBrg'].filter(id=>$(id).checked).length;
+const syncFiltBtn = () => { const n=activeFilters(); $('btnFilt').textContent = n ? `Filtros (${n})` : 'Filtros'; };
+$('btnFilt').addEventListener('click', ()=>{ const o=$('filtersBox').classList.toggle('open'); $('btnFilt').setAttribute('aria-expanded', o); });
+document.querySelectorAll('#filtersBox select, #filtersBox input').forEach(el=>el.addEventListener('change', syncFiltBtn));
+$('btnClear').addEventListener('click', syncFiltBtn);
+$('btnExport').addEventListener('click', exportCsv);
+// inventarios
+document.querySelectorAll('#invForm .seg button').forEach(b => b.addEventListener('click', ()=>{
+  alcance=b.dataset.a; document.querySelectorAll('#invForm .seg button').forEach(x=>x.setAttribute('aria-pressed', x===b)); updateInvForm();
+}));
+['aMarca','aTipo'].forEach(id=>$(id).addEventListener('change', updateInvForm));
+$('aCat').addEventListener('change', ()=>{ fillInvTipos(); updateInvForm(); });
+let ta; $('aBusca').addEventListener('input', ()=>{ clearTimeout(ta); ta=setTimeout(updateInvForm,150); });
+$('aPick').addEventListener('change', e => { const c=e.target.dataset.c; if(!c) return; e.target.checked ? picked.add(c) : picked.delete(c); updateInvForm(); });
+$('invForm').addEventListener('submit', createInv);
+$('icFilter').addEventListener('change', ()=>renderCount());
+$('icList').addEventListener('click', e => {
+  const b=e.target.closest('button[data-act]'); if(!b) return;
+  const row=b.closest('.count-row'), c=row.dataset.c, inv=invById(route().inv), cur=inv?.conteos?.[c]?.q;
+  const sys = inv?.sistema?.[c] ?? 0;
+  const v = b.dataset.act==='=' ? sys : b.dataset.act==='+' ? (cur ?? 0)+1 : Math.max(0,(cur ?? sys)-1);
+  setCount(inv.id, c, v);
+});
+$('icList').addEventListener('change', e => { if(e.target.tagName!=='INPUT') return; const c=e.target.closest('.count-row').dataset.c; if(e.target.value==='') return; setCount(route().inv, c, e.target.value); });
+$('icScan').addEventListener('keydown', e => {
+  if (e.key!=='Enter') return;
+  const v=$('icScan').value.trim(); $('icScan').value=''; if(!v) return;
+  countScan(v);
+});
+$('icCam').addEventListener('click', ()=>Scan.open({title:'Contar: cada lectura suma 1', continuous:true, onCode: countScan}));
+$('icClose').addEventListener('click', closeInv);
+$('icConfirmYes').addEventListener('click', applyInv);
+$('icConfirmNo').addEventListener('click', ()=>$('icConfirm').hidden=true);
+
+function showReadOnly(){ const n=$('notice'); n.hidden=false; n.textContent='Estás viendo el inventario en modo lectura: tus cambios no se pueden guardar con este acceso.'; $('btnNew').hidden=true; }
+
+// ---------- arranque ----------
+(window.loadData ? window.loadData('brg') : fetch('compras_brg.json').then(r=>r.ok?r.json():{})).catch(()=>({})).then(j => { BRG = j||{}; if (BY.size) renderList(); if (current) renderBrg(current.c); });
+(window.loadData ? window.loadData('catalogo') : fetch('catalogo.json').then(r=>r.json())).then(j => {
+  CATS = j.categorias; BASE = j.productos; baseByCode = new Map(BASE.map(b=>[b.c,b]));
+  const o = Object.keys(CATS).sort((a,b)=>CATS[a].localeCompare(CATS[b],'es')).map(p=>`<option value="${p}">${esc(CATS[p])} (${p})</option>`).join('');
+  $('fCat').insertAdjacentHTML('beforeend', o); $('i_cat').innerHTML = o;
+  try{ const c=localStorage.getItem('dcr-cat'); if(c && CATS[c]) $('fCat').value=c; }catch(_){}
+  refresh(); applyRoute(); syncFiltBtn();
+}).catch(()=>{ $('list').innerHTML='<div class="empty">No se pudo cargar el catálogo. Recarga la página.</div>'; });
+
+(async () => {
+  if (!window.claude || !window.claude.use) { const n=$('notice'); n.hidden=false; n.textContent='Abre la herramienta desde Claude para guardar cambios.'; $('btnNew').hidden=true; canWrite=false; return; }
+  const [d, u, a, dl] = await Promise.all(['db','user','assets','downloads'].map(n=>window.claude.use(n).catch(()=>null)));
+  db=d; user=u; assets=a; downloads=dl;
+  if (downloads) $('btnExport').hidden=false;
+  if (!db){ canWrite=false; showReadOnly(); return; }
+  if (user && user.can){ const w = await Promise.resolve(user.can('data.write')).catch(()=>null); if (w===false){ canWrite=false; showReadOnly(); } }
+  const lost = () => { const n=$('notice'); n.hidden=false; n.textContent='Se perdió la conexión con la base de datos. Recarga la página para seguir guardando.'; };
+  db.collection('cambios').onSnapshot(snap => {
+    const next = {}; docExists = new Set();
+    snap.docs.forEach(doc => { docExists.add(doc.id); next[doc.id] = JSON.parse(JSON.stringify((doc.data()||{}).items||{})); });
+    changes = next; refresh();
+  }, lost);
+  db.collection('inventarios').onSnapshot(snap => {
+    INVS = snap.docs.map(d => ({id:d.id, ...JSON.parse(JSON.stringify(d.data()||{}))})).sort((a,b)=>String(b.creado).localeCompare(String(a.creado)));
+    renderStats();
+    const r = route(); if (r.inv) renderCount(); else if (r.view==='I') renderInvList();
+    if (r.view==='I' && !r.inv) updateInvForm();
+  }, lost);
+  const hoy = new Date(); hoy.setHours(0,0,0,0);
+  db.collection('ventas').where('t','>=',hoy.toISOString()).onSnapshot(snap => {
+    VENTAS = snap.docs.map(d => ({id:d.id, ...JSON.parse(JSON.stringify(d.data()||{}))})).sort((a,b)=>String(b.t).localeCompare(String(a.t)));
+    if (route().view==='V') renderVentas();
+  }, lost);
+  if (route().view==='V') renderCart();
+})();
+})();
+</script>
+
+</body></html>
