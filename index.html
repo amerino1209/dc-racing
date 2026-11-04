@@ -153,6 +153,14 @@ button.ghead:hover h3{color:var(--accent)}
 .photo{display:grid;grid-template-columns:120px minmax(0,1fr);gap:12px;align-items:center}
 .photo .big{width:120px;height:120px;border-radius:10px;background:var(--surface-2);border:1px solid var(--line);display:grid;place-items:center;overflow:hidden;color:var(--muted);font-size:.75rem}
 .photo .big img{width:100%;height:100%;object-fit:cover}
+.photo .big.zoomable{cursor:zoom-in}
+.photo .big.zoomable:hover{border-color:var(--muted)}
+#zoom{position:fixed;inset:0;width:100vw;height:100dvh;max-width:none;max-height:none;margin:0;padding:max(12px,env(safe-area-inset-top,0px)) 12px max(12px,env(safe-area-inset-bottom,0px));border:0;background:rgba(0,0,0,.92);cursor:zoom-out}
+#zoom[open]{display:grid;place-items:center}
+#zoom::backdrop{background:transparent}
+#zoom img{max-width:100%;max-height:100%;object-fit:contain;border-radius:6px}
+#zoom .x{position:absolute;top:max(10px,env(safe-area-inset-top,0px));right:12px;width:42px;height:42px;border-radius:50%;border:0;background:rgba(255,255,255,.16);color:#fff;font-size:1.4rem;line-height:1}
+#zoom .cap{position:absolute;left:0;right:0;bottom:max(10px,env(safe-area-inset-bottom,0px));text-align:center;color:#ddd;font:500 .85rem var(--f-mono)}
 .photo .act{display:grid;gap:6px;justify-items:start}
 .hint{font-size:.8rem;color:var(--muted)}
 fieldset{border:0;padding:0;margin:0;display:grid;gap:10px;min-width:0}
@@ -402,6 +410,7 @@ label.f.miss input{border-color:var(--accent);background:var(--accent-soft)}
 </main>
 
 <div class="sheet-bg" id="bg" hidden></div>
+<dialog id="zoom" aria-label="Foto ampliada"><img id="zoomImg" alt=""><button type="button" class="x" aria-label="Cerrar">✕</button><div class="cap" id="zoomCap"></div></dialog>
 <aside class="sheet" id="sheet" hidden aria-modal="true" role="dialog" aria-labelledby="shName">
   <div class="sh-head">
     <div style="min-width:0">
@@ -920,7 +929,8 @@ function updateSheet(){
 }
 function renderPhoto(){
   const b=$('phBig');
-  const show = () => { const src = photoSrc(draft); b.innerHTML = src ? `<img alt="Foto de ${esc(draft.c)}" src="${esc(src)}">` : 'Sin foto'; };
+  const show = () => { const src = photoSrc(draft); b.innerHTML = src ? `<img alt="Foto de ${esc(draft.c)}" src="${esc(src)}">` : 'Sin foto';
+    b.classList.toggle('zoomable', !!src); if (src){ b.setAttribute('role','button'); b.tabIndex=0; b.title='Toca para ampliar'; } else { b.removeAttribute('role'); b.removeAttribute('tabindex'); b.title=''; } };
   show(); if (needXL(draft)) loadFor(draft).then(show);
   $('phBtnTxt').textContent = (draft.foto||draft.fx) ? 'Cambiar foto' : 'Tomar o subir foto';
   $('phHint').textContent = draft.foto ? 'Foto tomada en la herramienta.' : draft.fx ? 'Foto sacada del Excel. Puedes reemplazarla.' : 'Se comprime antes de subir (máx. 1200 px).';
@@ -1431,7 +1441,17 @@ $('list').addEventListener('click', e => {
 $('gOpenAll').addEventListener('click', ()=>{ gClosed.clear(); saveGClosed(); renderList(); });
 $('gCloseAll').addEventListener('click', ()=>{ lastGroups.forEach(k=>gClosed.add(k)); saveGClosed(); renderList(); });
 $('bg').addEventListener('click', close); $('shClose').addEventListener('click', close);
-document.addEventListener('keydown', e => { if(e.key==='Escape' && current && $('scanBg').hidden) close(); });
+document.addEventListener('keydown', e => { if(e.key==='Escape' && current && $('scanBg').hidden && !$('zoom').open) close(); });
+function openZoom(){
+  const img = $('phBig').querySelector('img'); if (!img) return;
+  $('zoomImg').src = img.src; $('zoomImg').alt = img.alt;
+  $('zoomCap').textContent = draft ? [draft.c, displayName(draft)].filter(Boolean).join(' · ') : '';
+  $('zoom').showModal();
+}
+$('phBig').addEventListener('click', openZoom);
+$('phBig').addEventListener('keydown', e => { if (e.key==='Enter' || e.key===' '){ e.preventDefault(); openZoom(); } });
+$('zoom').addEventListener('click', () => $('zoom').close());
+$('zoom').addEventListener('cancel', e => e.stopPropagation());
 $('form').addEventListener('input', updateSheet);
 $('form').addEventListener('submit', e => e.preventDefault());
 $('i_cat').addEventListener('change', ()=>{ fillDatalists($('i_cat').value); updateSheet(); });
