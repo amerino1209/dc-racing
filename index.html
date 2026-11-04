@@ -68,6 +68,12 @@ main{max-width:1280px;margin:0 auto;padding-block:14px 40px}
 .ghead:first-child{margin-top:0}
 .ghead h3{margin:0;font:700 1.05rem/1 var(--f-display);text-transform:uppercase;letter-spacing:.05em}
 .ghead span{color:var(--muted);font-size:.82rem;font-variant-numeric:tabular-nums}
+button.ghead{width:100%;background:none;border:0;border-bottom:2px solid var(--ink);border-radius:0;color:var(--ink);text-align:left;cursor:pointer;align-items:center}
+button.ghead:hover h3{color:var(--accent)}
+.ghead h3::before{content:"";display:inline-block;width:.42em;height:.42em;margin:0 .55em .15em .1em;border:solid currentColor;border-width:0 2.5px 2.5px 0;transform:rotate(45deg);transition:transform .15s}
+.ghead[aria-expanded="false"] h3::before{transform:rotate(-45deg)}
+.ghead[aria-expanded="false"]{border-bottom-color:var(--line)}
+.gtools{display:flex;gap:6px}
 .row{display:grid;grid-template-columns:56px minmax(0,1fr) auto;gap:12px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:8px 12px 8px 8px;text-align:left;width:100%;color:var(--ink)}
 .row:hover{border-color:var(--muted)}
 .row.ver{border-left:4px solid var(--ok)}
@@ -283,7 +289,6 @@ label.f.miss input{border-color:var(--accent);background:var(--accent-soft)}
         <label class="chk"><input type="checkbox" id="fDup"> Posible duplicado</label>
         <label class="chk"><input type="checkbox" id="fStock"> Con stock</label>
         <label class="chk"><input type="checkbox" id="fBrg"> Comprado a BRG</label>
-        <label class="chk"><input type="checkbox" id="fGroup" checked> Agrupar por tipo</label>
         <button class="btn sm" id="btnClear" type="button">Limpiar filtros</button>
         <button class="btn sm" id="btnExport" type="button" hidden>Exportar CSV</button>
       </div>
@@ -307,6 +312,7 @@ label.f.miss input{border-color:var(--accent);background:var(--accent-soft)}
       <h2 id="catTitle">Todas las categorías</h2>
       <div class="right">
         <div class="meta" id="catMeta"></div>
+        <div class="gtools"><button class="btn sm" type="button" id="gOpenAll">Expandir todo</button><button class="btn sm" type="button" id="gCloseAll">Contraer todo</button></div>
         <div class="vsw" role="group" aria-label="Vista"><button type="button" data-v="lista">Lista</button><button type="button" data-v="mosaico">Mosaico</button></div>
       </div>
     </div>
@@ -817,30 +823,36 @@ function setVista(v){
   document.querySelectorAll('.vsw button').forEach(b=>b.setAttribute('aria-pressed', b.dataset.v===v));
   $('list').classList.toggle('mosaic', v==='mosaico');
 }
+let gClosed = new Set(), lastGroups = [];
+try{ gClosed = new Set(JSON.parse(localStorage.getItem('dcr-gcerrados')||'[]')); }catch(_){}
+const saveGClosed = () => { try{ localStorage.setItem('dcr-gcerrados', JSON.stringify([...gClosed])); }catch(_){} };
 function renderList(){
   const item = vista==='mosaico' ? tileHtml : rowHtml;
-  let rows = filtered(); const cat=$('fCat').value, group=$('fGroup').checked;
+  let rows = filtered(); const cat=$('fCat').value;
   $('catTitle').textContent = cat ? `${CATS[cat]||cat} · ${cat}` : 'Todas las categorías';
   const ver = rows.filter(p=>p.ver).length, und = rows.reduce((s,p)=>s+(p.q||0),0);
   $('catMeta').textContent = `${int(rows.length)} productos · ${int(und)} unidades · ${int(ver)} verificados (${rows.length?Math.round(ver/rows.length*100):0}%)`;
   const list=$('list');
   if (!rows.length){ list.innerHTML = `<div class="empty">Ningún producto coincide con la búsqueda o los filtros.</div>`; $('more').hidden=true; return; }
   let html = '';
-  if (group){
-    const g = new Map();
-    for (const p of rows){ const k=tipoLabel(p); if(!g.has(k)) g.set(k,[]); g.get(k).push(p); }
-    const groups = [...g].sort((a,b)=> a[0]==='Sin tipo' ? 1 : b[0]==='Sin tipo' ? -1 : a[0].localeCompare(b[0],'es'));
-    let n = 0;
-    for (const [lab, ps] of groups){
-      if (n >= shown) break;
-      const u = ps.reduce((s,p)=>s+(p.q||0),0), v = ps.filter(p=>p.ver).length;
-      html += `<div class="ghead"><h3>${esc(lab)}</h3><span>${int(ps.length)} productos · ${int(u)} und · ${int(v)} verificados</span></div>`;
-      for (const p of ps){ if (n++ >= shown) break; html += item(p); }
-    }
-  } else html = rows.slice(0, shown).map(item).join('');
+  const g = new Map();
+  for (const p of rows){ const k=tipoLabel(p); if(!g.has(k)) g.set(k,[]); g.get(k).push(p); }
+  const groups = [...g].sort((a,b)=> a[0]==='Sin tipo' ? 1 : b[0]==='Sin tipo' ? -1 : a[0].localeCompare(b[0],'es'));
+  lastGroups = groups.map(x=>x[0]);
+  const buscando = $('q').value.trim() !== '';
+  let n = 0, visibles = 0;
+  for (const [lab, ps] of groups){
+    const abierto = buscando || !gClosed.has(lab);
+    if (abierto) visibles += ps.length;
+    if (abierto && n >= shown) continue;
+    const u = ps.reduce((s,p)=>s+(p.q||0),0), v = ps.filter(p=>p.ver).length;
+    html += `<button type="button" class="ghead" data-g="${esc(lab)}" aria-expanded="${abierto}"><h3>${esc(lab)}</h3><span>${int(ps.length)} productos · ${int(u)} und · ${int(v)} verificados</span></button>`;
+    if (abierto) for (const p of ps){ if (n++ >= shown) break; html += item(p); }
+  }
+  $('gOpenAll').hidden = $('gCloseAll').hidden = buscando;
   list.innerHTML = html; loadThumbs(list);
-  $('more').hidden = rows.length <= shown;
-  $('more').textContent = `Mostrar más (${int(rows.length-shown)} restantes)`;
+  $('more').hidden = visibles <= shown;
+  $('more').textContent = `Mostrar más (${int(visibles-shown)} restantes)`;
 }
 
 // ---------- compras a BRG ----------
@@ -1403,7 +1415,7 @@ $('vPago').querySelectorAll('button').forEach(b => b.addEventListener('click', (
 $('vClear').addEventListener('click', ()=>{ cart=[]; saveCart(); renderCart(); });
 $('vSell').addEventListener('click', sell);
 $('vHoy').addEventListener('click', e => { const b=e.target.closest('button[data-anular]'); if(b) anular(b.dataset.anular, b); });
-['fCat','fTipo','fMarca','fMat','fColor','fEst','fVer','fInc','fDup','fStock','fBrg','fGroup'].forEach(id => $(id).addEventListener('change', ()=>{
+['fCat','fTipo','fMarca','fMat','fColor','fEst','fVer','fInc','fDup','fStock','fBrg'].forEach(id => $(id).addEventListener('change', ()=>{
   if (id==='fCat') { fillFilterOptions(); try{localStorage.setItem('dcr-cat',$('fCat').value)}catch(_){} }
   shown=PAGE; renderList();
 }));
@@ -1411,7 +1423,13 @@ $('btnClear').addEventListener('click', ()=>{ ['fCat','fTipo','fMarca','fMat','f
 document.querySelectorAll('.vsw button').forEach(b => b.addEventListener('click', ()=>{ setVista(b.dataset.v); renderList(); }));
 setVista(vista);
 $('more').addEventListener('click', ()=>{ shown+=PAGE; renderList(); });
-$('list').addEventListener('click', e => { const r=e.target.closest('.row'); if(r) open(r.dataset.c); });
+$('list').addEventListener('click', e => {
+  const h=e.target.closest('.ghead[data-g]');
+  if (h){ if ($('q').value.trim()) return; const k=h.dataset.g; gClosed.has(k)?gClosed.delete(k):gClosed.add(k); saveGClosed(); renderList(); return; }
+  const r=e.target.closest('.row'); if(r) open(r.dataset.c);
+});
+$('gOpenAll').addEventListener('click', ()=>{ gClosed.clear(); saveGClosed(); renderList(); });
+$('gCloseAll').addEventListener('click', ()=>{ lastGroups.forEach(k=>gClosed.add(k)); saveGClosed(); renderList(); });
 $('bg').addEventListener('click', close); $('shClose').addEventListener('click', close);
 document.addEventListener('keydown', e => { if(e.key==='Escape' && current && $('scanBg').hidden) close(); });
 $('form').addEventListener('input', updateSheet);
