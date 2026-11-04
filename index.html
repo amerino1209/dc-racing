@@ -257,6 +257,23 @@ label.f.miss input{border-color:var(--accent);background:var(--accent-soft)}
 .venta.anulada b{text-decoration:line-through}
 .venta .sub{white-space:normal}
 .venta .r-side{justify-items:end}
+.hits button .inc{display:inline-block;margin-left:6px;padding:1px 7px;border-radius:999px;background:var(--ok-soft);color:var(--ok);font-size:.72rem;font-weight:700}
+.gun{font-size:.8rem;color:var(--muted)} .gun b{color:var(--ok)}
+.cli-pick{display:grid;gap:6px}
+.cli-sel{display:flex;gap:8px;align-items:center;justify-content:space-between;border:1.5px solid var(--ok);background:var(--ok-soft);border-radius:8px;padding:8px 10px;min-width:0}
+.cli-sel span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600}
+.cli-sel .sys{font-weight:400}
+.cli-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
+.cli-card{cursor:pointer}
+.cli-card:hover{border-color:var(--muted)}
+dialog.dlg{border:0;border-radius:14px;padding:0;width:min(560px,calc(100% - 24px));max-height:calc(100% - 24px);background:var(--surface);color:var(--ink);box-shadow:var(--shadow)}
+dialog.dlg::backdrop{background:rgba(10,12,16,.5)}
+.dlg form{display:grid;gap:12px;padding:16px}
+.dlg h3{margin:0;font:700 1.25rem/1 var(--f-display);text-transform:uppercase;letter-spacing:.04em}
+.dlg .acts{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
+.dlg .acts .del{margin-right:auto;color:var(--accent)}
+.dlg .hist-v{display:grid;gap:6px;max-height:260px;overflow:auto}
+@media (max-width:520px){.dlg .grid2{grid-template-columns:minmax(0,1fr)}}
 @media (max-width:620px){
   .cart-row{grid-template-columns:40px minmax(0,1fr)}
   .cart-row .thumb{width:40px;height:40px}
@@ -271,7 +288,7 @@ label.f.miss input{border-color:var(--accent);background:var(--accent-soft)}
   <div class="top-in wrap">
     <div class="brand">
       <h1>DC Racing <span>·</span> Inventario</h1>
-      <nav class="tabs" aria-label="Secciones"><a href="#productos" id="tabP">Productos</a><a href="#vender" id="tabV">Vender</a><a href="#inventarios" id="tabI">Inventarios<span class="n" id="invOpenN" hidden></span></a></nav>
+      <nav class="tabs" aria-label="Secciones"><a href="#productos" id="tabP">Productos</a><a href="#vender" id="tabV">Vender</a><a href="#inventarios" id="tabI">Inventarios<span class="n" id="invOpenN" hidden></span></a><a href="#clientes" id="tabC">Clientes</a></nav>
     </div>
     <div class="stats" id="stats">Cargando catálogo…</div>
     <div class="meter" title="Productos verificados"><i id="meter"></i></div>
@@ -336,6 +353,7 @@ label.f.miss input{border-color:var(--accent);background:var(--accent-soft)}
         <input id="vScan" type="search" placeholder="Escanea o busca el producto" autocomplete="off" enterkeyhint="search">
         <button class="btn primary icon" id="vCam" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 7V4h3M18 4h3v3M21 17v3h-3M6 20H3v-3M7 8v8M10 8v8M13 8v8M17 8v8"/></svg><span>Escanear</span></button>
       </div>
+      <div class="gun" id="vGun">Puedes escanear con la pistola en cualquier momento o usar la cámara. Busca por nombre para agregar varios productos: la lista queda abierta.</div>
       <div class="hits" id="vHits" hidden></div>
       <div class="list" id="cart"></div>
       <div class="sale-foot">
@@ -346,12 +364,26 @@ label.f.miss input{border-color:var(--accent);background:var(--accent-soft)}
           <button type="button" data-p="Transferencia">Transferencia</button>
           <button type="button" data-p="Tarjeta">Tarjeta</button>
         </div>
-        <label class="f">Nota (opcional) <input id="vNota" placeholder="Cliente, factura, descuento…"></label>
+        <div class="cli-pick">
+          <label class="f" id="vCliW">Cliente (opcional) <input id="vCli" type="search" placeholder="Nombre, cédula/RUC o teléfono" autocomplete="off"></label>
+          <div class="cli-sel" id="vCliSel" hidden><span id="vCliTxt"></span><button class="btn sm" type="button" id="vCliX">Quitar</button></div>
+          <div class="hits" id="vCliHits" hidden></div>
+        </div>
+        <label class="f">Nota (opcional) <input id="vNota" placeholder="Factura, descuento…"></label>
         <div class="sale-acts"><button class="btn" type="button" id="vClear">Vaciar</button><button class="btn ok" type="button" id="vSell">Registrar venta</button></div>
       </div>
     </div>
     <div class="catbar"><h2>Ventas de hoy</h2><div class="meta" id="vHoyMeta"></div></div>
     <div class="list" id="vHoy"></div>
+  </section>
+
+  <section id="viewC" hidden>
+    <div class="catbar"><h2>Clientes</h2><div class="meta" id="cliMeta"></div></div>
+    <div class="search" style="margin-bottom:12px">
+      <input id="cliQ" type="search" placeholder="Buscar por nombre, cédula/RUC, teléfono o correo" autocomplete="off">
+      <button class="btn primary" type="button" id="cliNew">+ Nuevo cliente</button>
+    </div>
+    <div class="cli-list" id="cliList"><div class="empty">Cargando clientes…</div></div>
   </section>
 
   <section id="viewI" hidden>
@@ -376,7 +408,7 @@ label.f.miss input{border-color:var(--accent);background:var(--accent-soft)}
       </form>
       <div class="catbar"><h2>Inventarios abiertos</h2></div>
       <div class="inv-grid" id="invOpen"></div>
-      <div class="catbar" style="margin-top:20px"><h2>Inventarios cerrados</h2></div>
+      <div class="catbar" style="margin-top:20px"><h2>Inventarios cerrados y descartados</h2></div>
       <div class="inv-grid" id="invClosed"></div>
     </div>
 
@@ -388,6 +420,7 @@ label.f.miss input{border-color:var(--accent);background:var(--accent-soft)}
           <div class="meta" id="icMeta"></div>
         </div>
         <div class="filters">
+          <button class="btn" type="button" id="icDiscard">Descartar</button>
           <button class="btn ok" type="button" id="icClose">Cerrar y aplicar al stock</button>
         </div>
       </div>
@@ -405,12 +438,42 @@ label.f.miss input{border-color:var(--accent);background:var(--accent-soft)}
         <p id="icConfirmTxt"></p>
         <div class="filters"><button class="btn ok" type="button" id="icConfirmYes">Sí, aplicar</button><button class="btn" type="button" id="icConfirmNo">Volver</button></div>
       </div>
+      <div class="motivo" id="icDiscardBox" hidden>
+        <p>¿Descartar este inventario? Los conteos no se aplican al stock y el inventario pasa a la lista de descartados.</p>
+        <div class="filters"><button class="btn primary" type="button" id="icDiscardYes">Sí, descartar</button><button class="btn" type="button" id="icDiscardNo">Volver</button></div>
+      </div>
       <div class="list" id="icList"></div>
     </div>
   </section>
 </main>
 
 <div class="sheet-bg" id="bg" hidden></div>
+<dialog class="dlg" id="cliDlg" aria-labelledby="cliDlgT">
+  <form id="cliForm" autocomplete="off">
+    <h3 id="cliDlgT">Nuevo cliente</h3>
+    <div class="grid2">
+      <label class="f">Nombre o razón social <input id="c_nombre" required></label>
+      <label class="f">Cédula / RUC <input id="c_doc" inputmode="numeric"></label>
+      <label class="f">Teléfono <input id="c_tel" type="tel" inputmode="tel"></label>
+      <label class="f">Correo <input id="c_email" type="email"></label>
+    </div>
+    <label class="f">Dirección <input id="c_dir"></label>
+    <label class="f">Notas <textarea id="c_nota" rows="2" placeholder="Ej. equipo, bicicleta que usa, preferencias"></textarea></label>
+    <div id="cliHistW" hidden>
+      <div class="kpi" id="cliKpi"></div>
+      <div class="hist-v" id="cliHist"></div>
+    </div>
+    <div class="motivo" id="cliDelBox" hidden>
+      <p>¿Eliminar este cliente? Sus ventas se conservan con el nombre guardado.</p>
+      <div class="filters"><button class="btn primary" type="button" id="cliDelYes">Sí, eliminar</button><button class="btn" type="button" id="cliDelNo">Volver</button></div>
+    </div>
+    <div class="acts">
+      <button class="btn del" type="button" id="cliDel" hidden>Eliminar</button>
+      <button class="btn" type="button" id="cliCancel">Cancelar</button>
+      <button class="btn ok" type="submit" id="cliSave">Guardar</button>
+    </div>
+  </form>
+</dialog>
 <dialog id="zoom" aria-label="Foto ampliada"><img id="zoomImg" alt=""><button type="button" class="x" aria-label="Cerrar">✕</button><div class="cap" id="zoomCap"></div></dialog>
 <aside class="sheet" id="sheet" hidden aria-modal="true" role="dialog" aria-labelledby="shName">
   <div class="sh-head">
@@ -1128,12 +1191,12 @@ function invStats(inv){
 function renderInvList(){
   const card = inv => {
     const s = invStats(inv);
-    const tag = inv.estado==='abierto' ? `<span class="pill R">Abierto</span>` : `<span class="pill I">Cerrado</span>`;
+    const tag = inv.estado==='abierto' ? `<span class="pill R">Abierto</span>` : inv.estado==='descartado' ? `<span class="pill P">Descartado</span>` : `<span class="pill I">Cerrado</span>`;
     return `<a class="card" href="#inv-${esc(inv.id)}" style="text-decoration:none">
       <div class="r-top">${tag}<span class="hint">${esc(fdate(inv.creado))}</span></div>
       <h4>${esc(inv.nombre)}</h4>
       <div class="meter"><i style="width:${s.total?s.contados/s.total*100:0}%"></i></div>
-      <span class="sub">${int(s.contados)} de ${int(s.total)} contados · ${int(s.dif)} con diferencia${s.faltan?` · faltan ${int(s.faltan)} und`:''}${s.sobran?` · sobran ${int(s.sobran)} und`:''}${inv.cerradoAt?` · cerrado ${esc(fdate(inv.cerradoAt))}`:''}</span>
+      <span class="sub">${int(s.contados)} de ${int(s.total)} contados · ${int(s.dif)} con diferencia${s.faltan?` · faltan ${int(s.faltan)} und`:''}${s.sobran?` · sobran ${int(s.sobran)} und`:''}${inv.cerradoAt?` · cerrado ${esc(fdate(inv.cerradoAt))}`:''}${inv.descartadoAt?` · descartado ${esc(fdate(inv.descartadoAt))}`:''}</span>
     </a>`;
   };
   const op = INVS.filter(i=>i.estado==='abierto'), cl = INVS.filter(i=>i.estado!=='abierto');
@@ -1156,9 +1219,9 @@ function renderCount(flash){
   if (!inv){ $('icTitle').textContent='Inventario no encontrado'; $('icList').innerHTML=''; return; }
   const s = invStats(inv), closed = inv.estado!=='abierto';
   $('icTitle').textContent = inv.nombre;
-  $('icMeta').textContent = `${int(s.contados)} de ${int(s.total)} contados · ${int(s.dif)} con diferencia · creado ${fdate(inv.creado)}${closed?` · cerrado ${fdate(inv.cerradoAt)}`:''}`;
+  $('icMeta').textContent = `${int(s.contados)} de ${int(s.total)} contados · ${int(s.dif)} con diferencia · creado ${fdate(inv.creado)}${inv.cerradoAt?` · cerrado ${fdate(inv.cerradoAt)}`:''}${inv.descartadoAt?` · descartado ${fdate(inv.descartadoAt)}`:''}`;
   $('icMeter').style.width = (s.total? s.contados/s.total*100 : 0)+'%';
-  $('icClose').hidden = closed || !canWrite; $('icScan').disabled = $('icCam').disabled = closed || !canWrite;
+  $('icClose').hidden = $('icDiscard').hidden = closed || !canWrite; if (closed) $('icDiscardBox').hidden = true; $('icScan').disabled = $('icCam').disabled = closed || !canWrite;
   const f = $('icFilter').value, cn = inv.conteos||{};
   const rows = (inv.codigos||[]).map(c => BY.get(c) || {c, d:'(producto movido o eliminado)'}).filter(p => {
     const k=cn[p.c], d = k ? (k.q - (inv.sistema?.[p.c]||0)) : null;
@@ -1210,6 +1273,17 @@ async function applyInv(){
   }catch(e){ toast('No se pudo cerrar el inventario: '+(e.message||'')); }
 }
 
+async function discardInv(){
+  $('icDiscardBox').hidden = true;
+  const inv = invById(route().inv); if (!inv || inv.estado!=='abierto' || !db) return;
+  try{
+    await countQueue.catch(()=>{});
+    await db.collection('inventarios').doc(inv.id).update({estado:'descartado', descartadoAt:new Date().toISOString(), descartadoPor: await myId()});
+    toast('Inventario descartado: el stock no cambió');
+    location.hash = 'inventarios';
+  }catch(e){ toast('No se pudo descartar: '+(e.message||'')); }
+}
+
 // ---------- código no registrado: asignar o crear ----------
 let assignCode = null;
 function askAssign(code){
@@ -1239,7 +1313,7 @@ function scanProducts(){
 function countScan(v){
   const p = findByCode(v);
   if (!p){ toast(`No encontré "${v}" en el catálogo`); return {ok:false, text:`${v}: no está en el catálogo`}; }
-  const inv = invById(route().inv); if(!inv || inv.estado!=='abierto') return {ok:false, text:'Este inventario está cerrado'};
+  const inv = invById(route().inv); if(!inv || inv.estado!=='abierto') return {ok:false, text:'Este inventario ya no está abierto'};
   const fuera = !(inv.codigos||[]).includes(p.c);
   setCount(inv.id, p.c, (inv.conteos?.[p.c]?.q ?? 0) + 1);
   const n = inv.conteos[p.c].q;
@@ -1256,7 +1330,7 @@ function addToCart(code){
   const p = BY.get(code); if (!p) return;
   const line = cart.find(l=>l.c===code);
   if (line) line.cant++; else cart.push({c:code, cant:1, precio: Number(p.v)||0});
-  saveCart(); renderCart();
+  saveCart(); renderCart(); if (!$('vHits').hidden) renderHits();
   return cart.find(l=>l.c===code).cant;
 }
 function saleScan(v){
@@ -1288,9 +1362,10 @@ function renderCart(){
 function renderHits(){
   const q = norm($('vScan').value), terms = q ? q.split(/\s+/) : [], box = $('vHits');
   if (!terms.length){ box.hidden = true; return; }
-  const hits = ALL.filter(p => { const h=norm([p.c,p.d,buildName(p),p.m,p.b,p.p,p.sku].join(' ')); return terms.every(t=>h.includes(t)); }).slice(0,12);
-  box.hidden = false;
-  box.innerHTML = hits.length ? hits.map(p=>`<button type="button" data-c="${esc(p.c)}"><span class="r-main"><span class="name">${esc(displayName(p))}</span><span class="sub"><span class="code">${esc(p.c)}</span> · stock ${p.q ?? 0}</span></span><b>${money(p.v)}</b></button>`).join('') : '<div class="hint" style="padding:8px">Sin resultados.</div>';
+  const hits = ALL.filter(p => { const h=norm([p.c,p.d,buildName(p),p.m,p.b,p.p,p.sku].join(' ')); return terms.every(t=>h.includes(t)); }).slice(0,30);
+  box.hidden = false; renderHits.last = hits;
+  const inCart = c => cart.find(l=>l.c===c)?.cant || 0;
+  box.innerHTML = hits.length ? hits.map(p=>`<button type="button" data-c="${esc(p.c)}"><span class="r-main"><span class="name">${esc(displayName(p))}${inCart(p.c)?`<span class="inc">${inCart(p.c)} en la venta</span>`:''}</span><span class="sub"><span class="code">${esc(p.c)}</span> · stock ${p.q ?? 0}</span></span><b>+ ${money(p.v)}</b></button>`).join('') : '<div class="hint" style="padding:8px">Sin resultados.</div>';
 }
 async function sell(){
   if (!cart.length || !db || selling) return;
@@ -1299,10 +1374,12 @@ async function sell(){
   const lines = cart.filter(l => BY.get(l.c) && l.cant > 0);
   const total = lines.reduce((s,l)=>s+l.cant*l.precio,0);
   try{
-    const ref = await db.collection('ventas').add({t:now, items: lines.map(l=>({c:l.c, n:displayName(BY.get(l.c)), cant:l.cant, precio:l.precio})), total, pago, nota:$('vNota').value.trim(), por:uid});
+    const venta = {t:now, items: lines.map(l=>({c:l.c, n:displayName(BY.get(l.c)), cant:l.cant, precio:l.precio})), total, pago, nota:$('vNota').value.trim(), por:uid};
+    if (selCli) venta.cliente = {id:selCli.id, nombre:selCli.nombre||'', doc:selCli.doc||''};
+    const ref = await db.collection('ventas').add(venta);
     const moves = await applyStock(lines.map(l=>({c:l.c, delta:-l.cant})), 'Venta', now, uid);
     if (moves.length) await logMoves('Venta', moves, {venta: ref.id, nombre: `Venta ${money(total)}`});
-    cart = []; saveCart(); $('vNota').value='';
+    cart = []; saveCart(); $('vNota').value=''; setCli(null);
     toast(`Venta registrada: ${money(total)}`);
   }catch(e){ toast('No se pudo registrar la venta: '+(e && e.message || '')); }
   selling = false; renderCart();
@@ -1343,9 +1420,94 @@ function renderVentas(){
     const hora = new Date(v.t).toLocaleTimeString('es-EC',{hour:'2-digit',minute:'2-digit'});
     const det = (v.items||[]).map(it=>`${it.cant} × ${it.n||it.c}`).join(' · ');
     return `<div class="venta${v.anulada?' anulada':''}"><time class="hint">${esc(hora)}</time>
-      <span class="r-main"><span class="sub">${esc(det)}</span><span class="hint">${esc(v.pago||'')}${v.nota?' · '+esc(v.nota):''}${v.anulada?' · anulada':''}</span></span>
+      <span class="r-main"><span class="sub">${esc(det)}</span><span class="hint">${v.cliente?.nombre?'👤 '+esc(v.cliente.nombre)+' · ':''}${esc(v.pago||'')}${v.nota?' · '+esc(v.nota):''}${v.anulada?' · anulada':''}</span></span>
       <span class="r-side"><b>${money(v.total)}</b>${!v.anulada && canWrite ? `<button class="btn sm" type="button" data-anular="${esc(v.id)}">Anular</button>` : ''}</span></div>`;
   }).join('') : '<div class="empty" style="padding:20px">Todavía no hay ventas hoy.</div>';
+}
+
+// ---------- clientes ----------
+let CLIS = [], selCli = null, cliEdit = null, cliAfter = null;
+try{ selCli = JSON.parse(localStorage.getItem('dcr-cliente')||'null'); }catch(_){ selCli = null; }
+const cliText = c => [c.nombre, c.doc, c.tel, c.email].filter(Boolean).join(' ');
+function cliSearch(q, max){
+  const terms = norm(q).split(/\s+/).filter(Boolean);
+  const r = terms.length ? CLIS.filter(c => { const h=norm(cliText(c)); return terms.every(t=>h.includes(t)); }) : CLIS.slice();
+  return max ? r.slice(0,max) : r;
+}
+function setCli(c){
+  selCli = c ? {id:c.id, nombre:c.nombre||'', doc:c.doc||''} : null;
+  try{ selCli ? localStorage.setItem('dcr-cliente', JSON.stringify(selCli)) : localStorage.removeItem('dcr-cliente'); }catch(_){}
+  renderCliPick();
+}
+function renderCliPick(){
+  $('vCliW').hidden = !!selCli; $('vCliSel').hidden = !selCli;
+  if (selCli){ $('vCliTxt').innerHTML = `👤 ${esc(selCli.nombre)}${selCli.doc?` <span class="sys">· ${esc(selCli.doc)}</span>`:''}`; $('vCliHits').hidden = true; return; }
+  const q = $('vCli').value.trim(), box = $('vCliHits');
+  if (!q){ box.hidden = true; return; }
+  const hits = cliSearch(q, 8);
+  box.hidden = false;
+  box.innerHTML = hits.map(c=>`<button type="button" data-cli="${esc(c.id)}"><span class="r-main"><span class="name">${esc(c.nombre)}</span><span class="sub">${esc([c.doc,c.tel].filter(Boolean).join(' · ')||'Sin datos de contacto')}</span></span><span></span></button>`).join('')
+    + (canWrite && db ? `<button type="button" data-cli-new="1"><span class="r-main"><span class="name">+ Crear cliente “${esc(q)}”</span><span class="sub">Se abre la ficha para completar sus datos</span></span><span></span></button>` : '');
+}
+function renderClientes(){
+  const q = $('cliQ').value, rows = cliSearch(q).sort((a,b)=>String(a.nombre||'').localeCompare(String(b.nombre||''),'es'));
+  $('cliMeta').textContent = `${int(CLIS.length)} ${CLIS.length===1?'cliente':'clientes'}`;
+  $('cliNew').hidden = !canWrite || !db;
+  $('cliList').innerHTML = rows.length ? rows.map(c=>`<div class="card cli-card" role="button" tabindex="0" data-cli="${esc(c.id)}">
+      <h4>${esc(c.nombre)}</h4>
+      <span class="sub">${esc([c.doc&&('Cédula/RUC '+c.doc), c.tel, c.email].filter(Boolean).join(' · ')||'Sin datos de contacto')}</span>
+      ${c.nota?`<span class="hint">${esc(c.nota)}</span>`:''}
+    </div>`).join('') : `<div class="empty">${CLIS.length?'Ningún cliente coincide con la búsqueda.':'Todavía no hay clientes. Crea el primero con “+ Nuevo cliente” o desde una venta.'}</div>`;
+}
+async function openCli(id, nombre, after){
+  const c = id ? CLIS.find(x=>x.id===id) : null;
+  cliEdit = c ? c.id : null; cliAfter = after || null;
+  $('cliDlgT').textContent = c ? 'Cliente' : 'Nuevo cliente';
+  $('c_nombre').value = c ? (c.nombre||'') : (nombre||'');
+  $('c_doc').value = c?.doc||''; $('c_tel').value = c?.tel||''; $('c_email').value = c?.email||''; $('c_dir').value = c?.dir||''; $('c_nota').value = c?.nota||'';
+  $('cliForm').querySelectorAll('input,textarea').forEach(el=>el.disabled = !canWrite);
+  $('cliSave').hidden = !canWrite; $('cliDel').hidden = !c || !canWrite; $('cliDelBox').hidden = true;
+  $('cliHistW').hidden = !c; $('cliHist').innerHTML = ''; $('cliKpi').textContent = c ? 'Cargando compras…' : '';
+  $('cliDlg').showModal();
+  if (!c) setTimeout(()=>$(nombre?'c_doc':'c_nombre').focus(), 30);
+  if (c && db){
+    try{
+      const snap = await db.collection('ventas').where('cliente.id','==',c.id).get();
+      if (cliEdit !== c.id) return;
+      const vs = snap.docs.map(d=>({id:d.id, ...d.data()})).sort((a,b)=>String(b.t).localeCompare(String(a.t)));
+      const ok = vs.filter(v=>!v.anulada);
+      $('cliKpi').innerHTML = `<span><b>${int(ok.length)}</b> ${ok.length===1?'compra':'compras'}</span><span>Total <b>${money(ok.reduce((s,v)=>s+(v.total||0),0))}</b></span>${ok[0]?`<span>Última ${esc(fdate(ok[0].t))}</span>`:''}`;
+      $('cliHist').innerHTML = vs.map(v=>`<div class="venta${v.anulada?' anulada':''}"><time class="hint">${esc(fdate(v.t))}</time><span class="r-main"><span class="sub">${esc((v.items||[]).map(it=>`${it.cant} × ${it.n||it.c}`).join(' · '))}</span><span class="hint">${esc(v.pago||'')}${v.anulada?' · anulada':''}</span></span><span class="r-side"><b>${money(v.total)}</b></span></div>`).join('');
+    }catch(e){ $('cliKpi').textContent = 'No se pudieron cargar las compras.'; }
+  }
+}
+async function saveCli(e){
+  e.preventDefault();
+  if (!db || !canWrite) return;
+  const d = {nombre:$('c_nombre').value.trim(), doc:$('c_doc').value.trim(), tel:$('c_tel').value.trim(), email:$('c_email').value.trim(), dir:$('c_dir').value.trim(), nota:$('c_nota').value.trim(), upd:new Date().toISOString()};
+  if (!d.nombre){ $('c_nombre').focus(); return; }
+  if (d.doc){ const dup = CLIS.find(c=>c.id!==cliEdit && c.doc && c.doc===d.doc); if (dup){ toast(`Ya existe un cliente con esa cédula/RUC: ${dup.nombre}`); return; } }
+  $('cliSave').disabled = true;
+  try{
+    let id = cliEdit;
+    if (id) await db.collection('clientes').doc(id).update(d);
+    else { d.creado = d.upd; d.por = await myId(); id = (await db.collection('clientes').add(d)).id; }
+    const saved = {id, ...d};
+    if (!CLIS.some(c=>c.id===id)) CLIS.push(saved); else CLIS = CLIS.map(c=>c.id===id?{...c,...d}:c);
+    if (selCli && selCli.id===id) setCli(saved);
+    $('cliDlg').close(); toast('Cliente guardado');
+    if (cliAfter) cliAfter(saved);
+    renderClientes();
+  }catch(err){ toast('No se pudo guardar el cliente: '+(err.message||'')); }
+  $('cliSave').disabled = false;
+}
+async function delCli(){
+  const id = cliEdit; if (!id || !db) return;
+  try{
+    await db.collection('clientes').doc(id).delete();
+    CLIS = CLIS.filter(c=>c.id!==id); if (selCli && selCli.id===id) setCli(null);
+    $('cliDlg').close(); toast('Cliente eliminado'); renderClientes();
+  }catch(err){ toast('No se pudo eliminar: '+(err.message||'')); }
 }
 
 // ---------- exportar ----------
@@ -1367,14 +1529,18 @@ function route(){
   if (h.startsWith('inv-')) return {view:'I', inv:h.slice(4)};
   if (h==='inventarios') return {view:'I'};
   if (h==='vender') return {view:'V'};
+  if (h==='clientes') return {view:'C'};
   return {view:'P'};
 }
 function applyRoute(){
   const r = route();
-  $('viewP').hidden = r.view!=='P'; $('prodBar').hidden = r.view!=='P'; $('viewI').hidden = r.view!=='I'; $('viewV').hidden = r.view!=='V';
+  $('viewP').hidden = r.view!=='P'; $('prodBar').hidden = r.view!=='P'; $('viewI').hidden = r.view!=='I'; $('viewV').hidden = r.view!=='V'; $('viewC').hidden = r.view!=='C';
+  $('tabC').setAttribute('aria-current', r.view==='C'?'page':'false');
+  if (r.view==='C') renderClientes();
+  if (r.view==='V') renderCliPick();
   $('tabP').setAttribute('aria-current', r.view==='P'?'page':'false'); $('tabI').setAttribute('aria-current', r.view==='I'?'page':'false'); $('tabV').setAttribute('aria-current', r.view==='V'?'page':'false');
   if (r.view==='V'){ renderCart(); renderVentas(); }
-  $('invList').hidden = !!r.inv; $('invCount').hidden = !r.inv; $('icConfirm').hidden = true;
+  $('invList').hidden = !!r.inv; $('invCount').hidden = !r.inv; $('icConfirm').hidden = true; $('icDiscardBox').hidden = true;
   if (r.view==='I' && !r.inv){ fillInvForm(); renderInvList(); }
   if (r.inv){ renderCount(); setTimeout(()=>$('icScan').focus({preventScroll:true}),50); }
   window.scrollTo(0,0);
@@ -1406,8 +1572,10 @@ $('vScan').addEventListener('keydown', e => {
   const p = findByCode(v);
   if (p){ addToCart(p.c); $('vScan').value=''; renderHits(); toast(`Agregado: ${displayName(p)}`); }
   else if (/^\d{6,14}$/.test(v)){ toast(`El código ${v} no está registrado. Asígnalo desde Productos.`); $('vScan').select(); }
+  else { renderHits(); const h=renderHits.last||[]; if (h.length===1){ addToCart(h[0].c); renderHits(); toast(`Agregado: ${displayName(h[0])}`); } }
 });
-$('vHits').addEventListener('click', e => { const b=e.target.closest('button[data-c]'); if(!b) return; addToCart(b.dataset.c); $('vScan').value=''; renderHits(); $('vScan').focus(); });
+// la búsqueda queda abierta para agregar varios productos seguidos
+$('vHits').addEventListener('click', e => { const b=e.target.closest('button[data-c]'); if(!b) return; const p=BY.get(b.dataset.c); addToCart(b.dataset.c); renderHits(); if (p) toast(`Agregado: ${displayName(p)}`); });
 $('vCam').addEventListener('click', ()=>Scan.open({title:'Vender: escanea los productos', continuous:true, onCode: saleScan}));
 $('cart').addEventListener('click', e => {
   const b=e.target.closest('button[data-act]'); if(!b) return;
@@ -1425,6 +1593,26 @@ $('cart').addEventListener('change', e => {
 $('vPago').querySelectorAll('button').forEach(b => b.addEventListener('click', ()=>{ pago=b.dataset.p; $('vPago').querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed', x===b)); }));
 $('vClear').addEventListener('click', ()=>{ cart=[]; saveCart(); renderCart(); });
 $('vSell').addEventListener('click', sell);
+// clientes en la venta
+let tc; $('vCli').addEventListener('input', ()=>{ clearTimeout(tc); tc=setTimeout(renderCliPick,120); });
+$('vCli').addEventListener('keydown', e => { if (e.key!=='Enter') return; e.preventDefault(); const h=cliSearch($('vCli').value,2); if (h.length===1){ setCli(h[0]); $('vCli').value=''; } });
+$('vCliHits').addEventListener('click', e => {
+  const b=e.target.closest('button'); if(!b) return;
+  if (b.dataset.cliNew){ openCli(null, $('vCli').value.trim(), c=>{ setCli(c); $('vCli').value=''; }); return; }
+  const c=CLIS.find(x=>x.id===b.dataset.cli); if (c){ setCli(c); $('vCli').value=''; }
+});
+$('vCliX').addEventListener('click', ()=>{ setCli(null); $('vCli').focus(); });
+// sección clientes
+let tcq; $('cliQ').addEventListener('input', ()=>{ clearTimeout(tcq); tcq=setTimeout(renderClientes,120); });
+$('cliNew').addEventListener('click', ()=>openCli(null, $('cliQ').value.trim()));
+$('cliList').addEventListener('click', e => { const c=e.target.closest('[data-cli]'); if (c) openCli(c.dataset.cli); });
+$('cliList').addEventListener('keydown', e => { if (e.key!=='Enter' && e.key!==' ') return; const c=e.target.closest('[data-cli]'); if (c){ e.preventDefault(); openCli(c.dataset.cli); } });
+$('cliForm').addEventListener('submit', saveCli);
+$('cliCancel').addEventListener('click', ()=>$('cliDlg').close());
+$('cliDel').addEventListener('click', ()=>{ $('cliDelBox').hidden=false; });
+$('cliDelNo').addEventListener('click', ()=>{ $('cliDelBox').hidden=true; });
+$('cliDelYes').addEventListener('click', delCli);
+$('cliDlg').addEventListener('close', ()=>{ cliEdit=null; cliAfter=null; });
 $('vHoy').addEventListener('click', e => { const b=e.target.closest('button[data-anular]'); if(b) anular(b.dataset.anular, b); });
 ['fCat','fTipo','fMarca','fMat','fColor','fEst','fVer','fInc','fDup','fStock','fBrg'].forEach(id => $(id).addEventListener('change', ()=>{
   if (id==='fCat') { fillFilterOptions(); try{localStorage.setItem('dcr-cat',$('fCat').value)}catch(_){} }
@@ -1493,9 +1681,46 @@ $('icScan').addEventListener('keydown', e => {
   countScan(v);
 });
 $('icCam').addEventListener('click', ()=>Scan.open({title:'Contar: cada lectura suma 1', continuous:true, onCode: countScan}));
-$('icClose').addEventListener('click', closeInv);
+$('icClose').addEventListener('click', ()=>{ $('icDiscardBox').hidden=true; closeInv(); });
 $('icConfirmYes').addEventListener('click', applyInv);
 $('icConfirmNo').addEventListener('click', ()=>$('icConfirm').hidden=true);
+$('icDiscard').addEventListener('click', ()=>{ $('icConfirm').hidden=true; $('icDiscardBox').hidden=false; $('icDiscardBox').scrollIntoView({block:'center'}); });
+$('icDiscardYes').addEventListener('click', discardInv);
+$('icDiscardNo').addEventListener('click', ()=>$('icDiscardBox').hidden=true);
+
+// ---------- pistola de códigos (lector USB/Bluetooth en modo teclado) ----------
+// La pistola "escribe" el código muy rápido y termina con Enter. Si no hay un campo de texto activo,
+// la lectura se reconoce aquí y va a la sección abierta: Productos abre la ficha, Vender agrega a la venta
+// e Inventarios suma 1 al conteo. Dentro de un campo, el campo la recibe como siempre.
+(() => {
+  let buf = '', lastT = 0, fast = 0;
+  const typing = el => el && (el.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(el.tagName));
+  function handle(code){
+    if (!$('scanBg').hidden){ $('scanInput').value = code; $('scanManual').requestSubmit(); return; }
+    if ($('cliDlg').open) return;
+    const r = route();
+    if (r.view==='V'){ const res = saleScan(code); if (res.ok) toast(`Agregado: ${res.text}`); return; }
+    if (r.view==='I'){ if (r.inv) countScan(code); else toast('Abre un inventario para contar con la pistola'); return; }
+    if (r.view==='P'){
+      const hit = findByCode(code);
+      if (hit){ endAssign(); if (current) close(); open(hit.c); }
+      else askAssign(code);
+    }
+  }
+  document.addEventListener('keydown', e => {
+    if (typing(e.target) || e.ctrlKey || e.altKey || e.metaKey) { buf=''; return; }
+    const now = performance.now(), gap = now - lastT; lastT = now;
+    if (e.key === 'Enter' || e.key === 'Tab'){
+      const code = buf.trim(); const ok = code.length >= 3 && fast >= code.length - 2;
+      buf = ''; fast = 0;
+      if (ok){ e.preventDefault(); handle(code); }
+      return;
+    }
+    if (e.key.length !== 1) return;
+    if (gap > 120){ buf = ''; fast = 0; } else fast++;
+    buf += e.key;
+  }, true);
+})();
 
 function showReadOnly(){ const n=$('notice'); n.hidden=false; n.textContent='Estás viendo el inventario en modo lectura: tus cambios no se pueden guardar con este acceso.'; $('btnNew').hidden=true; }
 
@@ -1533,7 +1758,11 @@ function showReadOnly(){ const n=$('notice'); n.hidden=false; n.textContent='Est
     VENTAS = snap.docs.map(d => ({id:d.id, ...JSON.parse(JSON.stringify(d.data()||{}))})).sort((a,b)=>String(b.t).localeCompare(String(a.t)));
     if (route().view==='V') renderVentas();
   }, lost);
-  if (route().view==='V') renderCart();
+  db.collection('clientes').onSnapshot(snap => {
+    CLIS = snap.docs.map(d => ({id:d.id, ...JSON.parse(JSON.stringify(d.data()||{}))}));
+    const r = route(); if (r.view==='C') renderClientes(); if (r.view==='V') renderCliPick();
+  }, lost);
+  if (route().view==='V'){ renderCart(); renderCliPick(); }
 })();
 })();
 </script>
