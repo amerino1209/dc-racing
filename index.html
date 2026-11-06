@@ -569,6 +569,7 @@ dialog.dlg::backdrop{background:rgba(10,12,16,.5)}
   </form>
   <div class="sh-foot">
     <span class="hint" id="shWho" style="margin-right:auto;align-self:center"></span>
+    <button class="btn" type="button" id="shDup" title="Crear otro producto con estos mismos datos">Duplicar</button>
     <button class="btn" type="button" id="shSave">Guardar</button>
     <button class="btn ok" type="button" id="shVerify">Guardar y verificar</button>
   </div>
@@ -943,7 +944,7 @@ function open(code){
   const p = BY.get(code); if(!p) return;
   current = p; draft = {...p}; motivo = null;
   $('shCode').textContent = p.c;
-  $('shOrig').innerHTML = p.d ? `Descripción original: <b>${esc(p.d)}</b>${p.f?` · fila ${p.f} del Excel`:''}` : 'Producto creado en la herramienta.';
+  $('shOrig').innerHTML = p.d ? `Descripción original: <b>${esc(p.d)}</b>${p.f?` · fila ${p.f} del Excel`:''}` : (p.dupDe ? `Producto duplicado de <b>${esc(p.dupDe)}</b>. Cambia lo que sea distinto y guarda.` : 'Producto creado en la herramienta.');
   ['q','t','m','mo','me','ma','co','d2','d5','k','v','b','p','sku','nota'].forEach(k => { $('i_'+k).value = p[k] ?? ''; });
   $('i_cat').value = pref(p.c);
   fillDatalists(pref(p.c));
@@ -953,7 +954,7 @@ function open(code){
   $('shWho').textContent = p.ver ? `Verificado el ${new Date(p.verAt).toLocaleDateString('es-EC')}` : 'Pendiente de verificar';
   const ro = !canWrite;
   $('form').querySelectorAll('input,select,textarea,.seg button,.stepper button').forEach(el=>el.disabled=ro);
-  $('shSave').disabled = $('shVerify').disabled = ro;
+  $('shSave').disabled = $('shVerify').disabled = ro; $('shDup').hidden = ro;
   $('phBtn').hidden = ro || !assets;
   $('bScan').hidden = ro;
   if (assignCode && !ro){
@@ -1103,6 +1104,24 @@ function newProduct(barcode){
   localApply(cat, {[code]: item}); refresh();
   open(code);
   writeItems(cat, {[code]: item}).catch(e=>toast('No se pudo crear: '+(e.message||'')));
+}
+// Duplicar: nuevo código en la misma categoría con los datos del producto abierto.
+// No se copian código de barras, SKU, stock, foto ni verificación, porque son de cada variante.
+const DUP_KEYS = ['t','m','mo','me','ma','co','d2','d5','k','v','p'];
+function duplicateProduct(){
+  if (!current || !canWrite || !db) return;
+  readForm();
+  if (FIELDS.some(k => (draft[k] ?? '') !== (current[k] ?? ''))){ toast('Primero guarda los cambios de este producto y luego duplícalo.'); return; }
+  const src = current, cat = pref(src.c), code = nextCode(cat), now = new Date().toISOString();
+  const item = {nuevo:true, e:'I', q:0, upd:now, dupDe:src.c};
+  for (const k of DUP_KEYS) if (src[k] != null && src[k] !== '') item[k] = src[k];
+  if (!item.t && src.d) item.nota = `Descripción original de ${src.c}: ${src.d}`;
+  item.n = buildName(item);
+  close();
+  localApply(cat, {[code]: item}); refresh();
+  open(code);
+  toast(`Creado ${code} como copia de ${src.c}`);
+  writeItems(cat, {[code]: item}).catch(e=>toast('No se pudo crear la copia: '+(e.message||'')));
 }
 
 // ---------- fotos ----------
@@ -1649,6 +1668,7 @@ $('segMot').querySelectorAll('button').forEach(b => b.addEventListener('click', 
 $('qm').addEventListener('click', ()=>{ $('i_q').value=Math.max(0,(Number($('i_q').value)||0)-1); updateSheet(); });
 $('qp').addEventListener('click', ()=>{ $('i_q').value=(Number($('i_q').value)||0)+1; updateSheet(); });
 $('shSave').addEventListener('click', ()=>save(false));
+$('shDup').addEventListener('click', duplicateProduct);
 $('shVerify').addEventListener('click', ()=>save(true));
 $('btnNew').addEventListener('click', newProduct);
 const activeFilters = () => ['fCat','fTipo','fMarca','fMat','fColor','fEst','fVer'].filter(id=>$(id).value).length + ['fInc','fDup','fStock','fBrg'].filter(id=>$(id).checked).length;
