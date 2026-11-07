@@ -489,7 +489,8 @@ dialog.dlg::backdrop{background:rgba(10,12,16,.5)}
     <div class="photo">
       <div class="big" id="phBig">Sin foto</div>
       <div class="act">
-        <label class="btn filebtn" id="phBtn"><span id="phBtnTxt">Tomar o subir foto</span><input id="phFile" type="file" accept="image/*"></label>
+        <label class="btn filebtn primary" id="phBtn"><span id="phBtnTxt">📷 Tomar foto</span><input id="phFile" type="file" accept="image/*" capture="environment"></label>
+        <label class="btn filebtn" id="phBtn2"><span>Elegir de la galería</span><input id="phFile2" type="file" accept="image/*"></label>
         <span class="hint" id="phHint">Se comprime antes de subir (máx. 1200 px).</span>
       </div>
     </div>
@@ -955,7 +956,7 @@ function open(code){
   const ro = !canWrite;
   $('form').querySelectorAll('input,select,textarea,.seg button,.stepper button').forEach(el=>el.disabled=ro);
   $('shSave').disabled = $('shVerify').disabled = ro; $('shDup').hidden = ro;
-  $('phBtn').hidden = ro || !assets;
+  $('phBtn').hidden = $('phBtn2').hidden = ro || !assets;
   $('bScan').hidden = ro;
   if (assignCode && !ro){
     const prev = p.b; $('i_b').value = assignCode; endAssign(); updateSheet();
@@ -997,7 +998,7 @@ function renderPhoto(){
   const show = () => { const src = photoSrc(draft); b.innerHTML = src ? `<img alt="Foto de ${esc(draft.c)}" src="${esc(src)}">` : 'Sin foto';
     b.classList.toggle('zoomable', !!src); if (src){ b.setAttribute('role','button'); b.tabIndex=0; b.title='Toca para ampliar'; } else { b.removeAttribute('role'); b.removeAttribute('tabindex'); b.title=''; } };
   show(); if (needXL(draft)) loadFor(draft).then(show);
-  $('phBtnTxt').textContent = (draft.foto||draft.fx) ? 'Cambiar foto' : 'Tomar o subir foto';
+  $('phBtnTxt').textContent = (draft.foto||draft.fx) ? '📷 Tomar otra foto' : '📷 Tomar foto';
   $('phHint').textContent = draft.foto ? 'Foto tomada en la herramienta.' : draft.fx ? 'Foto sacada del Excel. Puedes reemplazarla.' : 'Se comprime antes de subir (máx. 1200 px).';
 }
 function fillDatalists(p){
@@ -1133,7 +1134,8 @@ async function compress(file){
   cv.getContext('2d').drawImage(img,0,0,cv.width,cv.height);
   return await new Promise(r=>cv.toBlob(b=>r(b||file),'image/jpeg',.82));
 }
-$('phFile').addEventListener('change', async e => {
+// "Tomar foto" abre directo la cámara trasera del teléfono; "Elegir de la galería" abre las fotos guardadas
+const onPhoto = async e => {
   const f = e.target.files[0]; e.target.value=''; if(!f || !assets) return;
   $('phHint').textContent='Subiendo foto…';
   try{
@@ -1144,7 +1146,9 @@ $('phFile').addEventListener('change', async e => {
   }catch(err){
     $('phHint').textContent = {too_large:'La foto pesa más de 20 MB.',unsupported_type:'Ese formato de imagen no se acepta; usa JPG o PNG.',rate_limited:'Demasiadas subidas seguidas; espera un momento.',quota_or_state:'Se llenó el espacio de fotos de la herramienta.'}[err.code] || 'No se pudo subir la foto.';
   }
-});
+};
+$('phFile').addEventListener('change', onPhoto);
+$('phFile2').addEventListener('change', onPhoto);
 
 // ---------- inventarios parciales ----------
 let alcance = 'marca', picked = new Set();
