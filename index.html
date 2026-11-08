@@ -37,8 +37,9 @@ header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;backgroun
 .brand{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
 .brand h1{margin:0;font:700 1.55rem/1 var(--f-display);letter-spacing:.02em;text-transform:uppercase}
 .brand h1 span{color:var(--accent)}
-.tabs{display:flex;gap:4px;background:var(--surface-2);border:1px solid var(--line);border-radius:9px;padding:3px}
-.tabs a{padding:6px 12px;border-radius:7px;font:700 .95rem/1 var(--f-display);text-transform:uppercase;letter-spacing:.05em;color:var(--muted);text-decoration:none}
+.tabs{display:flex;gap:4px;background:var(--surface-2);border:1px solid var(--line);border-radius:9px;padding:3px;max-width:100%;overflow-x:auto;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tabs a{flex:none;white-space:nowrap;padding:6px 12px;border-radius:7px;font:700 .95rem/1 var(--f-display);text-transform:uppercase;letter-spacing:.05em;color:var(--muted);text-decoration:none}
 .tabs a[aria-current="page"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.12)}
 .tabs a .n{display:inline-block;min-width:18px;margin-left:6px;padding:1px 5px;border-radius:9px;background:var(--accent);color:var(--accent-ink);font:600 .7rem/1.3 var(--f-body);text-align:center}
 .stats{display:flex;gap:14px;flex-wrap:wrap;color:var(--muted);font-size:.86rem;font-variant-numeric:tabular-nums}
@@ -281,6 +282,50 @@ dialog.dlg::backdrop{background:rgba(10,12,16,.5)}
   .venta{grid-template-columns:minmax(0,1fr) auto}
   .venta time{grid-column:1 / -1}
 }
+/* ---------- categorías y marcas ---------- */
+.tx-top{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;margin-bottom:12px}
+.tx-top .seg{flex:1 1 320px;max-width:560px}
+.tx-top .seg button{min-height:44px}
+.tx-bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:12px}
+.tx-bar input[type=search]{flex:1 1 220px;min-width:0;min-height:44px;border:1.5px solid var(--line);border-radius:8px;padding:8px 10px;background:var(--surface)}
+.tx-bar select{min-height:44px;border:1.5px solid var(--line);border-radius:8px;padding:8px;background:var(--surface);max-width:100%}
+.tx-tree{display:grid;gap:6px}
+.tx-node{display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:6px 8px 6px 10px;min-width:0}
+.tx-node.l1{border-left:4px solid var(--ink)}
+.tx-node.l2{margin-left:18px}
+.tx-node.l3{margin-left:36px;background:var(--surface-2)}
+.tx-node .nm{flex:1;min-width:0;display:grid;gap:1px}
+.tx-node .nm b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tx-node.l1 .nm b{font:700 1.1rem/1.1 var(--f-display);text-transform:uppercase;letter-spacing:.03em}
+.tx-node .nm span{font-size:.8rem;color:var(--muted)}
+.tx-node .acts{display:flex;gap:4px;flex:none}
+.tx-node .acts button{min-width:44px;min-height:44px;border:1px solid var(--line);border-radius:8px;background:var(--surface);padding:0 8px}
+.tx-tog{min-width:36px;min-height:44px;border:0;background:transparent;font-size:1rem;color:var(--muted);flex:none}
+.tx-marcas{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:8px}
+.tx-mk{display:flex;align-items:center;gap:10px;min-height:56px;padding:8px 10px;background:var(--surface);border:1px solid var(--line);border-radius:10px;text-align:left;min-width:0}
+.tx-mk:hover{border-color:var(--muted)}
+.tx-mk .logo{width:40px;height:40px;border-radius:8px;background:var(--surface-2);display:grid;place-items:center;flex:none;overflow:hidden;font:700 .9rem/1 var(--f-display);color:var(--muted)}
+.tx-mk .logo img{width:100%;height:100%;object-fit:contain}
+.tx-mk .nm{min-width:0;display:grid}
+.tx-mk .nm b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tx-mk .nm span{font-size:.8rem;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tx-rows{display:grid;gap:4px}
+.tx-row{display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:6px 10px;min-height:48px;min-width:0;cursor:pointer}
+.tx-row input{width:22px;height:22px;flex:none}
+.tx-row .nm{flex:1;min-width:0;display:grid}
+.tx-row .nm b{font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tx-row .nm span{font-size:.8rem;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tx-apply{position:sticky;bottom:0;z-index:5;display:flex;flex-wrap:wrap;gap:8px;align-items:center;background:var(--surface);border:1.5px solid var(--ink);border-radius:12px;padding:10px;margin-top:12px;box-shadow:var(--shadow)}
+.tx-apply select{flex:1 1 200px;min-width:0;min-height:44px;border:1.5px solid var(--line);border-radius:8px;padding:8px;background:var(--surface)}
+.tx-apply .btn{min-height:44px}
+.tx-empty{max-width:640px}
+.tx-logo-prev{width:72px;height:72px;border-radius:10px;background:var(--surface-2);display:grid;place-items:center;overflow:hidden;color:var(--muted);font-size:.8rem}
+.tx-logo-prev img{width:100%;height:100%;object-fit:contain}
+#txDlg form{display:grid;gap:12px;padding:16px}
+#txDlg h3{margin:0;font:700 1.25rem/1 var(--f-display);text-transform:uppercase;letter-spacing:.04em}
+#txDlg .acts{display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end}
+#txDlg .acts .btn{min-height:44px}
+@media (max-width:560px){ .tx-node.l2{margin-left:10px} .tx-node.l3{margin-left:20px} .tx-node .acts button.opt{display:none} }
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 
@@ -288,7 +333,7 @@ dialog.dlg::backdrop{background:rgba(10,12,16,.5)}
   <div class="top-in wrap">
     <div class="brand">
       <h1>DC Racing <span>·</span> Inventario</h1>
-      <nav class="tabs" aria-label="Secciones"><a href="#productos" id="tabP">Productos</a><a href="#vender" id="tabV">Vender</a><a href="#inventarios" id="tabI">Inventarios<span class="n" id="invOpenN" hidden></span></a><a href="#clientes" id="tabC">Clientes</a></nav>
+      <nav class="tabs" aria-label="Secciones"><a href="#productos" id="tabP">Productos</a><a href="#vender" id="tabV">Vender</a><a href="#inventarios" id="tabI">Inventarios<span class="n" id="invOpenN" hidden></span></a><a href="#clientes" id="tabC">Clientes</a><a href="#categorias" id="tabT">Categorías</a></nav>
     </div>
     <div class="stats" id="stats">Cargando catálogo…</div>
     <div class="meter" title="Productos verificados"><i id="meter"></i></div>
@@ -386,6 +431,48 @@ dialog.dlg::backdrop{background:rgba(10,12,16,.5)}
     <div class="cli-list" id="cliList"><div class="empty">Cargando clientes…</div></div>
   </section>
 
+  <section id="viewT" hidden>
+    <div class="catbar"><h2>Categorías y marcas</h2><div class="meta" id="txMeta"></div></div>
+    <div class="card tx-empty" id="txEmpty" hidden>
+      <h4>Todavía no hay categorías ni marcas</h4>
+      <p class="sub">Carga el archivo <b>taxonomia_propuesta.json</b> que preparó Claude: crea el árbol de categorías en 3 niveles y la lista de marcas limpia, y une las marcas mal escritas. Después todo se puede editar aquí.</p>
+      <div class="filters"><label class="btn filebtn primary"><span>Cargar propuesta</span><input id="txFile" type="file" accept=".json,application/json"></label></div>
+    </div>
+    <div id="txMain" hidden>
+      <div class="tx-top">
+        <div class="seg" role="group" aria-label="Sección" id="txSeg">
+          <button type="button" data-t="cat" aria-pressed="true">Categorías</button>
+          <button type="button" data-t="marca">Marcas</button>
+          <button type="button" data-t="asig">Por asignar <span id="txPendN"></span></button>
+        </div>
+      </div>
+      <div id="txCat">
+        <div class="tx-bar"><button class="btn primary" type="button" id="txNewCat">+ Nueva categoría</button><button class="btn sm" type="button" id="txOpenAll">Expandir todo</button><button class="btn sm" type="button" id="txCloseAll">Contraer todo</button></div>
+        <div class="tx-tree" id="txTree"></div>
+      </div>
+      <div id="txMarca" hidden>
+        <div class="tx-bar"><input id="txMkQ" type="search" placeholder="Buscar marca" autocomplete="off" aria-label="Buscar marca"><select id="txMkOrd" aria-label="Orden"><option value="n">Orden alfabético</option><option value="c">Más productos primero</option></select><button class="btn primary" type="button" id="txNewMk">+ Nueva marca</button></div>
+        <div class="tx-marcas" id="txMkList"></div>
+      </div>
+      <div id="txAsig" hidden>
+        <div class="tx-bar">
+          <div class="seg" role="group" aria-label="Qué falta" id="txAsSeg"><button type="button" data-a="marca" aria-pressed="true">Sin marca</button><button type="button" data-a="cat">Sin categoría</button><button type="button" data-a="todos">Todos</button></div>
+          <input id="txAsQ" type="search" placeholder="Buscar por código, nombre o descripción" autocomplete="off" aria-label="Buscar productos">
+        </div>
+        <div class="kpi" id="txAsInfo"></div>
+        <div class="tx-rows" id="txAsList"></div>
+        <button class="btn more" type="button" id="txAsMore" hidden>Mostrar más</button>
+        <div class="tx-apply" id="txApply">
+          <label class="chk"><input type="checkbox" id="txAsAll"> Todos los mostrados</label>
+          <select id="txAsMk" aria-label="Marca a asignar"></select>
+          <select id="txAsCat" aria-label="Categoría a asignar"></select>
+          <button class="btn ok" type="button" id="txAsGo" disabled>Asignar</button>
+        </div>
+      </div>
+      <p class="hint" style="margin-top:18px">¿Volver a empezar desde una propuesta nueva? <label class="btn sm filebtn"><span>Cargar propuesta</span><input id="txFile2" type="file" accept=".json,application/json"></label></p>
+    </div>
+  </section>
+
   <section id="viewI" hidden>
     <div id="invList">
       <form class="newinv" id="invForm">
@@ -450,6 +537,26 @@ dialog.dlg::backdrop{background:rgba(10,12,16,.5)}
 </main>
 
 <div class="sheet-bg" id="bg" hidden></div>
+<dialog class="dlg" id="txDlg" aria-labelledby="txDlgT">
+  <form id="txForm" autocomplete="off">
+    <h3 id="txDlgT">Categoría</h3>
+    <label class="f">Nombre <input id="tx_n" required maxlength="60"></label>
+    <label class="f" id="tx_padreW">Dentro de <select id="tx_padre"></select></label>
+    <div id="tx_logoW" class="filters" style="align-items:center">
+      <div class="tx-logo-prev" id="tx_logo">Sin logo</div>
+      <label class="btn filebtn"><span>Subir logo</span><input id="tx_logoF" type="file" accept="image/*"></label>
+      <button class="btn sm" type="button" id="tx_logoX">Quitar logo</button>
+    </div>
+    <p class="hint" id="tx_info"></p>
+    <label class="f" id="tx_fusW">Fusionar con… <select id="tx_fus"></select></label>
+    <p class="hint" id="tx_fusInfo" hidden></p>
+    <div class="acts">
+      <button class="btn del" type="button" id="tx_del">Eliminar</button>
+      <button class="btn" type="button" id="tx_cancel">Cancelar</button>
+      <button class="btn ok" type="submit" id="tx_save">Guardar</button>
+    </div>
+  </form>
+</dialog>
 <dialog class="dlg" id="cliDlg" aria-labelledby="cliDlgT">
   <form id="cliForm" autocomplete="off">
     <h3 id="cliDlgT">Nuevo cliente</h3>
@@ -509,6 +616,10 @@ dialog.dlg::backdrop{background:rgba(10,12,16,.5)}
           <div class="stepper"><button type="button" id="qm" aria-label="Restar uno">−</button><input id="i_q" type="number" inputmode="numeric" min="0" step="1"><button type="button" id="qp" aria-label="Sumar uno">+</button></div>
         </label>
         <label class="f">Categoría <select id="i_cat"></select></label>
+      </div>
+      <div class="grid2" id="txFicha" hidden>
+        <label class="f">Categoría en la vitrina <select id="i_cx"></select></label>
+        <label class="f">Marca del catálogo <select id="i_mk"></select></label>
       </div>
       <div class="motivo" id="motivoBox" hidden>
         <p id="motivoTxt">El stock cambió. ¿Por qué?</p>
@@ -820,7 +931,7 @@ function completeness(p){ return 1 - missing(p).length/COMP.length; }
 function refresh(){
   ALL = merged(); BY = new Map(ALL.map(p=>[p.c,p])); buildTipos();
   renderStats(); fillFilterOptions(); renderList();
-  if (route().inv) renderCount(); else if (route().view==='I') renderInvList(); else if (route().view==='V') renderCart();
+  if (route().inv) renderCount(); else if (route().view==='I') renderInvList(); else if (route().view==='V') renderCart(); else if (route().view==='T') renderTax();
 }
 function opts(sel, values, first){
   const cur = sel.value;
@@ -834,7 +945,8 @@ function fillFilterOptions(){
   const tipos = countBy(base, p=>p.t?tkey(p.t):'_').map(([k,,n])=>[k, k==='_'?'Sin tipo':TIPOS.get(k), n]).sort((a,b)=>a[1].localeCompare(b[1],'es'));
   opts($('fTipo'), tipos, 'Todos los tipos');
   const lab = (fn) => countBy(base, p=>{const v=fn(p); return v?cap(norm(v)):'';}).sort((a,b)=>a[1].localeCompare(b[1],'es'));
-  opts($('fMarca'), lab(p=>p.m).map(([k,,n])=>[k,k.toUpperCase(),n]), 'Todas las marcas');
+  if (TAX && TAX.marcas.length) opts($('fMarca'), countBy(base, p=>{const m=marcaOf(p); return m?'mk:'+m:'';}).map(([k,,n])=>[k, TX.mk.get(k.slice(3))?.n||k, n]).sort((a,b)=>a[1].localeCompare(b[1],'es')), 'Todas las marcas');
+  else opts($('fMarca'), lab(p=>p.m).map(([k,,n])=>[k,k.toUpperCase(),n]), 'Todas las marcas');
   opts($('fMat'), lab(p=>p.ma), 'Todo material');
   opts($('fColor'), lab(p=>p.co), 'Todo color');
 }
@@ -846,7 +958,7 @@ function filtered(){
   return ALL.filter(p => {
     if (cat && pref(p.c)!==cat) return false;
     if (tipo && (p.t?tkey(p.t):'_')!==tipo) return false;
-    if (marca && cap(norm(p.m))!==marca) return false;
+    if (marca && (marca.startsWith('mk:') ? 'mk:'+(marcaOf(p)||'') : cap(norm(p.m)))!==marca) return false;
     if (mat && cap(norm(p.ma))!==mat) return false;
     if (color && cap(norm(p.co))!==color) return false;
     if (est && p.e!==est) return false;
@@ -950,6 +1062,7 @@ function open(code){
   $('shOrig').innerHTML = p.d ? `Descripción original: <b>${esc(p.d)}</b>${p.f?` · fila ${p.f} del Excel`:''}` : (p.dupDe ? `Producto duplicado de <b>${esc(p.dupDe)}</b>. Cambia lo que sea distinto y guarda.` : 'Producto creado en la herramienta.');
   ['q','t','m','mo','me','ma','co','d2','d5','k','v','b','p','sku','nota'].forEach(k => { $('i_'+k).value = p[k] ?? ''; });
   $('i_cat').value = pref(p.c);
+  txFillFicha(p);
   fillDatalists(pref(p.c));
   setEstado(p.e||'R'); setMotivo(null);
   $('qInfo').textContent = p.qAt ? `Último cambio de stock: ${fdate(p.qAt)}${p.qMot?` (${MOT[p.qMot]||p.qMot})`:''}` : 'Sin cambios de stock registrados en la herramienta.';
@@ -971,6 +1084,7 @@ function close(){ $('bg').hidden=true; $('sheet').hidden=true; current=null; dra
 function readForm(){
   ['t','m','mo','me','ma','co','d2','d5','b','p','sku','nota'].forEach(k => draft[k] = $('i_'+k).value.trim());
   ['q','k','v'].forEach(k => { const v=$('i_'+k).value; draft[k] = v==='' ? null : Number(v); });
+  if (TAX){ ['cx','mk'].forEach(k => { const v=$('i_'+k).value; if (v || draft[k]) draft[k] = v; }); }
 }
 function setEstado(e){ draft.e=e; $('segEst').querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed', b.dataset.e===e)); }
 function setMotivo(m){ motivo=m; $('segMot').querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed', b.dataset.m===m)); }
@@ -1061,7 +1175,7 @@ async function logMoves(motivoKey, items, extra){
   }
 }
 async function myId(){ try { return user ? await user.id() : null; } catch(_){ return null; } }
-const FIELDS = ['e','q','t','m','mo','me','ma','co','d2','d5','k','v','b','p','sku','nota','foto'];
+const FIELDS = ['e','q','t','m','mo','me','ma','co','d2','d5','k','v','b','p','sku','nota','foto','cx','mk'];
 async function save(verify){
   if (!db){ toast('No hay conexión con la base de datos: los cambios no se guardaron.'); return; }
   readForm();
@@ -1571,16 +1685,352 @@ async function delCli(){
 
 // ---------- exportar ----------
 async function exportCsv(){
-  const cols=[['c','Código interno'],['cat','Categoría'],['tipoG','Tipo (agrupado)'],['e','Estado'],['n','Nombre'],['t','Tipo'],['m','Marca'],['mo','Modelo'],['me','Medida'],['d2','Detalle 2'],['ma','Material'],['co','Color'],['d5','Detalle extra'],['sku','SKU'],['b','Código de barras'],['p','Código proveedor'],['q','Cantidad'],['qAt','Último cambio de stock'],['qMot','Motivo'],['k','Costo'],['v','Venta'],['ver','Verificado'],['verAt','Fecha verificación'],['foto','Foto (id)'],['nota','Notas'],['d','Descripción original'],['brgRef','Ref. BRG'],['brgU','Unid. compradas a BRG'],['brgO','Pedidos a BRG'],['brgUc','Última compra a BRG']];
+  const cols=[['c','Código interno'],['cat','Categoría'],['tipoG','Tipo (agrupado)'],['e','Estado'],['n','Nombre'],['t','Tipo'],['m','Marca'],['mo','Modelo'],['me','Medida'],['d2','Detalle 2'],['ma','Material'],['co','Color'],['d5','Detalle extra'],['sku','SKU'],['b','Código de barras'],['p','Código proveedor'],['q','Cantidad'],['qAt','Último cambio de stock'],['qMot','Motivo'],['k','Costo'],['v','Venta'],['ver','Verificado'],['verAt','Fecha verificación'],['foto','Foto (id)'],['nota','Notas'],['d','Descripción original'],['cxN','Categoría vitrina'],['mkN','Marca catálogo'],['brgRef','Ref. BRG'],['brgU','Unid. compradas a BRG'],['brgO','Pedidos a BRG'],['brgUc','Última compra a BRG']];
   const cell = v => { const s=String(v??''); return /[";\n]/.test(s) ? '"'+s.replace(/"/g,'""')+'"' : s; };
   const lines=[cols.map(c=>c[1]).join(';')];
   for (const p of ALL){
-    const r={...p, cat:CATS[pref(p.c)], tipoG:tipoLabel(p), e:EST[p.e]||'', n:buildName(p)||p.d, ver:p.ver?'Sí':'', qMot:MOT[p.qMot]||p.qMot||'', k:p.k!=null?String(p.k).replace('.',','):'', v:p.v!=null?String(p.v).replace('.',','):'', brgRef:brgRefs(p.c), brgU:BRG[p.c]?.u ?? '', brgO:BRG[p.c]?.o ?? '', brgUc:BRG[p.c]?.uc ?? ''};
+    const r={...p, cat:CATS[pref(p.c)], tipoG:tipoLabel(p), e:EST[p.e]||'', n:buildName(p)||p.d, ver:p.ver?'Sí':'', qMot:MOT[p.qMot]||p.qMot||'', k:p.k!=null?String(p.k).replace('.',','):'', v:p.v!=null?String(p.v).replace('.',','):'', cxN:TAX&&catOf(p)?catPath(catOf(p)):'', mkN:TAX&&marcaOf(p)?TX.mk.get(marcaOf(p)).n:'', brgRef:brgRefs(p.c), brgU:BRG[p.c]?.u ?? '', brgO:BRG[p.c]?.o ?? '', brgUc:BRG[p.c]?.uc ?? ''};
     lines.push(cols.map(([k])=>cell(r[k])).join(';'));
   }
   try{ await downloads.save({filename:`inventario_dc_racing_${new Date().toISOString().slice(0,10)}.csv`, data:'﻿'+lines.join('\r\n')}); }
   catch(e){ toast('La descarga se canceló o no está disponible.'); }
 }
+
+// ---------- categorías y marcas (taxonomía de la vitrina) ----------
+// Firestore: taxonomia/arbol = {categorias:[{id,n,nivel,padre,orden,prefs?}], marcas:[{id,n,alias[],logo?}], upd, por}
+// En cada producto (cambios): cx = categoría elegida a mano, mk = marca elegida a mano. Si faltan, se deducen
+// del prefijo del código (categoría) y del texto de marca con sus alias (marca).
+let TAX = null;
+const TX = {cat:new Map(), mk:new Map(), kids:new Map(), pref:new Map(), alias:new Map()};
+const mkey = s => norm(s).replace(/[^a-z0-9%]/g,'');
+const prods = n => `${int(n)} ${n===1?'producto':'productos'}`;
+const slugify = s => norm(s).replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'') || 'x';
+function setTax(t){
+  TAX = t && Array.isArray(t.categorias) ? {categorias:t.categorias, marcas:t.marcas||[], upd:t.upd, archivo:t.archivo} : null;
+  TX.cat = new Map(); TX.mk = new Map(); TX.kids = new Map(); TX.pref = new Map(); TX.alias = new Map();
+  if (TAX){
+    for (const c of TAX.categorias){
+      TX.cat.set(c.id, c);
+      const k = c.padre || ''; if (!TX.kids.has(k)) TX.kids.set(k, []); TX.kids.get(k).push(c);
+      for (const p of (c.prefs || (c.pref ? [c.pref] : []))) TX.pref.set(p, c.id);
+    }
+    for (const l of TX.kids.values()) l.sort((a,b)=>(a.orden||0)-(b.orden||0) || a.n.localeCompare(b.n,'es'));
+    for (const m of TAX.marcas){ TX.mk.set(m.id, m); for (const a of [m.n, ...(m.alias||[])]) { const k = mkey(a); if (k && !TX.alias.has(k)) TX.alias.set(k, m.id); } }
+  }
+  refresh();
+}
+const catOf = p => (p.cx && TX.cat.has(p.cx)) ? p.cx : (TX.pref.get(pref(p.c)) || null);
+const marcaOf = p => (p.mk && TX.mk.has(p.mk)) ? p.mk : (TX.alias.get(mkey(p.m)) || null);
+const kidsOf = id => TX.kids.get(id || '') || [];
+const sinClasif = id => { let c = TX.cat.get(id); while (c && c.padre) c = TX.cat.get(c.padre); return !c || c.id==='sin-clasificar'; };
+function catPath(id){ const out=[]; let c=TX.cat.get(id); while(c){ out.unshift(c.n); c=TX.cat.get(c.padre); } return out.join(' › '); }
+function subtree(id){ const out=[id]; for (const k of kidsOf(id)) out.push(...subtree(k.id)); return out; }
+function height(id){ const k=kidsOf(id); return k.length ? 1+Math.max(...k.map(x=>height(x.id))) : 0; }
+function catCounts(){
+  const n = new Map();
+  for (const p of ALL){ let id = catOf(p); while (id){ n.set(id,(n.get(id)||0)+1); id = TX.cat.get(id)?.padre; } }
+  return n;
+}
+function catOptions(sel, cur, first, filter){
+  const rows = []; const walk = (pid, d) => { for (const c of kidsOf(pid)){ if (!filter || filter(c)) rows.push(`<option value="${esc(c.id)}">${'   '.repeat(d)}${esc(c.n)}</option>`); walk(c.id, d+1); } };
+  walk('', 0);
+  sel.innerHTML = (first!=null ? `<option value="">${esc(first)}</option>` : '') + rows.join('');
+  sel.value = cur || '';
+}
+function mkOptions(sel, cur, first){
+  sel.innerHTML = (first!=null ? `<option value="">${esc(first)}</option>` : '') + [...TX.mk.values()].sort((a,b)=>a.n.localeCompare(b.n,'es')).map(m=>`<option value="${esc(m.id)}">${esc(m.n)}</option>`).join('');
+  sel.value = cur || '';
+}
+function txFillFicha(p){
+  $('txFicha').hidden = !TAX;
+  if (!TAX) return;
+  const dc = TX.pref.get(pref(p.c)), dm = TX.alias.get(mkey(p.m));
+  catOptions($('i_cx'), p.cx && TX.cat.has(p.cx) ? p.cx : '', dc ? `Según el código: ${catPath(dc)}` : 'Sin categoría');
+  mkOptions($('i_mk'), p.mk && TX.mk.has(p.mk) ? p.mk : '', dm ? `Según el texto de marca: ${TX.mk.get(dm).n}` : 'Sin marca');
+}
+async function saveTax(msg){
+  if (!db || !canWrite){ toast('No tienes permiso para guardar.'); return false; }
+  const doc = {categorias:TAX.categorias, marcas:TAX.marcas, upd:new Date().toISOString(), por: await myId()};
+  if (TAX.archivo) doc.archivo = TAX.archivo;
+  try{ await db.collection('taxonomia').doc('arbol').set(doc); setTax(doc); if (msg) toast(msg); return true; }
+  catch(e){ toast('No se guardó: '+(e && e.message || '')); return false; }
+}
+// Escribe cx/mk en varios productos (agrupado por documento de categoría)
+async function patchMany(map){
+  const now = new Date().toISOString(), uid = await myId(), byCat = {};
+  for (const c in map){ (byCat[pref(c)] = byCat[pref(c)] || {})[c] = {...map[c], upd:now, ...(uid?{por:uid}:{})}; }
+  for (const p in byCat) localApply(p, byCat[p]);
+  refresh();
+  for (const p in byCat) await writeItems(p, byCat[p]);
+  return Object.keys(map).length;
+}
+
+// ---------- pantalla ----------
+let txTab = 'cat', txAs = 'marca', txShown = 200, txSel = new Set();
+let txOpen = new Set(); try{ txOpen = new Set(JSON.parse(localStorage.getItem('dcr-txopen')||'[]')); }catch(_){}
+const saveOpen = () => { try{ localStorage.setItem('dcr-txopen', JSON.stringify([...txOpen])); }catch(_){} };
+function renderTax(){
+  if (route().view!=='T') return;
+  $('txEmpty').hidden = !!TAX; $('txMain').hidden = !TAX;
+  if (!TAX){ $('txMeta').textContent = ''; return; }
+  const noMk = ALL.filter(p=>!marcaOf(p)).length, noCat = ALL.filter(p=>sinClasif(catOf(p))).length;
+  $('txMeta').textContent = `${int(TAX.categorias.length)} categorías · ${int(TAX.marcas.length)} marcas`;
+  $('txPendN').textContent = `(${int(noMk + noCat)})`;
+  $('txSeg').querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed', b.dataset.t===txTab));
+  $('txCat').hidden = txTab!=='cat'; $('txMarca').hidden = txTab!=='marca'; $('txAsig').hidden = txTab!=='asig';
+  $('txNewCat').hidden = $('txNewMk').hidden = !canWrite;
+  if (txTab==='cat') renderTree(); else if (txTab==='marca') renderMarcas(); else renderAsig();
+}
+function renderTree(){
+  const n = catCounts(), rows = [];
+  const walk = (pid) => {
+    const list = kidsOf(pid);
+    list.forEach((c, i) => {
+      const kids = kidsOf(c.id), open = txOpen.has(c.id) || c.nivel===1 && false;
+      const prefs = (c.prefs || (c.pref?[c.pref]:[])).join(', ');
+      rows.push(`<div class="tx-node l${c.nivel}" data-id="${esc(c.id)}">
+        ${kids.length ? `<button class="tx-tog" type="button" data-act="tog" aria-expanded="${open}" aria-label="${open?'Contraer':'Expandir'} ${esc(c.n)}">${open?'▾':'▸'}</button>` : '<span class="tx-tog" aria-hidden="true"></span>'}
+        <span class="nm"><b>${esc(c.n)}</b><span>${prods(n.get(c.id)||0)}${kids.length?` · ${kids.length} ${c.nivel===1?'grupos':'subcategorías'}`:''}${prefs?` · código ${esc(prefs)}`:''}</span></span>
+        ${canWrite ? `<span class="acts"><button type="button" class="opt" data-act="up" aria-label="Subir ${esc(c.n)}" ${i===0?'disabled':''}>↑</button><button type="button" class="opt" data-act="down" aria-label="Bajar ${esc(c.n)}" ${i===list.length-1?'disabled':''}>↓</button>${c.nivel<3?`<button type="button" data-act="add" aria-label="Agregar dentro de ${esc(c.n)}">+</button>`:''}<button type="button" data-act="edit" aria-label="Editar ${esc(c.n)}">Editar</button></span>` : ''}
+      </div>`);
+      if (kids.length && open) walk(c.id);
+    });
+  };
+  walk('');
+  $('txTree').innerHTML = rows.join('') || '<div class="empty">No hay categorías.</div>';
+}
+function renderMarcas(){
+  const q = norm($('txMkQ').value), cnt = new Map();
+  for (const p of ALL){ const m = marcaOf(p); if (m) cnt.set(m, (cnt.get(m)||0)+1); }
+  let list = TAX.marcas.filter(m => !q || norm([m.n, ...(m.alias||[])].join(' ')).includes(q));
+  list.sort($('txMkOrd').value==='c' ? (a,b)=>(cnt.get(b.id)||0)-(cnt.get(a.id)||0) || a.n.localeCompare(b.n,'es') : (a,b)=>a.n.localeCompare(b.n,'es'));
+  $('txMkList').innerHTML = list.map(m => `<button type="button" class="tx-mk" data-mk="${esc(m.id)}">
+      <span class="logo" data-logo="${esc(m.logo||'')}">${esc(m.n.slice(0,2).toUpperCase())}</span>
+      <span class="nm"><b>${esc(m.n)}</b><span>${prods(cnt.get(m.id)||0)}${(m.alias||[]).filter(a=>mkey(a)!==mkey(m.n)).length?` · también: ${esc(m.alias.filter(a=>mkey(a)!==mkey(m.n)).join(', '))}`:''}</span></span>
+    </button>`).join('') || '<div class="empty">Ninguna marca coincide.</div>';
+  loadLogos($('txMkList'));
+}
+function loadLogos(root){
+  root.querySelectorAll('[data-logo]').forEach(el => {
+    const id = el.dataset.logo; if (!id || !window.fotoGet) return;
+    const put = url => { if (url) el.innerHTML = `<img alt="" src="${esc(url)}">`; };
+    const now = window.fotoPeek && window.fotoPeek(id); if (now) put(now); else window.fotoGet(id).then(put);
+  });
+}
+function asigRows(){
+  const q = norm($('txAsQ').value), terms = q ? q.split(/\s+/) : [];
+  return ALL.filter(p => {
+    if (txAs==='marca' && marcaOf(p)) return false;
+    if (txAs==='cat' && !sinClasif(catOf(p))) return false;
+    if (!terms.length) return true;
+    const h = norm([p.c, p.d, buildName(p), p.m, p.t].join(' '));
+    return terms.every(t=>h.includes(t));
+  });
+}
+function renderAsig(){
+  $('txAsSeg').querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed', b.dataset.a===txAs));
+  const rows = asigRows();
+  for (const c of [...txSel]) if (!BY.has(c)) txSel.delete(c);
+  $('txAsInfo').innerHTML = `<span><b>${int(rows.length)}</b> ${txAs==='marca'?'productos sin marca':txAs==='cat'?'productos sin categoría':'productos'}</span><span><b>${int(txSel.size)}</b> elegidos</span>`;
+  $('txAsList').innerHTML = rows.slice(0, txShown).map(p => {
+    const m = marcaOf(p), c = catOf(p);
+    return `<label class="tx-row"><input type="checkbox" data-c="${esc(p.c)}" ${txSel.has(p.c)?'checked':''}>
+      <span class="nm"><b>${esc(displayName(p))}</b><span><span class="code">${esc(p.c)}</span> · ${m?esc(TX.mk.get(m).n):'<i>sin marca</i>'}${p.m && !m?` (texto: “${esc(p.m)}”)`:''} · ${c && !sinClasif(c)?esc(catPath(c)):'<i>sin categoría</i>'}</span></span></label>`;
+  }).join('') || `<div class="empty">${txAs==='todos'?'Ningún producto coincide.':'¡Nada pendiente aquí!'}</div>`;
+  $('txAsMore').hidden = rows.length <= txShown;
+  $('txAsAll').checked = rows.length>0 && rows.slice(0, txShown).every(p=>txSel.has(p.c));
+  if (!$('txAsMk').options.length || $('txAsMk').dataset.v !== String(TAX.upd)){
+    mkOptions($('txAsMk'), $('txAsMk').value, 'No cambiar la marca');
+    catOptions($('txAsCat'), $('txAsCat').value, 'No cambiar la categoría');
+    $('txAsMk').dataset.v = String(TAX.upd);
+  }
+  $('txApply').hidden = !canWrite;
+  $('txAsGo').disabled = !txSel.size || (!$('txAsMk').value && !$('txAsCat').value);
+}
+async function asigGo(){
+  const mk = $('txAsMk').value, cx = $('txAsCat').value; if (!txSel.size || (!mk && !cx)) return;
+  const map = {}; for (const c of txSel){ map[c] = {}; if (mk) map[c].mk = mk; if (cx) map[c].cx = cx; }
+  $('txAsGo').disabled = true;
+  try{ const n = await patchMany(map); txSel.clear(); toast(`Listo: ${int(n)} productos actualizados`); }
+  catch(e){ toast('No se guardó: '+(e && e.message || '')); }
+  renderTax();
+}
+
+// ---------- diálogo de categoría o marca ----------
+let txEd = null; // {kind:'cat'|'mk', id?, padre?}
+function openTx(kind, id, padre){
+  txEd = {kind, id, padre}; const isCat = kind==='cat';
+  const it = id ? (isCat ? TX.cat.get(id) : TX.mk.get(id)) : null;
+  $('txDlgT').textContent = (it ? 'Editar ' : 'Nueva ') + (isCat ? 'categoría' : 'marca');
+  $('tx_n').value = it ? it.n : '';
+  $('tx_padreW').hidden = !isCat; $('tx_logoW').hidden = isCat;
+  const n = isCat ? catCounts() : null;
+  if (isCat){
+    const own = it ? new Set(subtree(it.id)) : new Set(), h = it ? height(it.id) : 0;
+    catOptions($('tx_padre'), it ? (it.padre||'') : (padre||''), 'Ninguna (categoría principal)', c => !own.has(c.id) && c.nivel + 1 + h <= 3);
+    $('tx_info').textContent = it ? `${int(n.get(it.id)||0)} productos${(it.prefs||[]).length?` · incluye todos los códigos ${it.prefs.join(', ')}`:''}` : '';
+  } else {
+    const cnt = it ? ALL.filter(p=>marcaOf(p)===it.id).length : 0;
+    $('tx_info').textContent = it ? `${int(cnt)} productos${(it.alias||[]).length?` · también se reconoce como: ${it.alias.join(', ')}`:''}` : 'Los productos cuyo texto de marca coincida con este nombre quedan asignados solos.';
+    txLogo = it ? (it.logo||'') : ''; showLogo();
+  }
+  $('tx_fusW').hidden = !it; $('tx_fusInfo').hidden = true;
+  if (it){
+    if (isCat) catOptions($('tx_fus'), '', 'No fusionar', c => c.id!==it.id && !subtree(it.id).includes(c.id) && c.nivel===it.nivel);
+    else mkOptions($('tx_fus'), '', 'No fusionar');
+    if (!isCat) $('tx_fus').querySelector(`option[value="${CSS.escape(it.id)}"]`)?.remove();
+  }
+  const used = it ? (isCat ? (n.get(it.id)||0) + kidsOf(it.id).length : ALL.filter(p=>marcaOf(p)===it.id).length) : 1;
+  $('tx_del').hidden = !it || used>0; $('tx_del').textContent = 'Eliminar';
+  $('txForm').querySelectorAll('input,select,button').forEach(el=>{ if (el.id!=='tx_cancel') el.disabled = !canWrite; });
+  $('txDlg').showModal(); setTimeout(()=>$('tx_n').focus(), 30);
+}
+let txLogo = '';
+function showLogo(){
+  const el = $('tx_logo'); el.dataset.logo = txLogo; el.textContent = txLogo ? '…' : 'Sin logo'; $('tx_logoX').hidden = !txLogo;
+  if (txLogo) loadLogos(el.parentElement);
+}
+function uniqueId(base){ let id = base, i = 2; while (TX.cat.has(id) || TX.mk.has(id)) id = `${base}-${i++}`; return id; }
+async function txSubmit(e){
+  e.preventDefault(); if (!txEd || !TAX) return;
+  const name = $('tx_n').value.replace(/\s+/g,' ').trim(); if (!name) return;
+  const fus = !$('tx_fusW').hidden ? $('tx_fus').value : '';
+  if (txEd.kind==='cat'){
+    const padre = $('tx_padre').value || null, pc = padre ? TX.cat.get(padre) : null, nivel = pc ? pc.nivel+1 : 1;
+    if (TAX.categorias.some(c => c.id!==txEd.id && (c.padre||null)===padre && norm(c.n)===norm(name))){ toast('Ya existe una categoría con ese nombre en el mismo lugar.'); return; }
+    if (txEd.id){
+      const c = TX.cat.get(txEd.id);
+      if (fus) return mergeCat(c, TX.cat.get(fus));
+      if (nivel + height(c.id) > 3){ toast('No caben más de 3 niveles.'); return; }
+      const moved = (c.padre||null) !== padre;
+      c.n = name;
+      if (moved){ c.padre = padre; c.orden = Math.max(0, ...kidsOf(padre).map(x=>x.orden||0)) + 1; const fix = (id, lv) => { const x = TX.cat.get(id); x.nivel = lv; kidsOf(id).forEach(k=>fix(k.id, lv+1)); }; fix(c.id, nivel); }
+      if (await saveTax(moved ? 'Categoría movida' : 'Categoría guardada')) $('txDlg').close();
+    } else {
+      if (nivel > 3){ toast('No caben más de 3 niveles.'); return; }
+      const id = uniqueId((pc ? pc.id+'/' : '') + slugify(name));
+      TAX.categorias.push({id, n:name, nivel, padre, orden: Math.max(0, ...kidsOf(padre).map(x=>x.orden||0)) + 1});
+      if (padre) txOpen.add(padre), saveOpen();
+      if (await saveTax('Categoría creada')) $('txDlg').close();
+    }
+  } else {
+    if (TAX.marcas.some(m => m.id!==txEd.id && mkey(m.n)===mkey(name))){ toast('Ya existe una marca con ese nombre. Usa “Fusionar con…”.'); return; }
+    if (txEd.id){
+      const m = TX.mk.get(txEd.id);
+      if (fus) return mergeMk(m, TX.mk.get(fus));
+      if (mkey(m.n)!==mkey(name)) m.alias = [...new Set([...(m.alias||[]), m.n])].filter(a=>mkey(a)!==mkey(name));
+      m.n = name; if (txLogo) m.logo = txLogo; else delete m.logo;
+      if (await saveTax('Marca guardada')) $('txDlg').close();
+    } else {
+      TAX.marcas.push({id: uniqueId(slugify(name)), n:name, alias:[], ...(txLogo?{logo:txLogo}:{})});
+      if (await saveTax('Marca creada')) $('txDlg').close();
+    }
+  }
+}
+async function mergeCat(a, b){
+  if (!b) return;
+  if (b.nivel + height(a.id) > 3 + (a.nivel - b.nivel)){ toast('No se puede: quedarían más de 3 niveles.'); return; }
+  const map = {};
+  for (const p of ALL) if (p.cx===a.id) map[p.c] = {cx:b.id};
+  b.prefs = [...new Set([...(b.prefs || (b.pref?[b.pref]:[])), ...(a.prefs || (a.pref?[a.pref]:[]))])]; delete b.pref;
+  for (const k of kidsOf(a.id)) k.padre = b.id;
+  TAX.categorias = TAX.categorias.filter(c => c.id!==a.id);
+  if (!await saveTax(`“${a.n}” se unió a “${b.n}”`)) return;
+  if (Object.keys(map).length) await patchMany(map);
+  $('txDlg').close();
+}
+async function mergeMk(a, b){
+  if (!b) return;
+  b.alias = [...new Set([...(b.alias||[]), a.n, ...(a.alias||[])])].filter(x=>mkey(x)!==mkey(b.n));
+  if (!b.logo && a.logo) b.logo = a.logo;
+  const map = {}; for (const p of ALL) if (p.mk===a.id) map[p.c] = {mk:b.id};
+  TAX.marcas = TAX.marcas.filter(m => m.id!==a.id);
+  if (!await saveTax(`“${a.n}” se unió a “${b.n}”`)) return;
+  if (Object.keys(map).length) await patchMany(map);
+  $('txDlg').close();
+}
+async function txDelete(){
+  if (!txEd || !txEd.id) return;
+  const btn = $('tx_del');
+  if (btn.textContent==='Eliminar'){ btn.textContent = '¿Seguro? Toca otra vez'; return; }
+  if (txEd.kind==='cat') TAX.categorias = TAX.categorias.filter(c=>c.id!==txEd.id);
+  else TAX.marcas = TAX.marcas.filter(m=>m.id!==txEd.id);
+  if (await saveTax('Eliminado')) $('txDlg').close();
+}
+async function moveCat(id, dir){
+  const c = TX.cat.get(id), sib = kidsOf(c.padre), i = sib.indexOf(c), o = sib[i+dir]; if (!o) return;
+  sib.forEach((x,k)=>x.orden=k+1); [c.orden, o.orden] = [o.orden, c.orden];
+  await saveTax();
+}
+
+// ---------- cargar propuesta (archivo preparado por Claude) ----------
+async function loadTaxFile(file){
+  if (!file) return;
+  if (!db || !canWrite){ toast('No tienes permiso para guardar.'); return; }
+  let j; try{ j = JSON.parse(await file.text()); }catch(_){ toast('El archivo no es válido.'); return; }
+  if (!j || j.tipo!=='taxonomia' || !Array.isArray(j.categorias) || !Array.isArray(j.marcas)){ toast('Este archivo no es una propuesta de categorías y marcas.'); return; }
+  if (TAX && !confirmTax.armed){ confirmTax.armed = true; toast('Esto reemplaza las categorías y marcas actuales. Vuelve a elegir el archivo para confirmar.'); setTimeout(()=>confirmTax.armed=false, 15000); return; }
+  confirmTax.armed = false;
+  const cats = j.categorias.map(c => { const o = {id:c.id, n:c.n, nivel:c.nivel, padre:c.padre||null, orden:c.orden||0}; if (c.prefs || c.pref) o.prefs = c.prefs || [c.pref]; return o; });
+  TAX = {categorias:cats, marcas:j.marcas.map(m=>({id:m.id, n:m.n, alias:m.alias||[], ...(m.logo?{logo:m.logo}:{})})), archivo:j.id||file.name};
+  if (!await saveTax()) return;
+  // marca o categoría que no se deduce sola del texto o del código: se guarda en el producto
+  const map = {};
+  for (const [c, a] of Object.entries(j.asignar||{})){
+    const p = BY.get(c); if (!p) continue;
+    const patch = {};
+    if (a.marca && TX.mk.has(a.marca) && !p.mk && TX.alias.get(mkey(p.m)) !== a.marca) patch.mk = a.marca;
+    if (a.cat && TX.cat.has(a.cat) && !p.cx && TX.pref.get(pref(c)) !== a.cat) patch.cx = a.cat;
+    if (Object.keys(patch).length) map[c] = patch;
+  }
+  const n = Object.keys(map).length ? await patchMany(map) : 0;
+  toast(`Propuesta cargada: ${int(TAX.categorias.length)} categorías, ${int(TAX.marcas.length)} marcas${n?`, ${int(n)} productos con marca deducida de la descripción`:''}`);
+  renderTax();
+}
+const confirmTax = {armed:false};
+
+// ---------- eventos ----------
+['txFile','txFile2'].forEach(id => $(id).addEventListener('change', e => { const f = e.target.files[0]; e.target.value=''; loadTaxFile(f); }));
+$('txSeg').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; txTab = b.dataset.t; renderTax(); });
+$('txAsSeg').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; txAs = b.dataset.a; txShown = 200; renderTax(); });
+$('txNewCat').addEventListener('click', () => openTx('cat'));
+$('txNewMk').addEventListener('click', () => openTx('mk'));
+$('txOpenAll').addEventListener('click', () => { TAX.categorias.forEach(c=>{ if (kidsOf(c.id).length) txOpen.add(c.id); }); saveOpen(); renderTree(); });
+$('txCloseAll').addEventListener('click', () => { txOpen.clear(); saveOpen(); renderTree(); });
+$('txTree').addEventListener('click', e => {
+  const b = e.target.closest('button[data-act]'), row = e.target.closest('.tx-node'); if (!row) return;
+  const id = row.dataset.id, act = b ? b.dataset.act : (kidsOf(id).length ? 'tog' : null);
+  if (act==='tog'){ txOpen.has(id) ? txOpen.delete(id) : txOpen.add(id); saveOpen(); renderTree(); }
+  else if (act==='edit') openTx('cat', id);
+  else if (act==='add') openTx('cat', null, id);
+  else if (act==='up' || act==='down') moveCat(id, act==='up'?-1:1);
+});
+$('txMkList').addEventListener('click', e => { const b = e.target.closest('[data-mk]'); if (b) openTx('mk', b.dataset.mk); });
+let txq; $('txMkQ').addEventListener('input', () => { clearTimeout(txq); txq = setTimeout(renderMarcas, 120); });
+$('txMkOrd').addEventListener('change', renderMarcas);
+let txaq; $('txAsQ').addEventListener('input', () => { clearTimeout(txaq); txaq = setTimeout(()=>{ txShown = 200; renderAsig(); }, 150); });
+$('txAsList').addEventListener('change', e => { const c = e.target.dataset.c; if (!c) return; e.target.checked ? txSel.add(c) : txSel.delete(c); renderAsig(); });
+$('txAsAll').addEventListener('change', e => { asigRows().slice(0, txShown).forEach(p => e.target.checked ? txSel.add(p.c) : txSel.delete(p.c)); renderAsig(); });
+$('txAsMore').addEventListener('click', () => { txShown += 200; renderAsig(); });
+['txAsMk','txAsCat'].forEach(id => $(id).addEventListener('change', () => { $('txAsGo').disabled = !txSel.size || (!$('txAsMk').value && !$('txAsCat').value); }));
+$('txAsGo').addEventListener('click', asigGo);
+$('txForm').addEventListener('submit', txSubmit);
+$('tx_cancel').addEventListener('click', () => $('txDlg').close());
+$('tx_del').addEventListener('click', txDelete);
+$('tx_fus').addEventListener('change', () => {
+  const v = $('tx_fus').value, i = $('tx_fusInfo'); i.hidden = !v;
+  if (v){ const it = txEd.kind==='cat' ? TX.cat.get(txEd.id) : TX.mk.get(txEd.id), to = txEd.kind==='cat' ? TX.cat.get(v) : TX.mk.get(v);
+    i.textContent = `Al guardar, “${it.n}” desaparece y todo lo suyo pasa a “${to.n}”${txEd.kind==='mk'?` (su nombre queda como alias)`:''}.`; $('tx_save').textContent = 'Fusionar'; }
+  else $('tx_save').textContent = 'Guardar';
+});
+$('txDlg').addEventListener('close', () => { $('tx_save').textContent = 'Guardar'; txEd = null; });
+$('tx_logoF').addEventListener('change', async e => {
+  const f = e.target.files[0]; e.target.value=''; if (!f || !assets) return;
+  $('tx_logo').textContent = 'Subiendo…';
+  try{ const r = await assets.upload(f); txLogo = r.id; showLogo(); }catch(err){ toast('No se pudo subir el logo'); showLogo(); }
+});
+$('tx_logoX').addEventListener('click', () => { txLogo = ''; showLogo(); });
+['i_cx','i_mk'].forEach(id => $(id).addEventListener('change', () => { if (current) updateSheet(); }));
 
 // ---------- rutas ----------
 function route(){
@@ -1589,11 +2039,14 @@ function route(){
   if (h==='inventarios') return {view:'I'};
   if (h==='vender') return {view:'V'};
   if (h==='clientes') return {view:'C'};
+  if (h==='categorias') return {view:'T'};
   return {view:'P'};
 }
 function applyRoute(){
   const r = route();
-  $('viewP').hidden = r.view!=='P'; $('prodBar').hidden = r.view!=='P'; $('viewI').hidden = r.view!=='I'; $('viewV').hidden = r.view!=='V'; $('viewC').hidden = r.view!=='C';
+  $('viewP').hidden = r.view!=='P'; $('prodBar').hidden = r.view!=='P'; $('viewI').hidden = r.view!=='I'; $('viewV').hidden = r.view!=='V'; $('viewC').hidden = r.view!=='C'; $('viewT').hidden = r.view!=='T';
+  $('tabT').setAttribute('aria-current', r.view==='T'?'page':'false');
+  if (r.view==='T') renderTax();
   $('tabC').setAttribute('aria-current', r.view==='C'?'page':'false');
   if (r.view==='C') renderClientes();
   if (r.view==='V') renderCliPick();
@@ -1818,6 +2271,10 @@ function showReadOnly(){ const n=$('notice'); n.hidden=false; n.textContent='Est
   db.collection('ventas').where('t','>=',hoy.toISOString()).onSnapshot(snap => {
     VENTAS = snap.docs.map(d => ({id:d.id, ...JSON.parse(JSON.stringify(d.data()||{}))})).sort((a,b)=>String(b.t).localeCompare(String(a.t)));
     if (route().view==='V') renderVentas();
+  }, lost);
+  db.collection('taxonomia').onSnapshot(snap => {
+    const d = snap.docs.find(x => x.id==='arbol');
+    setTax(d ? JSON.parse(JSON.stringify(d.data()||{})) : null);
   }, lost);
   db.collection('clientes').onSnapshot(snap => {
     CLIS = snap.docs.map(d => ({id:d.id, ...JSON.parse(JSON.stringify(d.data()||{}))}));
