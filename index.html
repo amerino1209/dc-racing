@@ -96,6 +96,9 @@ button.ghead:hover h3{color:var(--accent)}
 .pill.v{background:var(--ok);color:var(--surface)}
 .pill.dup{background:var(--accent-soft);color:var(--accent)}
 .pill.new{background:var(--accent);color:var(--accent-ink)}
+.pill.arch{background:var(--line);color:var(--ink)}
+.row.arch .thumb,.row.arch .name{opacity:.6}
+.arch-note{border:1.5px dashed var(--line);border-radius:10px;padding:10px;margin-bottom:8px}
 .comp{width:64px;height:5px;border-radius:3px;background:var(--surface-2);overflow:hidden;border:1px solid var(--line)}
 .comp i{display:block;height:100%;background:var(--accent)}
 .more{margin:14px auto 0;display:block}
@@ -457,11 +460,15 @@ label.chk.sm{font-size:.85rem}
         <select id="fVer" aria-label="Verificación">
           <option value="">Verificados y pendientes</option><option value="no">Pendientes de verificar</option><option value="si">Ya verificados</option>
         </select>
+        <select id="fArch" aria-label="Archivados">
+          <option value="">Solo activos</option><option value="si">Solo archivados</option><option value="todos">Activos y archivados</option>
+        </select>
         <label class="chk"><input type="checkbox" id="fInc"> Ficha incompleta</label>
         <label class="chk"><input type="checkbox" id="fDup"> Posible duplicado</label>
         <label class="chk"><input type="checkbox" id="fStock"> Con stock</label>
         <label class="chk"><input type="checkbox" id="fBrg"> Comprado a BRG</label>
         <button class="btn sm" id="btnClear" type="button">Limpiar filtros</button>
+        <button class="btn sm" id="btnArchAll" type="button" hidden>Archivar esta lista</button>
         <button class="btn sm" id="btnExport" type="button" hidden>Exportar CSV</button>
       </div>
     </div>
@@ -742,6 +749,23 @@ label.chk.sm{font-size:.85rem}
     </div>
   </form>
 </dialog>
+<dialog class="dlg" id="archDlg" aria-labelledby="archT">
+  <form id="archForm" style="display:grid;gap:12px;padding:16px">
+    <h3 id="archT" style="margin:0;font:700 1.25rem/1 var(--f-display);text-transform:uppercase">Archivar producto</h3>
+    <p class="hint" id="archInfo" style="margin:0"></p>
+    <div id="archMotW" style="display:grid;gap:6px">
+      <span class="hint">Motivo</span>
+      <div class="seg" role="group" aria-label="Motivo" id="archMot">
+        <button type="button" data-m="descontinuado">Descontinuado</button>
+        <button type="button" data-m="obsoleto">Obsoleto</button>
+        <button type="button" data-m="viejo">Viejo, sin rotación</button>
+      </div>
+      <label class="f">Nota (opcional) <input id="arch_nota" type="text" maxlength="200" placeholder="Ej.: la marca dejó de fabricarlo"></label>
+    </div>
+    <p class="hint warn" id="archWarn" style="margin:0"></p>
+    <div class="acts"><button class="btn" type="button" id="arch_cancel">Cancelar</button><button class="btn ok" type="submit" id="arch_ok">Archivar</button></div>
+  </form>
+</dialog>
 <dialog class="dlg" id="ivaDlg" aria-labelledby="ivaDlgT">
   <form id="ivaForm" style="display:grid;gap:12px;padding:16px">
     <h3 id="ivaDlgT" style="margin:0;font:700 1.25rem/1 var(--f-display);text-transform:uppercase">Tarifa de IVA</h3>
@@ -901,6 +925,7 @@ label.chk.sm{font-size:.85rem}
   </form>
   <div class="sh-foot">
     <span class="hint" id="shWho" style="margin-right:auto;align-self:center"></span>
+    <button class="btn" type="button" id="shArch">Archivar</button>
     <button class="btn" type="button" id="shDup" title="Crear otro producto con estos mismos datos">Duplicar</button>
     <button class="btn" type="button" id="shSave">Guardar</button>
     <button class="btn ok" type="button" id="shVerify">Guardar y verificar</button>
@@ -1168,12 +1193,14 @@ function fillFilterOptions(){
   opts($('fMat'), lab(p=>p.ma), 'Todo material');
   opts($('fColor'), lab(p=>p.co), 'Todo color');
 }
-function filtered(){
+function filtered(arOverride){
   const q = norm($('q').value), cat=$('fCat').value, est=$('fEst').value, ver=$('fVer').value;
+  const ar = arOverride ?? $('fArch').value;
   const tipo=$('fTipo').value, marca=$('fMarca').value, mat=$('fMat').value, color=$('fColor').value;
   const inc=$('fInc').checked, dup=$('fDup').checked, stock=$('fStock').checked;
   const terms = q ? q.split(/\s+/) : [];
   return ALL.filter(p => {
+    if (ar==='si' ? !p.arch : ar!=='todos' && p.arch) return false;
     if (cat && pref(p.c)!==cat) return false;
     if (tipo && (p.t?tkey(p.t):'_')!==tipo) return false;
     if (marca && (marca.startsWith('mk:') ? 'mk:'+(marcaOf(p)||'') : cap(norm(p.m)))!==marca) return false;
@@ -1194,10 +1221,11 @@ function filtered(){
   });
 }
 function renderStats(){
-  const tot=ALL.length, ver=ALL.filter(p=>p.ver).length;
-  const costo=ALL.reduce((s,p)=>s+(p.q||0)*(p.k||0),0), venta=ALL.reduce((s,p)=>s+(p.q||0)*(p.v||0),0);
-  const fotos=ALL.filter(p=>p.foto||p.fx).length;
-  $('stats').innerHTML = `<span><b>${int(ver)}</b> de ${int(tot)} verificados</span><span><b>${int(fotos)}</b> con foto</span><span>Costo <b>$${fmt(costo)}</b></span><span>Venta <b>$${fmt(venta)}</b></span>`;
+  const act = activos(), nArch = ALL.length - act.length;
+  const tot=act.length, ver=act.filter(p=>p.ver).length;
+  const costo=act.reduce((s,p)=>s+(p.q||0)*(p.k||0),0), venta=act.reduce((s,p)=>s+(p.q||0)*(p.v||0),0);
+  const fotos=act.filter(p=>p.foto||p.fx).length;
+  $('stats').innerHTML = `<span><b>${int(ver)}</b> de ${int(tot)} verificados</span><span><b>${int(fotos)}</b> con foto</span><span>Costo <b>$${fmt(costo)}</b></span><span>Venta <b>$${fmt(venta)}</b></span>${nArch?`<span><b>${int(nArch)}</b> archivados</span>`:''}`;
   $('meter').style.width = (tot? ver/tot*100 : 0)+'%';
   const open = INVS.filter(i=>i.estado==='abierto').length;
   $('invOpenN').hidden = !open; $('invOpenN').textContent = open;
@@ -1205,10 +1233,10 @@ function renderStats(){
 function rowHtml(p){
   const comp = completeness(p);
   const stockInfo = p.qAt ? ` · stock ${ago(p.qAt)}` : '';
-  return `<button type="button" class="row${p.ver?' ver':''}" data-c="${esc(p.c)}"${needXL(p)?' data-xl="1"':''}>
+  return `<button type="button" class="row${p.ver?' ver':''}${p.arch?' arch':''}" data-c="${esc(p.c)}"${needXL(p)?' data-xl="1"':''}>
     <span class="thumb">${thumbHtml(p)}</span>
     <span class="r-main">
-      <span class="r-top"><span class="code">${esc(p.c)}</span><span class="pill ${p.e||'R'}">${EST[p.e]||'Por revisar'}</span>${p.ver?'<span class="pill v">Verificado</span>':''}${p.dup?'<span class="pill dup">Duplicado?</span>':''}${p.nuevo?'<span class="pill new">Nuevo</span>':''}</span>
+      <span class="r-top"><span class="code">${esc(p.c)}</span><span class="pill ${p.e||'R'}">${EST[p.e]||'Por revisar'}</span>${p.ver?'<span class="pill v">Verificado</span>':''}${p.dup?'<span class="pill dup">Duplicado?</span>':''}${p.nuevo?'<span class="pill new">Nuevo</span>':''}${p.arch?'<span class="pill arch">Archivado</span>':''}</span>
       <span class="name">${esc(displayName(p))}</span>
       <span class="sub">${esc([CATS[pref(p.c)], p.m, p.b].filter(Boolean).join(' · ')+stockInfo)}</span>
     </span>
@@ -1216,10 +1244,10 @@ function rowHtml(p){
   </button>`;
 }
 function tileHtml(p){
-  return `<button type="button" class="tile row${p.ver?' ver':''}" data-c="${esc(p.c)}"${needXL(p)?' data-xl="1"':''}>
+  return `<button type="button" class="tile row${p.ver?' ver':''}${p.arch?' arch':''}" data-c="${esc(p.c)}"${needXL(p)?' data-xl="1"':''}>
     <span class="thumb">${thumbHtml(p)}</span>
     <span class="t-body">
-      <span class="r-top"><span class="code">${esc(p.c)}</span><span class="pill ${p.e||'R'}">${EST[p.e]||'Por revisar'}</span>${p.ver?'<span class="pill v">✓</span>':''}${p.dup?'<span class="pill dup">Dup?</span>':''}${p.nuevo?'<span class="pill new">Nuevo</span>':''}</span>
+      <span class="r-top"><span class="code">${esc(p.c)}</span><span class="pill ${p.e||'R'}">${EST[p.e]||'Por revisar'}</span>${p.ver?'<span class="pill v">✓</span>':''}${p.dup?'<span class="pill dup">Dup?</span>':''}${p.nuevo?'<span class="pill new">Nuevo</span>':''}${p.arch?'<span class="pill arch">Archivado</span>':''}</span>
       <span class="name">${esc(displayName(p))}</span>
       <span class="t-foot"><span class="qty">${p.q ?? '—'}<small>und</small></span><span class="price">$${fmt(p.v)}</span></span>
     </span>
@@ -1240,7 +1268,12 @@ function renderList(){
   const ver = rows.filter(p=>p.ver).length, und = rows.reduce((s,p)=>s+(p.q||0),0);
   $('catMeta').textContent = `${int(rows.length)} productos · ${int(und)} unidades · ${int(ver)} verificados (${rows.length?Math.round(ver/rows.length*100):0}%)`;
   const list=$('list');
-  if (!rows.length){ list.innerHTML = `<div class="empty">Ningún producto coincide con la búsqueda o los filtros.</div>`; $('more').hidden=true; return; }
+  updArchAll(rows);
+  if (!rows.length){
+    const na = $('fArch').value==='' ? filtered('si').length : 0;
+    list.innerHTML = `<div class="empty">Ningún producto coincide con la búsqueda o los filtros.${na?`<br><button type="button" class="btn sm" id="seeArch" style="margin-top:10px">${na===1?'Ver 1 producto archivado que coincide':`Ver ${int(na)} productos archivados que coinciden`}</button>`:''}</div>`;
+    $('more').hidden=true; return;
+  }
   let html = '';
   const g = new Map();
   for (const p of rows){ const k=tipoLabel(p); if(!g.has(k)) g.set(k,[]); g.get(k).push(p); }
@@ -1281,6 +1314,7 @@ function open(code){
   ['q','t','m','mo','me','ma','co','d2','d5','k','v','b','p','sku','nota'].forEach(k => { $('i_'+k).value = p[k] ?? ''; });
   $('i_cat').value = pref(p.c);
   txFillFicha(p); fiFillSheet(p);
+  if (p.arch) $('shOrig').insertAdjacentHTML('afterbegin', `<div class="arch-note"><span class="pill arch">Archivado</span> el ${esc(new Date(p.arch).toLocaleDateString('es-EC'))}${p.archMot?` · ${esc(ARCH_MOT[p.archMot]||p.archMot)}`:''}${p.archNota?` · ${esc(p.archNota)}`:''}. No aparece en ventas, inventarios ni en la vitrina.</div>`);
   fillDatalists(pref(p.c));
   setEstado(p.e||'R'); setMotivo(null);
   $('qInfo').textContent = p.qAt ? `Último cambio de stock: ${fdate(p.qAt)}${p.qMot?` (${MOT[p.qMot]||p.qMot})`:''}` : 'Sin cambios de stock registrados en la herramienta.';
@@ -1289,6 +1323,7 @@ function open(code){
   const ro = !canWrite;
   $('form').querySelectorAll('input,select,textarea,.seg button,.stepper button').forEach(el=>el.disabled=ro);
   $('shSave').disabled = $('shVerify').disabled = ro; $('shDup').hidden = ro;
+  $('shArch').hidden = ro; $('shArch').textContent = p.arch ? 'Restaurar' : 'Archivar';
   $('phBtn').hidden = $('phBtn2').hidden = ro || !assets;
   $('bScan').hidden = ro;
   if (assignCode && !ro){
@@ -1440,6 +1475,62 @@ function newProduct(barcode){
   open(code);
   writeItems(cat, {[code]: item}).catch(e=>toast('No se pudo crear: '+(e.message||'')));
 }
+// ---------- archivar ----------
+// Un producto archivado (viejo, obsoleto, descontinuado) conserva su código e historial, pero se oculta de la lista
+// de productos (salvo con el filtro), de ventas, inventarios, sugerencias de fichas y de la vitrina pública.
+// Campos en cambios: arch (fecha), archMot, archNota, archPor. Restaurar los deja vacíos.
+const ARCH_MOT = {descontinuado:'Descontinuado', obsoleto:'Obsoleto', viejo:'Viejo, sin rotación'};
+const activos = () => ALL.filter(p => !p.arch);
+let archList = [], archRestore = false, archM = 'descontinuado';
+function setArchMot(m){ archM = m; $('archMot').querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed', b.dataset.m===m)); }
+function openArch(list, restore){
+  if (!canWrite || !db){ toast('No tienes permiso para guardar.'); return; }
+  archList = list.filter(p => restore ? p.arch : !p.arch); archRestore = restore;
+  if (!archList.length){ toast(restore ? 'No hay productos archivados en esta lista.' : 'Todos ya están archivados.'); return; }
+  const one = archList.length === 1, n = prods(archList.length);
+  $('archT').textContent = restore ? (one ? 'Restaurar producto' : `Restaurar ${n}`) : (one ? 'Archivar producto' : `Archivar ${n}`);
+  $('archInfo').textContent = restore
+    ? (one ? `${archList[0].c} · ${displayName(archList[0])} vuelve a aparecer en productos, ventas e inventarios.` : 'Vuelven a aparecer en productos, ventas e inventarios.')
+    : (one ? `${archList[0].c} · ${displayName(archList[0])}. ` : '') + 'Se oculta de productos, ventas, inventarios y de la vitrina. Conserva su código e historial, y puedes restaurarlo cuando quieras.';
+  $('archMotW').hidden = restore; setArchMot('descontinuado'); $('arch_nota').value = '';
+  const conStock = archList.filter(p => (p.q||0) > 0), enFicha = archList.filter(p => FI_OF.has(p.c));
+  $('archWarn').textContent = restore ? '' : [
+    conStock.length ? (one ? `Todavía tiene ${conStock[0].q} und en stock.` : `${prods(conStock.length)} todavía tienen stock (${int(conStock.reduce((s,p)=>s+p.q,0))} und).`) : '',
+    enFicha.length ? (one ? 'Está en una ficha de la vitrina: dejará de mostrarse como opción.' : `${prods(enFicha.length)} están en fichas de la vitrina y dejarán de mostrarse.`) : ''
+  ].filter(Boolean).join(' ');
+  $('arch_ok').textContent = restore ? 'Restaurar' : 'Archivar';
+  $('archDlg').showModal();
+}
+async function doArch(e){
+  e.preventDefault();
+  const now = new Date().toISOString(), uid = await myId(), nota = $('arch_nota').value.trim();
+  const patch = archRestore ? {arch:'', archMot:'', archNota:'', archPor:'', upd:now}
+                            : {arch:now, archMot:archM, archNota:nota, archPor:uid||'', upd:now};
+  const by = {}; for (const p of archList){ (by[pref(p.c)] = by[pref(p.c)] || {})[p.c] = {...patch}; }
+  const n = archList.length, restore = archRestore;
+  $('archDlg').close(); if (!$('sheet').hidden) close();
+  for (const pr in by) localApply(pr, by[pr]);
+  refresh();
+  try {
+    for (const pr in by) await writeItems(pr, by[pr]);
+    toast(restore ? `${prods(n)} restaurado${n===1?'':'s'}` : `${prods(n)} archivado${n===1?'':'s'}`);
+  } catch(err){ toast('No se pudo guardar: ' + (err && err.message || 'error desconocido')); }
+}
+function archCurrent(){
+  if (!current) return;
+  readForm();
+  if (FIELDS.some(k => (draft[k] ?? '') !== (current[k] ?? ''))){ toast('Primero guarda los cambios de este producto.'); return; }
+  openArch([current], !!current.arch);
+}
+// "Archivar esta lista": solo con búsqueda o filtros puestos, para no archivar todo por error
+function updArchAll(rows){
+  const b = $('btnArchAll'), ar = $('fArch').value, filtros = $('q').value.trim() !== '' || activeFilters() > (ar ? 1 : 0);
+  const restore = ar === 'si';
+  b.hidden = !canWrite || !filtros || !rows.length || ar === 'todos';
+  const n = rows.length; b.textContent = (restore ? 'Restaurar ' : 'Archivar ') + (n===1 ? 'este producto' : `estos ${int(n)}`);
+  b.dataset.restore = restore ? '1' : '';
+}
+
 // Duplicar: nuevo código en la misma categoría con los datos del producto abierto.
 // No se copian código de barras, SKU, stock, foto ni verificación, porque son de cada variante.
 const DUP_KEYS = ['t','m','mo','me','ma','co','d2','d5','k','v','p'];
@@ -1487,8 +1578,8 @@ $('phFile2').addEventListener('change', onPhoto);
 // ---------- inventarios parciales ----------
 let alcance = 'marca', picked = new Set();
 function scopeProducts(){
-  if (alcance==='marca'){ const m=$('aMarca').value; return m ? ALL.filter(p=>cap(norm(p.m))===m) : []; }
-  if (alcance==='tipo'){ const c=$('aCat').value, t=$('aTipo').value; return t ? ALL.filter(p=>(!c||pref(p.c)===c) && (p.t?tkey(p.t):'_')===t) : []; }
+  if (alcance==='marca'){ const m=$('aMarca').value; return m ? ALL.filter(p=>!p.arch && cap(norm(p.m))===m) : []; }
+  if (alcance==='tipo'){ const c=$('aCat').value, t=$('aTipo').value; return t ? ALL.filter(p=>!p.arch && (!c||pref(p.c)===c) && (p.t?tkey(p.t):'_')===t) : []; }
   return [...picked].map(c=>BY.get(c)).filter(Boolean);
 }
 function scopeName(){
@@ -1497,14 +1588,14 @@ function scopeName(){
   return picked.size ? `${picked.size} productos sueltos` : '';
 }
 function fillInvForm(){
-  const marcas = countBy(ALL, p=>p.m?cap(norm(p.m)):'').sort((a,b)=>a[1].localeCompare(b[1],'es')).map(([k,,n])=>[k,k.toUpperCase(),n]);
+  const marcas = countBy(activos(), p=>p.m?cap(norm(p.m)):'').sort((a,b)=>a[1].localeCompare(b[1],'es')).map(([k,,n])=>[k,k.toUpperCase(),n]);
   opts($('aMarca'), marcas, 'Elige una marca');
   const cats = Object.keys(CATS).sort((a,b)=>CATS[a].localeCompare(CATS[b],'es')).map(p=>[p,CATS[p]]);
   opts($('aCat'), cats, 'Todas las categorías');
   fillInvTipos(); updateInvForm();
 }
 function fillInvTipos(){
-  const c=$('aCat').value, base = c ? ALL.filter(p=>pref(p.c)===c) : ALL;
+  const c=$('aCat').value, base = activos().filter(p=>!c || pref(p.c)===c);
   opts($('aTipo'), countBy(base, p=>p.t?tkey(p.t):'_').map(([k,,n])=>[k, k==='_'?'Sin tipo':TIPOS.get(k), n]).sort((a,b)=>a[1].localeCompare(b[1],'es')), 'Elige un tipo');
 }
 function updateInvForm(){
@@ -1514,7 +1605,7 @@ function updateInvForm(){
   const pick=$('aPick');
   if (alcance==='individual'){
     const q = norm($('aBusca').value); const terms=q?q.split(/\s+/):[];
-    const hits = terms.length ? ALL.filter(p=>{const h=norm([p.c,p.d,buildName(p),p.m,p.b,p.p].join(' ')); return terms.every(t=>h.includes(t));}).slice(0,60) : [];
+    const hits = terms.length ? ALL.filter(p=>{if (p.arch) return false; const h=norm([p.c,p.d,buildName(p),p.m,p.b,p.p].join(' ')); return terms.every(t=>h.includes(t));}).slice(0,60) : [];
     const sel = [...picked].map(c=>BY.get(c)).filter(Boolean);
     const list = [...sel, ...hits.filter(p=>!picked.has(p.c))];
     pick.hidden = !list.length;
@@ -1753,7 +1844,7 @@ function renderCart(){
 function renderHits(){
   const q = norm($('vScan').value), terms = q ? q.split(/\s+/) : [], box = $('vHits');
   if (!terms.length){ box.hidden = true; return; }
-  const hits = ALL.filter(p => { const h=norm([p.c,p.d,buildName(p),p.m,p.b,p.p,p.sku].join(' ')); return terms.every(t=>h.includes(t)); }).slice(0,30);
+  const hits = ALL.filter(p => { if (p.arch) return false; const h=norm([p.c,p.d,buildName(p),p.m,p.b,p.p,p.sku].join(' ')); return terms.every(t=>h.includes(t)); }).slice(0,30);
   box.hidden = false; renderHits.last = hits;
   const inCart = c => cart.find(l=>l.c===c)?.cant || 0;
   box.innerHTML = hits.length ? hits.map(p=>`<button type="button" data-c="${esc(p.c)}"><span class="r-main"><span class="name">${esc(displayName(p))}${inCart(p.c)?`<span class="inc">${inCart(p.c)} en la venta</span>`:''}</span><span class="sub"><span class="code">${esc(p.c)}</span> · stock ${p.q ?? 0}</span></span><b>+ ${money(p.v)}</b></button>`).join('') : '<div class="hint" style="padding:8px">Sin resultados.</div>';
@@ -1903,11 +1994,11 @@ async function delCli(){
 
 // ---------- exportar ----------
 async function exportCsv(){
-  const cols=[['c','Código interno'],['cat','Categoría'],['tipoG','Tipo (agrupado)'],['e','Estado'],['n','Nombre'],['t','Tipo'],['m','Marca'],['mo','Modelo'],['me','Medida'],['d2','Detalle 2'],['ma','Material'],['co','Color'],['d5','Detalle extra'],['sku','SKU'],['b','Código de barras'],['p','Código proveedor'],['q','Cantidad'],['qAt','Último cambio de stock'],['qMot','Motivo'],['k','Costo'],['v','Venta'],['ver','Verificado'],['verAt','Fecha verificación'],['foto','Foto (id)'],['nota','Notas'],['d','Descripción original'],['cxN','Categoría vitrina'],['mkN','Marca catálogo'],['brgRef','Ref. BRG'],['brgU','Unid. compradas a BRG'],['brgO','Pedidos a BRG'],['brgUc','Última compra a BRG']];
+  const cols=[['c','Código interno'],['cat','Categoría'],['tipoG','Tipo (agrupado)'],['e','Estado'],['n','Nombre'],['t','Tipo'],['m','Marca'],['mo','Modelo'],['me','Medida'],['d2','Detalle 2'],['ma','Material'],['co','Color'],['d5','Detalle extra'],['sku','SKU'],['b','Código de barras'],['p','Código proveedor'],['q','Cantidad'],['qAt','Último cambio de stock'],['qMot','Motivo'],['k','Costo'],['v','Venta'],['ver','Verificado'],['verAt','Fecha verificación'],['foto','Foto (id)'],['nota','Notas'],['d','Descripción original'],['archN','Archivado'],['cxN','Categoría vitrina'],['mkN','Marca catálogo'],['brgRef','Ref. BRG'],['brgU','Unid. compradas a BRG'],['brgO','Pedidos a BRG'],['brgUc','Última compra a BRG']];
   const cell = v => { const s=String(v??''); return /[";\n]/.test(s) ? '"'+s.replace(/"/g,'""')+'"' : s; };
   const lines=[cols.map(c=>c[1]).join(';')];
   for (const p of ALL){
-    const r={...p, cat:CATS[pref(p.c)], tipoG:tipoLabel(p), e:EST[p.e]||'', n:buildName(p)||p.d, ver:p.ver?'Sí':'', qMot:MOT[p.qMot]||p.qMot||'', k:p.k!=null?String(p.k).replace('.',','):'', v:p.v!=null?String(p.v).replace('.',','):'', cxN:TAX&&catOf(p)?catPath(catOf(p)):'', mkN:TAX&&marcaOf(p)?TX.mk.get(marcaOf(p)).n:'', brgRef:brgRefs(p.c), brgU:BRG[p.c]?.u ?? '', brgO:BRG[p.c]?.o ?? '', brgUc:BRG[p.c]?.uc ?? ''};
+    const r={...p, cat:CATS[pref(p.c)], tipoG:tipoLabel(p), e:EST[p.e]||'', n:buildName(p)||p.d, ver:p.ver?'Sí':'', qMot:MOT[p.qMot]||p.qMot||'', k:p.k!=null?String(p.k).replace('.',','):'', v:p.v!=null?String(p.v).replace('.',','):'', cxN:TAX&&catOf(p)?catPath(catOf(p)):'', mkN:TAX&&marcaOf(p)?TX.mk.get(marcaOf(p)).n:'', brgRef:brgRefs(p.c), brgU:BRG[p.c]?.u ?? '', brgO:BRG[p.c]?.o ?? '', brgUc:BRG[p.c]?.uc ?? '', archN: p.arch ? `${ARCH_MOT[p.archMot]||'Sí'} ${String(p.arch).slice(0,10)}` : ''};
     lines.push(cols.map(([k])=>cell(r[k])).join(';'));
   }
   try{ await downloads.save({filename:`inventario_dc_racing_${new Date().toISOString().slice(0,10)}.csv`, data:'﻿'+lines.join('\r\n')}); }
@@ -1991,7 +2082,7 @@ function renderTax(){
   if (route().view!=='T') return;
   $('txEmpty').hidden = !!TAX; $('txMain').hidden = !TAX;
   if (!TAX){ $('txMeta').textContent = ''; return; }
-  const noMk = ALL.filter(p=>!marcaOf(p)).length, noCat = ALL.filter(p=>sinClasif(catOf(p))).length;
+  const noMk = ALL.filter(p=>!p.arch && !marcaOf(p)).length, noCat = ALL.filter(p=>!p.arch && sinClasif(catOf(p))).length;
   $('txMeta').textContent = `${int(TAX.categorias.length)} categorías · ${int(TAX.marcas.length)} marcas`;
   $('txPendN').textContent = `(${int(noMk + noCat)})`;
   $('txSeg').querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed', b.dataset.t===txTab));
@@ -2038,6 +2129,7 @@ function loadLogos(root){
 function asigRows(){
   const q = norm($('txAsQ').value), terms = q ? q.split(/\s+/) : [];
   return ALL.filter(p => {
+    if (p.arch) return false;
     if (txAs==='marca' && marcaOf(p)) return false;
     if (txAs==='cat' && !sinClasif(catOf(p))) return false;
     if (!terms.length) return true;
@@ -2297,7 +2389,7 @@ function fiAttrsSugeridos(ps){
 function sugerencias(){
   const g = new Map();
   for (const p of ALL){
-    if (FI_OF.has(p.c) || !p.t || !p.mo) continue;
+    if (p.arch || FI_OF.has(p.c) || !p.t || !p.mo) continue;
     const k = [pref(p.c), tkey(p.t), TAX ? (marcaOf(p)||'') : norm(p.m), norm(p.mo), norm(p.ma), norm(p.d2), norm(p.d5)].join('|');
     if (!g.has(k)) g.set(k, []); g.get(k).push(p);
   }
@@ -2331,7 +2423,7 @@ let fiTab = 'fichas', fiShown = 60, fiSelSueltos = new Set();
 function renderFichas(){
   if (route().view!=='F') return;
   $('fiIvaBtn').textContent = `IVA ${String(ivaRate()).replace('.',',')}%`;
-  const sug = sugerencias(), sueltos = ALL.filter(p => !FI_OF.has(p.c));
+  const sug = sugerencias(), sueltos = ALL.filter(p => !p.arch && !FI_OF.has(p.c));
   $('fiMeta').textContent = `${int(FICHAS.length)} fichas · ${int(FICHAS.filter(f=>f.pub).length)} publicadas`;
   $('fiSugN').textContent = sug.length ? `(${int(sug.length)})` : '';
   $('fiSueltosN').textContent = `(${int(sueltos.length)})`;
@@ -2435,7 +2527,7 @@ function renderFiVars(){
     return `<div class="fi-var" data-c="${esc(c)}"${needXL(p)?' data-xl="1"':''}>
       <span class="thumb">${thumbHtml(p)}</span>
       <div class="fi-var-main">
-        <div class="fi-var-top"><span class="code">${esc(c)}</span><span class="sys">stock ${p.q ?? 0}</span><label class="chk sm"><input type="radio" name="fi_foto" value="${esc(c)}" ${fe.foto===c?'checked':''} ${canWrite?'':'disabled'}> Foto principal</label>${canWrite?`<button type="button" class="btn sm" data-rm="${esc(c)}" aria-label="Quitar ${esc(c)} de la ficha">Quitar</button>`:''}</div>
+        <div class="fi-var-top"><span class="code">${esc(c)}</span><span class="sys">stock ${p.q ?? 0}</span>${p.arch?'<span class="pill arch">Archivado</span>':''}<label class="chk sm"><input type="radio" name="fi_foto" value="${esc(c)}" ${fe.foto===c?'checked':''} ${canWrite?'':'disabled'}> Foto principal</label>${canWrite?`<button type="button" class="btn sm" data-rm="${esc(c)}" aria-label="Quitar ${esc(c)} de la ficha">Quitar</button>`:''}</div>
         <span class="sub">${esc(displayName(p))}</span>
         <div class="fi-var-f">
           ${attrs.map(a=>`<label class="f">${esc(a.n)} <input data-v="${esc(c)}" data-k="${a.k}" value="${esc(fval(c,a.k))}" ${canWrite?'':'disabled'}></label>`).join('')}
@@ -2463,7 +2555,7 @@ function renderFiPrev(){
   const mk = TAX ? TX.mk.get($('fi_mk').value)?.n : '';
   const chips = fe.attrs.map(a => {
     const vals = new Map();
-    for (const p of ps){ const v = String(p[a.k] ?? '').trim(); if (!v) continue; const k = norm(v); const e = vals.get(k) || {v, disp:false}; if ((p.q||0) > 0) e.disp = true; vals.set(k, e); }
+    for (const p of ps){ if (p.arch) continue; const v = String(p[a.k] ?? '').trim(); if (!v) continue; const k = norm(v); const e = vals.get(k) || {v, disp:false}; if ((p.q||0) > 0) e.disp = true; vals.set(k, e); }
     if (!vals.size) return '';
     return `<div class="fi-chips"><span class="lab">${esc(a.n)}</span>${[...vals.values()].map(x=>`<span class="fi-chip${x.disp?'':' off'}"${x.disp?'':' title="Agotado"'}>${esc(x.v)}</span>`).join('')}</div>`;
   }).join('');
@@ -2589,7 +2681,7 @@ $('fi_vars').addEventListener('click', e => {
 let fiaq; $('fi_add').addEventListener('input', () => { clearTimeout(fiaq); fiaq = setTimeout(() => {
   const q = norm($('fi_add').value), terms = q ? q.split(/\s+/) : [], box = $('fi_addHits');
   if (!terms.length || !fe){ box.hidden = true; return; }
-  const hits = ALL.filter(p => !fe.codes.includes(p.c) && terms.every(t=>norm([p.c,p.d,displayName(p),p.m].join(' ')).includes(t))).slice(0, 20);
+  const hits = ALL.filter(p => !p.arch && !fe.codes.includes(p.c) && terms.every(t=>norm([p.c,p.d,displayName(p),p.m].join(' ')).includes(t))).slice(0, 20);
   box.hidden = false;
   box.innerHTML = hits.map(p => `<button type="button" data-addc="${esc(p.c)}"><span class="r-main"><span class="name">${esc(displayName(p))}</span><span class="sub"><span class="code">${esc(p.c)}</span>${FI_OF.has(p.c)?' · ya está en otra ficha':''}</span></span><b>+</b></button>`).join('') || '<div class="hint" style="padding:8px">Sin resultados.</div>';
 }, 150); });
@@ -2757,11 +2849,11 @@ $('cliDelNo').addEventListener('click', ()=>{ $('cliDelBox').hidden=true; });
 $('cliDelYes').addEventListener('click', delCli);
 $('cliDlg').addEventListener('close', ()=>{ cliEdit=null; cliAfter=null; });
 $('vHoy').addEventListener('click', e => { const b=e.target.closest('button[data-anular]'); if(b) anular(b.dataset.anular, b); });
-['fCat','fTipo','fMarca','fMat','fColor','fEst','fVer','fInc','fDup','fStock','fBrg'].forEach(id => $(id).addEventListener('change', ()=>{
+['fCat','fTipo','fMarca','fMat','fColor','fEst','fVer','fArch','fInc','fDup','fStock','fBrg'].forEach(id => $(id).addEventListener('change', ()=>{
   if (id==='fCat') { fillFilterOptions(); try{localStorage.setItem('dcr-cat',$('fCat').value)}catch(_){} }
   shown=PAGE; renderList();
 }));
-$('btnClear').addEventListener('click', ()=>{ ['fCat','fTipo','fMarca','fMat','fColor','fEst','fVer'].forEach(id=>$(id).value=''); ['fInc','fDup','fStock','fBrg'].forEach(id=>$(id).checked=false); $('q').value=''; fillFilterOptions(); shown=PAGE; renderList(); });
+$('btnClear').addEventListener('click', ()=>{ ['fCat','fTipo','fMarca','fMat','fColor','fEst','fVer','fArch'].forEach(id=>$(id).value=''); ['fInc','fDup','fStock','fBrg'].forEach(id=>$(id).checked=false); $('q').value=''; fillFilterOptions(); shown=PAGE; renderList(); });
 document.querySelectorAll('.vsw button').forEach(b => b.addEventListener('click', ()=>{ setVista(b.dataset.v); renderList(); }));
 setVista(vista);
 $('more').addEventListener('click', ()=>{ shown+=PAGE; renderList(); });
@@ -2793,9 +2885,15 @@ $('qm').addEventListener('click', ()=>{ $('i_q').value=Math.max(0,(Number($('i_q
 $('qp').addEventListener('click', ()=>{ $('i_q').value=(Number($('i_q').value)||0)+1; updateSheet(); });
 $('shSave').addEventListener('click', ()=>save(false));
 $('shDup').addEventListener('click', duplicateProduct);
+$('shArch').addEventListener('click', archCurrent);
+$('archMot').addEventListener('click', e => { const b = e.target.closest('button[data-m]'); if (b) setArchMot(b.dataset.m); });
+$('archForm').addEventListener('submit', doArch);
+$('arch_cancel').addEventListener('click', () => $('archDlg').close());
+$('btnArchAll').addEventListener('click', () => openArch(filtered(), $('btnArchAll').dataset.restore === '1'));
+$('list').addEventListener('click', e => { if (e.target.id === 'seeArch'){ $('fArch').value = 'si'; shown = PAGE; renderList(); } });
 $('shVerify').addEventListener('click', ()=>save(true));
 $('btnNew').addEventListener('click', newProduct);
-const activeFilters = () => ['fCat','fTipo','fMarca','fMat','fColor','fEst','fVer'].filter(id=>$(id).value).length + ['fInc','fDup','fStock','fBrg'].filter(id=>$(id).checked).length;
+const activeFilters = () => ['fCat','fTipo','fMarca','fMat','fColor','fEst','fVer','fArch'].filter(id=>$(id).value).length + ['fInc','fDup','fStock','fBrg'].filter(id=>$(id).checked).length;
 const syncFiltBtn = () => { const n=activeFilters(); $('btnFilt').textContent = n ? `Filtros (${n})` : 'Filtros'; };
 $('btnFilt').addEventListener('click', ()=>{ const o=$('filtersBox').classList.toggle('open'); $('btnFilt').setAttribute('aria-expanded', o); });
 document.querySelectorAll('#filtersBox select, #filtersBox input').forEach(el=>el.addEventListener('change', syncFiltBtn));
