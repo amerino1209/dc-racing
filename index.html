@@ -326,6 +326,52 @@ dialog.dlg::backdrop{background:rgba(10,12,16,.5)}
 #txDlg .acts{display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end}
 #txDlg .acts .btn{min-height:44px}
 @media (max-width:560px){ .tx-node.l2{margin-left:10px} .tx-node.l3{margin-left:20px} .tx-node .acts button.opt{display:none} }
+/* ---------- vitrina: fichas ---------- */
+.fi-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:10px}
+.fi-card{display:flex;gap:12px;align-items:flex-start;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px;text-align:left;min-width:0;color:var(--ink)}
+button.fi-card:hover{border-color:var(--muted)}
+.fi-card .thumb{width:72px;height:72px}
+.fi-th{flex:none}
+.fi-tx{display:grid;gap:4px;min-width:0;flex:1}
+.fi-tx b{font-weight:600;line-height:1.25}
+.fi-tx>span{font-size:.85rem;color:var(--muted)}
+.fi-pills{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.fi-pills .btn{min-height:40px}
+dialog.fi-dlg{width:min(1100px,calc(100% - 16px))}
+.fi-dlg form{display:grid;gap:0}
+.fi-head{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:14px 16px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--surface);z-index:2}
+.fi-head h3{margin:0;font:700 1.3rem/1 var(--f-display);text-transform:uppercase;letter-spacing:.04em}
+.fi-body{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:16px;padding:16px}
+.fi-col{display:grid;gap:12px;align-content:start;min-width:0}
+.fi-attrs{display:grid;gap:6px}
+.fi-attr{display:grid;grid-template-columns:minmax(120px,auto) minmax(0,1fr);gap:8px;align-items:center}
+.fi-attr input[type=text]{min-height:44px;border:1.5px solid var(--line);border-radius:8px;padding:8px 10px;background:var(--surface);min-width:0}
+.fi-vars{display:grid;gap:8px}
+.fi-var{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--line);border-radius:10px;padding:8px;background:var(--surface-2);min-width:0}
+.fi-var-main{flex:1;min-width:0;display:grid;gap:4px}
+.fi-var-top{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.fi-var-top .btn{margin-left:auto;min-height:40px}
+.fi-var-f{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px;align-items:end}
+.fi-siniva{font-size:.85rem;color:var(--muted);padding-bottom:6px}
+.fi-prev-card{display:grid;gap:10px;border:1px solid var(--line);border-radius:12px;padding:12px;background:var(--bg)}
+.fi-prev-card .thumb{width:100%;height:auto;aspect-ratio:1;max-height:280px;background:#fff}
+.fi-prev-card .thumb img{object-fit:contain;width:100%;height:100%}
+.fi-prev-tx{display:grid;gap:6px}
+.fi-prev-n{font:700 1.25rem/1.15 var(--f-display);text-transform:uppercase;letter-spacing:.02em}
+.fi-prev-p{font-size:1.3rem}
+.fi-prev-p s{color:var(--muted);font-size:1rem}
+.fi-chips{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.fi-chips .lab{width:100%;font-size:.8rem;color:var(--muted)}
+.fi-chip{border:1.5px solid var(--ink);border-radius:8px;padding:6px 10px;font-size:.9rem;min-height:36px;display:inline-flex;align-items:center}
+.fi-chip.off{opacity:.35;text-decoration:line-through;border-style:dashed}
+.fi-prev-d{margin:0;font-size:.9rem;white-space:pre-line}
+.fi-wa{display:block;text-align:center;background:#1f9d55;color:#fff;border-radius:10px;padding:12px;font-weight:600}
+.fi-pub{font-weight:600}
+.hint.warn{color:var(--accent)}
+.fi-acts{padding:12px 16px;border-top:1px solid var(--line);position:sticky;bottom:0;background:var(--surface)}
+label.chk.sm{font-size:.85rem}
+@media (max-width:820px){ .fi-body{grid-template-columns:1fr} }
+@media (max-width:560px){ .fi-grid{grid-template-columns:1fr} .fi-var .thumb{width:44px;height:44px} .fi-attr{grid-template-columns:1fr} }
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 
@@ -333,7 +379,7 @@ dialog.dlg::backdrop{background:rgba(10,12,16,.5)}
   <div class="top-in wrap">
     <div class="brand">
       <h1>DC Racing <span>·</span> Inventario</h1>
-      <nav class="tabs" aria-label="Secciones"><a href="#productos" id="tabP">Productos</a><a href="#vender" id="tabV">Vender</a><a href="#inventarios" id="tabI">Inventarios<span class="n" id="invOpenN" hidden></span></a><a href="#clientes" id="tabC">Clientes</a><a href="#categorias" id="tabT">Categorías</a></nav>
+      <nav class="tabs" aria-label="Secciones"><a href="#productos" id="tabP">Productos</a><a href="#vender" id="tabV">Vender</a><a href="#inventarios" id="tabI">Inventarios<span class="n" id="invOpenN" hidden></span></a><a href="#clientes" id="tabC">Clientes</a><a href="#categorias" id="tabT">Categorías</a><a href="#vitrina" id="tabF">Vitrina</a></nav>
     </div>
     <div class="stats" id="stats">Cargando catálogo…</div>
     <div class="meter" title="Productos verificados"><i id="meter"></i></div>
@@ -473,6 +519,21 @@ dialog.dlg::backdrop{background:rgba(10,12,16,.5)}
     </div>
   </section>
 
+  <section id="viewF" hidden>
+    <div class="catbar"><h2>Vitrina</h2><div class="right"><div class="meta" id="fiMeta"></div><button class="btn sm" type="button" id="fiIvaBtn">IVA 15%</button></div></div>
+    <div class="tx-top">
+      <div class="seg" role="group" aria-label="Sección" id="fiSeg">
+        <button type="button" data-t="fichas" aria-pressed="true">Fichas</button>
+        <button type="button" data-t="sug">Sugerencias <span id="fiSugN"></span></button>
+        <button type="button" data-t="sueltos">Sin ficha <span id="fiSueltosN"></span></button>
+      </div>
+    </div>
+    <div class="tx-bar"><input id="fiQ" type="search" placeholder="Buscar por nombre, marca o código" autocomplete="off" aria-label="Buscar"><select id="fiFil" aria-label="Filtro"><option value="">Todas</option><option value="pub">Publicadas</option><option value="nopub">Sin publicar</option><option value="dsc">Con descuento</option></select><button class="btn ok" type="button" id="fiAllSug" hidden>Crear todas las sugerencias</button></div>
+    <p class="hint" id="fiHint"></p>
+    <div class="fi-grid" id="fiList"></div>
+    <button class="btn more" type="button" id="fiMore" hidden>Mostrar más</button>
+  </section>
+
   <section id="viewI" hidden>
     <div id="invList">
       <form class="newinv" id="invForm">
@@ -537,6 +598,67 @@ dialog.dlg::backdrop{background:rgba(10,12,16,.5)}
 </main>
 
 <div class="sheet-bg" id="bg" hidden></div>
+<dialog class="dlg fi-dlg" id="fiDlg" aria-labelledby="fiDlgT">
+  <form id="fiForm" autocomplete="off">
+    <div class="fi-head"><h3 id="fiDlgT">Ficha</h3><button class="btn sm" type="button" id="fi_x" aria-label="Cerrar">Cerrar</button></div>
+    <div class="fi-body">
+      <div class="fi-col">
+        <label class="f">Nombre en la vitrina <input id="fi_n" required maxlength="120"></label>
+        <div class="grid2">
+          <label class="f">Marca <select id="fi_mk"></select></label>
+          <label class="f">Categoría <select id="fi_cx"></select></label>
+        </div>
+        <label class="f">Descripción <textarea id="fi_desc" rows="3" placeholder="Qué es, para qué sirve, materiales, compatibilidad"></textarea></label>
+        <fieldset>
+          <legend>Opciones que elige el cliente</legend>
+          <div class="fi-attrs" id="fi_attrs"></div>
+          <p class="hint">El valor de cada opción se toma del producto (medida, color…). Puedes cambiar el nombre que ve el cliente, por ejemplo “Talla” en vez de “Medida”.</p>
+        </fieldset>
+        <fieldset>
+          <legend>Variantes</legend>
+          <div class="fi-vars" id="fi_vars"></div>
+          <p class="hint warn" id="fi_varWarn" hidden></p>
+          <label class="f">Agregar variante <input id="fi_add" type="search" placeholder="Código o nombre del producto"></label>
+          <div class="hits" id="fi_addHits" hidden></div>
+        </fieldset>
+      </div>
+      <div class="fi-col">
+        <fieldset>
+          <legend>Descuento o promoción</legend>
+          <div class="seg" role="group" aria-label="Tipo de descuento" id="fi_dTipo">
+            <button type="button" data-d="">Sin descuento</button><button type="button" data-d="%">Porcentaje</button><button type="button" data-d="$">Valor fijo</button>
+          </div>
+          <div class="grid2" id="fi_dBox">
+            <label class="f" id="fi_dValW">Descuento <input id="fi_dVal" type="number" inputmode="decimal" min="0" step="0.01"></label>
+            <span></span>
+            <label class="f">Desde <input id="fi_dDesde" type="date"></label>
+            <label class="f">Hasta <input id="fi_dHasta" type="date"></label>
+          </div>
+          <p class="hint" id="fi_dInfo"></p>
+        </fieldset>
+        <fieldset>
+          <legend>Así lo verá el cliente</legend>
+          <div class="fi-prev" id="fi_prev"></div>
+        </fieldset>
+        <label class="chk fi-pub"><input type="checkbox" id="fi_pub"> Publicar en la vitrina</label>
+        <p class="hint" id="fi_info"></p>
+      </div>
+    </div>
+    <div class="acts fi-acts">
+      <button class="btn del" type="button" id="fi_del">Deshacer ficha</button>
+      <button class="btn" type="button" id="fi_cancel">Cancelar</button>
+      <button class="btn ok" type="submit" id="fi_save">Guardar ficha</button>
+    </div>
+  </form>
+</dialog>
+<dialog class="dlg" id="ivaDlg" aria-labelledby="ivaDlgT">
+  <form id="ivaForm" style="display:grid;gap:12px;padding:16px">
+    <h3 id="ivaDlgT" style="margin:0;font:700 1.25rem/1 var(--f-display);text-transform:uppercase">Tarifa de IVA</h3>
+    <p class="hint">Los precios de venta se ingresan con IVA incluido. El sistema calcula el valor sin IVA con esta tarifa.</p>
+    <label class="f">IVA (%) <input id="iva_v" type="number" inputmode="decimal" min="0" max="100" step="0.01" required></label>
+    <div class="acts"><button class="btn" type="button" id="iva_cancel">Cancelar</button><button class="btn ok" type="submit" id="iva_save">Guardar</button></div>
+  </form>
+</dialog>
 <dialog class="dlg" id="txDlg" aria-labelledby="txDlgT">
   <form id="txForm" autocomplete="off">
     <h3 id="txDlgT">Categoría</h3>
@@ -664,6 +786,11 @@ dialog.dlg::backdrop{background:rgba(10,12,16,.5)}
         <label class="f" data-k="p">Código proveedor <input id="i_p"></label>
         <label class="f" data-k="sku">SKU <input id="i_sku"></label>
       </div>
+    </fieldset>
+
+    <fieldset id="fiBox">
+      <legend>Vitrina</legend>
+      <div id="fiBoxIn"></div>
     </fieldset>
 
     <fieldset id="brgBox" hidden>
@@ -931,7 +1058,7 @@ function completeness(p){ return 1 - missing(p).length/COMP.length; }
 function refresh(){
   ALL = merged(); BY = new Map(ALL.map(p=>[p.c,p])); buildTipos();
   renderStats(); fillFilterOptions(); renderList();
-  if (route().inv) renderCount(); else if (route().view==='I') renderInvList(); else if (route().view==='V') renderCart(); else if (route().view==='T') renderTax();
+  if (route().inv) renderCount(); else if (route().view==='I') renderInvList(); else if (route().view==='V') renderCart(); else if (route().view==='T') renderTax(); else if (route().view==='F') renderFichas();
 }
 function opts(sel, values, first){
   const cur = sel.value;
@@ -1062,7 +1189,7 @@ function open(code){
   $('shOrig').innerHTML = p.d ? `Descripción original: <b>${esc(p.d)}</b>${p.f?` · fila ${p.f} del Excel`:''}` : (p.dupDe ? `Producto duplicado de <b>${esc(p.dupDe)}</b>. Cambia lo que sea distinto y guarda.` : 'Producto creado en la herramienta.');
   ['q','t','m','mo','me','ma','co','d2','d5','k','v','b','p','sku','nota'].forEach(k => { $('i_'+k).value = p[k] ?? ''; });
   $('i_cat').value = pref(p.c);
-  txFillFicha(p);
+  txFillFicha(p); fiFillSheet(p);
   fillDatalists(pref(p.c));
   setEstado(p.e||'R'); setMotivo(null);
   $('qInfo').textContent = p.qAt ? `Último cambio de stock: ${fdate(p.qAt)}${p.qMot?` (${MOT[p.qMot]||p.qMot})`:''}` : 'Sin cambios de stock registrados en la herramienta.';
@@ -1106,7 +1233,7 @@ function updateSheet(){
   if (ch){ const d=(draft.q||0)-(current.q||0); $('motivoTxt').textContent = `El stock cambia de ${current.q ?? 0} a ${draft.q ?? 0} (${d>0?'+':''}${d}). ¿Por qué?`; }
   const k=draft.k, v=draft.v;
   const mg = (v>0 && k!=null) ? Math.round((v-k)/v*100) : null;
-  $('kpi').innerHTML = `<span>Margen <b>${mg==null?'—':mg+'%'}</b></span><span>Ganancia por unidad <b>$${(v!=null&&k!=null)?fmt(v-k):'—'}</b></span><span>Stock a venta <b>$${fmt((draft.q||0)*(v||0))}</b></span>`;
+  $('kpi').innerHTML = `<span>Margen <b>${mg==null?'—':mg+'%'}</b></span><span>Ganancia por unidad <b>$${(v!=null&&k!=null)?fmt(v-k):'—'}</b></span><span>Stock a venta <b>$${fmt((draft.q||0)*(v||0))}</b></span><span>Precio sin IVA <b>${v!=null?'$'+fmt(sinIva(v)):'—'}</b></span>`;
   $('shPills').innerHTML = `<span class="pill ${draft.e}">${EST[draft.e]}</span>${current.ver?' <span class="pill v">Verificado</span>':''}`;
 }
 function renderPhoto(){
@@ -2032,6 +2159,368 @@ $('tx_logoF').addEventListener('change', async e => {
 $('tx_logoX').addEventListener('click', () => { txLogo = ''; showLogo(); });
 ['i_cx','i_mk'].forEach(id => $(id).addEventListener('change', () => { if (current) updateSheet(); }));
 
+// ---------- vitrina: fichas con variantes, IVA y descuentos ----------
+// Firestore: fichas/{id} = {n, mk, cx, desc, attrs:[{k,n}], codes:[código], foto:código, dsc:{tipo:'%'|'$', valor, desde, hasta}|null,
+//   dscVar:{código:{sin:true}|{valor}}, pub, creado, upd, por}. config/tienda = {iva}.
+// El precio de cada variante es el precio de venta del producto (v), con IVA incluido. Los valores de las opciones
+// (medida, color…) son los campos del producto, así no hay dos lugares donde corregirlos.
+let FICHAS = [], FI_OF = new Map(), CFG = {iva:15};
+const ATTR_KEYS = [['me','Medida'],['co','Color'],['ma','Material'],['d2','Detalle 2'],['d5','Detalle extra']];
+const ivaRate = () => Number(CFG.iva ?? 15) || 0;
+const sinIva = v => Math.round((Number(v)||0) / (1 + ivaRate()/100) * 100) / 100;
+const hoyStr = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; };
+const fday2 = s => s ? new Date(s+'T12:00:00').toLocaleDateString('es-EC',{day:'numeric',month:'short',year:'numeric'}) : '';
+function setFichas(list){
+  FICHAS = list; FI_OF = new Map();
+  for (const f of FICHAS) for (const c of (f.codes||[])) if (!FI_OF.has(c)) FI_OF.set(c, f.id);
+  if (route().view==='F') renderFichas();
+  if (current) fiFillSheet(current);
+}
+function dscEstado(d){
+  if (!d || !d.tipo || !(Number(d.valor) > 0)) return 'no';
+  const h = hoyStr();
+  if (d.desde && h < d.desde) return 'futuro';
+  if (d.hasta && h > d.hasta) return 'vencido';
+  return 'activo';
+}
+// Precio final de una variante dentro de una ficha: {v, final, pct}
+function precioVar(f, p){
+  const v = Number(p.v) || 0, d = f.dsc, o = (f.dscVar||{})[p.c];
+  if (dscEstado(d)!=='activo' || (o && o.sin)) return {v, final:v, pct:0};
+  const valor = o && o.valor != null ? Number(o.valor) : Number(d.valor);
+  if (!(valor > 0) || !v) return {v, final:v, pct:0};
+  const final = Math.max(0, Math.round((d.tipo==='%' ? v*(1-valor/100) : v - valor) * 100) / 100);
+  return {v, final, pct: Math.round((1 - final/v) * 100)};
+}
+const fiProds = f => (f.codes||[]).map(c=>BY.get(c)).filter(Boolean);
+function fiNombreSugerido(ps){
+  const p = ps[0]; if (!p) return '';
+  const m = TAX ? TX.mk.get(marcaOf(p))?.n : (p.m||'');
+  return cap([p.t ? String(p.t).trim() : '', m, p.mo].filter(Boolean).join(' ').replace(/\s+/g,' ').trim()) || displayName(p);
+}
+function fiAttrsSugeridos(ps){
+  const varia = ATTR_KEYS.filter(([k]) => new Set(ps.map(p=>norm(p[k]))).size > 1);
+  const base = varia.length ? varia : [ATTR_KEYS[0]];
+  return base.map(([k,n]) => ({k, n}));
+}
+function sugerencias(){
+  const g = new Map();
+  for (const p of ALL){
+    if (FI_OF.has(p.c) || !p.t || !p.mo) continue;
+    const k = [pref(p.c), tkey(p.t), TAX ? (marcaOf(p)||'') : norm(p.m), norm(p.mo), norm(p.ma), norm(p.d2), norm(p.d5)].join('|');
+    if (!g.has(k)) g.set(k, []); g.get(k).push(p);
+  }
+  return [...g.values()].filter(v => v.length > 1).sort((a,b)=>b.length-a.length);
+}
+// Sugerencia "clara": pocas variantes y cada una con una combinación distinta de opciones
+function sugClara(ps){
+  if (ps.length > 12) return false;
+  const at = fiAttrsSugeridos(ps);
+  return new Set(ps.map(p => at.map(a=>norm(p[a.k])).join('|'))).size === ps.length;
+}
+function nuevaFicha(ps){
+  const conFoto = ps.find(p => p.foto || p.fx);
+  return {n: fiNombreSugerido(ps), mk: TAX ? (marcaOf(ps[0])||'') : '', cx: TAX ? (catOf(ps[0])||'') : '', desc:'',
+          attrs: fiAttrsSugeridos(ps), codes: ps.map(p=>p.c), foto: conFoto ? conFoto.c : (ps[0]?.c||''), dsc:null, dscVar:{}, pub:false};
+}
+async function crearFichas(groups){
+  if (!db || !canWrite){ toast('No tienes permiso para guardar.'); return 0; }
+  const now = new Date().toISOString(), uid = await myId(); let n = 0;
+  for (const ps of groups){
+    if (ps.some(p => FI_OF.has(p.c))) continue;
+    const f = nuevaFicha(ps);
+    const ref = await db.collection('fichas').add({...f, creado:now, upd:now, por:uid});
+    ps.forEach(p => FI_OF.set(p.c, ref.id)); n++;
+  }
+  return n;
+}
+
+// ---------- pantalla ----------
+let fiTab = 'fichas', fiShown = 60, fiSelSueltos = new Set();
+function renderFichas(){
+  if (route().view!=='F') return;
+  $('fiIvaBtn').textContent = `IVA ${String(ivaRate()).replace('.',',')}%`;
+  const sug = sugerencias(), sueltos = ALL.filter(p => !FI_OF.has(p.c));
+  $('fiMeta').textContent = `${int(FICHAS.length)} fichas · ${int(FICHAS.filter(f=>f.pub).length)} publicadas`;
+  $('fiSugN').textContent = sug.length ? `(${int(sug.length)})` : '';
+  $('fiSueltosN').textContent = `(${int(sueltos.length)})`;
+  $('fiSeg').querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed', b.dataset.t===fiTab));
+  $('fiFil').hidden = fiTab!=='fichas';
+  const claras = sug.filter(sugClara);
+  $('fiAllSug').hidden = fiTab!=='sug' || !claras.length || !canWrite;
+  if (!$('fiAllSug').dataset.arm) $('fiAllSug').textContent = `Crear las ${int(claras.length)} sugerencias claras`;
+  const q = norm($('fiQ').value), terms = q ? q.split(/\s+/) : [];
+  const hit = h => terms.every(t => h.includes(t));
+  let html = '', total = 0;
+  if (fiTab==='fichas'){
+    const fil = $('fiFil').value;
+    const list = FICHAS.filter(f => {
+      if (fil==='pub' && !f.pub) return false; if (fil==='nopub' && f.pub) return false;
+      if (fil==='dsc' && dscEstado(f.dsc)!=='activo') return false;
+      return !terms.length || hit(norm([f.n, TX.mk.get(f.mk)?.n, ...(f.codes||[])].join(' ')));
+    }).sort((a,b)=>a.n.localeCompare(b.n,'es'));
+    total = list.length;
+    $('fiHint').textContent = FICHAS.length ? '' : 'Una ficha agrupa las medidas y colores de un mismo producto: el cliente ve un solo producto y elige la opción. Empieza por las sugerencias.';
+    html = list.slice(0, fiShown).map(f => {
+      const ps = fiProds(f), fp = BY.get(f.foto) || ps[0] || {c:f.foto};
+      const precios = ps.map(p => precioVar(f, p).final).filter(x=>x>0), mn = Math.min(...precios), mx = Math.max(...precios);
+      const st = dscEstado(f.dsc), pct = st==='activo' ? Math.max(0, ...ps.map(p=>precioVar(f,p).pct)) : 0;
+      return `<button type="button" class="fi-card" data-f="${esc(f.id)}"><span class="fi-th" data-c="${esc(fp.c)}"${needXL(fp)?' data-xl="1"':''}><span class="thumb">${thumbHtml(fp)}</span></span>
+        <span class="fi-tx"><b>${esc(f.n)}</b><span>${int(ps.length)} ${ps.length===1?'variante':'variantes'} · ${precios.length ? (mn===mx ? money(mn) : `${money(mn)} – ${money(mx)}`) : 'sin precio'}</span>
+        <span class="fi-pills"><span class="pill ${f.pub?'I':'R'}">${f.pub?'Publicada':'Sin publicar'}</span>${pct?`<span class="pill dup">−${pct}%</span>`:''}${st==='futuro'?'<span class="pill">Promo programada</span>':''}</span></span></button>`;
+    }).join('') || `<div class="empty">${FICHAS.length?'Ninguna ficha coincide.':'Todavía no hay fichas.'}</div>`;
+  } else if (fiTab==='sug'){
+    const list = sug.filter(ps => !terms.length || hit(norm([fiNombreSugerido(ps), ...ps.map(p=>p.c)].join(' '))));
+    total = list.length;
+    $('fiHint').textContent = 'Productos con el mismo tipo, marca y modelo que solo cambian en medida o color. Las claras se pueden crear todas de una vez; las marcadas “Revisar antes” conviene abrirlas una por una. Todas quedan sin publicar hasta que las revises.';
+    html = list.slice(0, fiShown).map((ps, i) => {
+      const attrs = fiAttrsSugeridos(ps).map(a=>a.n.toLowerCase()).join(' y ');
+      return `<div class="fi-card fi-sug" data-c="${esc(ps[0].c)}"${needXL(ps[0])?' data-xl="1"':''}><span class="fi-th"><span class="thumb">${thumbHtml(ps[0])}</span></span>
+        <span class="fi-tx"><b>${esc(fiNombreSugerido(ps))}</b><span>${int(ps.length)} variantes por ${esc(attrs)}: ${esc(ps.map(p=>[p.me,p.co].filter(Boolean).join(' ')||p.c).slice(0,6).join(' · '))}${ps.length>6?'…':''}</span>
+        <span class="fi-pills">${sugClara(ps)?'':'<span class="pill P">Revisar antes: muchas variantes o repetidas</span>'}${canWrite?`<button class="btn sm" type="button" data-sug="${i}" data-act="ver">Revisar</button><button class="btn sm ok" type="button" data-sug="${i}" data-act="crear">Crear ficha</button>`:''}</span></span></div>`;
+    }).join('') || '<div class="empty">No hay sugerencias pendientes.</div>';
+    renderFichas.sug = list;
+  } else {
+    const list = sueltos.filter(p => !terms.length || hit(norm([p.c, p.d, displayName(p), p.m].join(' '))));
+    total = list.length;
+    $('fiHint').innerHTML = `Productos que todavía no están en una ficha. Elige varios para juntarlos en una sola ficha, o crea una ficha para uno solo.${canWrite?` <button class="btn sm ok" type="button" id="fiJuntar" ${fiSelSueltos.size?'':'disabled'}>Crear ficha con ${int(fiSelSueltos.size)} elegidos</button>`:''}`;
+    html = `<div class="tx-rows">` + list.slice(0, fiShown).map(p => `<label class="tx-row" data-c="${esc(p.c)}"${needXL(p)?' data-xl="1"':''}><input type="checkbox" data-sel="${esc(p.c)}" ${fiSelSueltos.has(p.c)?'checked':''} ${canWrite?'':'disabled'}><span class="thumb">${thumbHtml(p)}</span>
+      <span class="nm"><b>${esc(displayName(p))}</b><span><span class="code">${esc(p.c)}</span> · ${money(p.v)} · stock ${p.q ?? 0}</span></span></label>`).join('') + '</div>';
+    if (!list.length) html = '<div class="empty">Todos los productos están en alguna ficha.</div>';
+  }
+  $('fiList').className = fiTab==='sueltos' ? '' : 'fi-grid';
+  $('fiList').innerHTML = html;
+  $('fiMore').hidden = total <= fiShown;
+  loadThumbs($('fiList'));
+}
+
+// ---------- editor de ficha ----------
+let fe = null; // ficha en edición: {...ficha, id?} + ed (cambios a productos: {código:{campo:valor}})
+function openFicha(f){
+  fe = JSON.parse(JSON.stringify(f)); fe.ed = {}; fe.dscVar = fe.dscVar || {};
+  $('fiDlgT').textContent = f.id ? 'Editar ficha' : 'Nueva ficha';
+  $('fi_n').value = fe.n || '';
+  $('fi_desc').value = fe.desc || '';
+  $('fi_pub').checked = !!fe.pub;
+  if (TAX){ mkOptions($('fi_mk'), fe.mk, 'Sin marca'); catOptions($('fi_cx'), fe.cx, 'Sin categoría'); }
+  else { $('fi_mk').innerHTML = '<option value="">Primero carga las marcas</option>'; $('fi_cx').innerHTML = '<option value="">Primero carga las categorías</option>'; }
+  const d = fe.dsc || {};
+  $('fi_dVal').value = d.valor ?? ''; $('fi_dDesde').value = d.desde || ''; $('fi_dHasta').value = d.hasta || '';
+  setDTipo(d.tipo || '');
+  $('fi_del').hidden = !f.id || !canWrite; $('fi_del').textContent = 'Deshacer ficha';
+  $('fi_add').value = ''; $('fi_addHits').hidden = true;
+  $('fiForm').querySelectorAll('input,select,textarea,.seg button').forEach(el => el.disabled = !canWrite);
+  $('fi_save').hidden = !canWrite;
+  renderFiAttrs(); renderFiVars(); renderFiPrev();
+  $('fiDlg').showModal();
+}
+function setDTipo(t){
+  if (!fe) return;
+  fe.dsc = t ? {...(fe.dsc||{}), tipo:t} : (fe.dsc ? {...fe.dsc, tipo:''} : null);
+  $('fi_dTipo').querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed', b.dataset.d===t));
+  $('fi_dBox').hidden = !t;
+  $('fi_dValW').firstChild.textContent = t==='%' ? 'Descuento (%) ' : 'Descuento (USD) ';
+}
+function readDsc(){
+  const t = fe.dsc?.tipo || '';
+  fe.dsc = t ? {tipo:t, valor: $('fi_dVal').value==='' ? null : Number($('fi_dVal').value), desde:$('fi_dDesde').value||'', hasta:$('fi_dHasta').value||''} : null;
+}
+const fval = (c, k) => (fe.ed[c] && k in fe.ed[c]) ? fe.ed[c][k] : (BY.get(c)?.[k] ?? '');
+const fprod = c => ({...BY.get(c), ...(fe.ed[c]||{})});
+function renderFiAttrs(){
+  $('fi_attrs').innerHTML = ATTR_KEYS.map(([k, def]) => {
+    const a = fe.attrs.find(x=>x.k===k);
+    return `<div class="fi-attr"><label class="chk"><input type="checkbox" data-ak="${k}" ${a?'checked':''} ${canWrite?'':'disabled'}> ${esc(def)}</label>
+      <input type="text" data-an="${k}" value="${esc(a ? a.n : def)}" aria-label="Nombre que ve el cliente para ${esc(def)}" ${a && canWrite?'':'disabled'}></div>`;
+  }).join('');
+}
+function renderFiVars(){
+  const attrs = fe.attrs, tipo = fe.dsc?.tipo || '';
+  const combos = new Map();
+  $('fi_vars').innerHTML = fe.codes.map(c => {
+    const p = fprod(c); if (!p.c) return `<div class="fi-var"><span class="code">${esc(c)}</span> <span class="hint">ya no existe</span></div>`;
+    const key = attrs.map(a=>norm(p[a.k])).join('|'); combos.set(key, (combos.get(key)||0)+1);
+    const o = fe.dscVar[c] || {}, pv = precioVar({...fe, dsc:fe.dsc}, p);
+    return `<div class="fi-var" data-c="${esc(c)}"${needXL(p)?' data-xl="1"':''}>
+      <span class="thumb">${thumbHtml(p)}</span>
+      <div class="fi-var-main">
+        <div class="fi-var-top"><span class="code">${esc(c)}</span><span class="sys">stock ${p.q ?? 0}</span><label class="chk sm"><input type="radio" name="fi_foto" value="${esc(c)}" ${fe.foto===c?'checked':''} ${canWrite?'':'disabled'}> Foto principal</label>${canWrite?`<button type="button" class="btn sm" data-rm="${esc(c)}" aria-label="Quitar ${esc(c)} de la ficha">Quitar</button>`:''}</div>
+        <span class="sub">${esc(displayName(p))}</span>
+        <div class="fi-var-f">
+          ${attrs.map(a=>`<label class="f">${esc(a.n)} <input data-v="${esc(c)}" data-k="${a.k}" value="${esc(fval(c,a.k))}" ${canWrite?'':'disabled'}></label>`).join('')}
+          <label class="f">Precio con IVA <input type="number" inputmode="decimal" min="0" step="0.01" data-v="${esc(c)}" data-k="v" value="${esc(fval(c,'v'))}" ${canWrite?'':'disabled'}></label>
+          <span class="fi-siniva">Sin IVA <b>${money(sinIva(p.v))}</b>${pv.pct?`<br>Cliente paga <b>${money(pv.final)}</b>`:''}</span>
+          ${tipo ? `<label class="f">Descuento de esta variante <select data-dv="${esc(c)}" ${canWrite?'':'disabled'}><option value="">Igual que la ficha</option><option value="sin" ${o.sin?'selected':''}>Sin descuento</option><option value="otro" ${o.valor!=null?'selected':''}>Otro valor</option></select></label>
+          ${o.valor!=null?`<label class="f">Valor (${tipo==='%'?'%':'USD'}) <input type="number" inputmode="decimal" min="0" step="0.01" data-dvv="${esc(c)}" value="${esc(o.valor)}" ${canWrite?'':'disabled'}></label>`:''}` : ''}
+        </div>
+      </div>
+    </div>`;
+  }).join('') || '<div class="empty">La ficha no tiene variantes.</div>';
+  const dup = [...combos.values()].some(n=>n>1);
+  $('fi_varWarn').hidden = !dup;
+  if (dup) $('fi_varWarn').textContent = 'Hay variantes con la misma combinación de opciones: el cliente no podría distinguirlas. Corrige la medida o el color, o agrega otra opción.';
+  loadThumbs($('fi_vars'));
+}
+function renderFiPrev(){
+  readDsc();
+  const ps = fe.codes.map(fprod).filter(p=>p.c);
+  const st = dscEstado(fe.dsc);
+  $('fi_dInfo').textContent = !fe.dsc ? '' : st==='activo' ? `Activo ahora${fe.dsc.hasta?` hasta el ${fday2(fe.dsc.hasta)}`:''}.` : st==='futuro' ? `Empieza el ${fday2(fe.dsc.desde)}.` : st==='vencido' ? `Terminó el ${fday2(fe.dsc.hasta)}.` : 'Escribe el valor del descuento.';
+  const fp = ps.find(p=>p.c===fe.foto) || ps[0];
+  if (!fp){ $('fi_prev').innerHTML = '<span class="hint">Agrega variantes para ver la vista previa.</span>'; return; }
+  const pv = precioVar(fe, fp);
+  const mk = TAX ? TX.mk.get($('fi_mk').value)?.n : '';
+  const chips = fe.attrs.map(a => {
+    const vals = new Map();
+    for (const p of ps){ const v = String(p[a.k] ?? '').trim(); if (!v) continue; const k = norm(v); const e = vals.get(k) || {v, disp:false}; if ((p.q||0) > 0) e.disp = true; vals.set(k, e); }
+    if (!vals.size) return '';
+    return `<div class="fi-chips"><span class="lab">${esc(a.n)}</span>${[...vals.values()].map(x=>`<span class="fi-chip${x.disp?'':' off'}"${x.disp?'':' title="Agotado"'}>${esc(x.v)}</span>`).join('')}</div>`;
+  }).join('');
+  $('fi_prev').innerHTML = `<div class="fi-prev-card" data-c="${esc(fp.c)}"${needXL(fp)?' data-xl="1"':''}>
+    <span class="thumb">${thumbHtml(fp)}</span>
+    <div class="fi-prev-tx">
+      ${mk?`<span class="sys">${esc(mk)}</span>`:''}
+      <b class="fi-prev-n">${esc($('fi_n').value || 'Sin nombre')}</b>
+      <span class="fi-prev-p">${pv.pct?`<s>${money(pv.v)}</s> `:''}<b>${money(pv.final)}</b>${pv.pct?` <span class="pill dup">−${pv.pct}%</span>`:''}</span>
+      <span class="sys">IVA incluido</span>
+      ${chips}
+      ${$('fi_desc').value.trim()?`<p class="fi-prev-d">${esc($('fi_desc').value.trim())}</p>`:''}
+      <span class="fi-wa">Consultar por WhatsApp</span>
+    </div></div>
+    <p class="hint">Las opciones agotadas se ven apagadas; el cliente nunca ve cantidades.</p>`;
+  loadThumbs($('fi_prev'));
+}
+async function saveFicha(e){
+  e.preventDefault(); if (!fe || !db || !canWrite) return;
+  readDsc();
+  const n = $('fi_n').value.replace(/\s+/g,' ').trim(); if (!n){ toast('Escribe el nombre de la ficha.'); return; }
+  if (!fe.codes.length){ toast('La ficha necesita al menos una variante.'); return; }
+  const otra = fe.codes.find(c => FI_OF.has(c) && FI_OF.get(c)!==fe.id);
+  if (otra){ toast(`${otra} ya está en otra ficha.`); return; }
+  if (fe.dsc && !(Number(fe.dsc.valor) > 0)){ toast('Escribe el valor del descuento o elige “Sin descuento”.'); return; }
+  if (fe.dsc && fe.dsc.tipo==='%' && fe.dsc.valor >= 100){ toast('El porcentaje debe ser menor que 100.'); return; }
+  if (fe.dsc && fe.dsc.desde && fe.dsc.hasta && fe.dsc.hasta < fe.dsc.desde){ toast('La fecha final es anterior a la inicial.'); return; }
+  const now = new Date().toISOString(), uid = await myId();
+  const doc = {n, mk:$('fi_mk').value||'', cx:$('fi_cx').value||'', desc:$('fi_desc').value.trim(), attrs:fe.attrs, codes:fe.codes,
+    foto: fe.codes.includes(fe.foto) ? fe.foto : fe.codes[0], dsc: fe.dsc, dscVar: Object.fromEntries(Object.entries(fe.dscVar).filter(([c])=>fe.codes.includes(c))),
+    pub: $('fi_pub').checked, upd:now, por:uid, creado: fe.creado || now};
+  const map = {};
+  for (const [c, ch] of Object.entries(fe.ed)){
+    const p = BY.get(c); if (!p) continue; const patch = {};
+    for (const [k, v] of Object.entries(ch)){
+      const val = k==='v' ? (v==='' ? null : Number(v)) : String(v).trim();
+      if ((val ?? '') !== (p[k] ?? '')) patch[k] = val;
+    }
+    if (Object.keys(patch).length) map[c] = patch;
+  }
+  $('fi_save').disabled = true;
+  try{
+    if (fe.id) await db.collection('fichas').doc(fe.id).set(doc);
+    else await db.collection('fichas').add(doc);
+    if (Object.keys(map).length) await patchMany(map);
+    $('fiDlg').close(); toast('Ficha guardada');
+  }catch(err){ toast('No se guardó: '+(err && err.message || '')); }
+  $('fi_save').disabled = false;
+}
+async function delFicha(){
+  if (!fe || !fe.id) return;
+  const b = $('fi_del'); if (b.textContent==='Deshacer ficha'){ b.textContent = '¿Seguro? Toca otra vez'; return; }
+  try{ await db.collection('fichas').doc(fe.id).delete(); $('fiDlg').close(); toast('Ficha deshecha: los productos siguen igual'); }
+  catch(err){ toast('No se pudo: '+(err && err.message || '')); }
+}
+function fiFillSheet(p){
+  const box = $('fiBoxIn'); if (!box) return;
+  const fid = FI_OF.get(p.c), f = fid && FICHAS.find(x=>x.id===fid);
+  if (f){
+    box.innerHTML = `<p>Parte de la ficha <b>${esc(f.n)}</b> (${int((f.codes||[]).length)} ${(f.codes||[]).length===1?'variante':'variantes'})${f.pub?' · publicada':''}.</p><div class="filters"><button class="btn sm" type="button" data-fi="${esc(f.id)}">Abrir ficha</button></div>`;
+  } else {
+    const sug = p.t && p.mo ? sugerencias().find(ps => ps.some(x=>x.c===p.c)) : null;
+    box.innerHTML = `<p class="hint">Este producto no está en ninguna ficha de la vitrina.</p>${canWrite?`<div class="filters">${sug?`<button class="btn sm ok" type="button" data-fisug="1">Crear ficha con ${int(sug.length)} productos parecidos</button>`:''}<button class="btn sm" type="button" data-finew="1">Crear ficha solo con este</button></div>`:''}`;
+    fiFillSheet.sug = sug;
+  }
+}
+
+// ---------- eventos ----------
+$('fiSeg').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; fiTab = b.dataset.t; fiShown = 60; renderFichas(); });
+let fiq; $('fiQ').addEventListener('input', () => { clearTimeout(fiq); fiq = setTimeout(()=>{ fiShown = 60; renderFichas(); }, 150); });
+$('fiFil').addEventListener('change', renderFichas);
+$('fiMore').addEventListener('click', () => { fiShown += 60; renderFichas(); });
+$('fiAllSug').addEventListener('click', async () => {
+  const b = $('fiAllSug'); if (!b.dataset.arm){ b.dataset.arm = '1'; b.textContent = '¿Seguro? Toca otra vez'; setTimeout(()=>{ delete b.dataset.arm; renderFichas(); }, 4000); return; }
+  delete b.dataset.arm; b.disabled = true;
+  const n = await crearFichas(sugerencias().filter(sugClara)).catch(err => { toast('Se detuvo: '+(err && err.message || '')); return 0; });
+  b.disabled = false; toast(`${int(n)} fichas creadas sin publicar. Revísalas y publícalas.`); fiTab = 'fichas'; renderFichas();
+});
+$('fiList').addEventListener('click', async e => {
+  const card = e.target.closest('[data-f]'); if (card){ const f = FICHAS.find(x=>x.id===card.dataset.f); if (f) openFicha(f); return; }
+  const s = e.target.closest('[data-sug]');
+  if (s){ const ps = renderFichas.sug[Number(s.dataset.sug)]; if (!ps) return;
+    if (s.dataset.act==='ver') openFicha(nuevaFicha(ps));
+    else { s.disabled = true; const n = await crearFichas([ps]); if (n) toast('Ficha creada sin publicar'); renderFichas(); }
+    return; }
+});
+$('fiList').addEventListener('change', e => { const c = e.target.dataset.sel; if (!c) return; e.target.checked ? fiSelSueltos.add(c) : fiSelSueltos.delete(c); const b=$('fiJuntar'); if (b){ b.disabled=!fiSelSueltos.size; b.textContent=`Crear ficha con ${int(fiSelSueltos.size)} elegidos`; } });
+$('fiHint').addEventListener('click', e => { if (e.target.id!=='fiJuntar') return; const ps = [...fiSelSueltos].map(c=>BY.get(c)).filter(Boolean); if (!ps.length) return; fiSelSueltos.clear(); openFicha(nuevaFicha(ps)); });
+$('fiForm').addEventListener('submit', saveFicha);
+$('fi_cancel').addEventListener('click', () => $('fiDlg').close());
+$('fi_x').addEventListener('click', () => $('fiDlg').close());
+$('fi_del').addEventListener('click', delFicha);
+$('fiDlg').addEventListener('close', () => { fe = null; if (route().view==='F') renderFichas(); });
+$('fi_dTipo').addEventListener('click', e => { const b = e.target.closest('button'); if (!b || !fe) return; setDTipo(b.dataset.d); renderFiVars(); renderFiPrev(); });
+['fi_dVal','fi_dDesde','fi_dHasta','fi_n','fi_desc'].forEach(id => $(id).addEventListener('input', () => { if (fe){ renderFiPrev(); if (id==='fi_dVal') renderFiVarsSoft(); } }));
+$('fi_mk').addEventListener('change', () => fe && renderFiPrev());
+function renderFiVarsSoft(){ clearTimeout(renderFiVarsSoft.t); renderFiVarsSoft.t = setTimeout(()=>{ const a = document.activeElement?.id; renderFiVars(); if (a) $(a)?.focus(); }, 400); }
+$('fi_attrs').addEventListener('input', e => {
+  if (!fe) return; const k = e.target.dataset.ak || e.target.dataset.an; if (!k) return;
+  if (e.target.dataset.ak){
+    if (e.target.checked){ if (!fe.attrs.some(a=>a.k===k)) fe.attrs.push({k, n: $('fi_attrs').querySelector(`[data-an="${k}"]`).value || ATTR_KEYS.find(x=>x[0]===k)[1]}); }
+    else fe.attrs = fe.attrs.filter(a=>a.k!==k);
+    fe.attrs.sort((a,b)=>ATTR_KEYS.findIndex(x=>x[0]===a.k)-ATTR_KEYS.findIndex(x=>x[0]===b.k));
+    renderFiAttrs(); renderFiVars();
+  } else { const a = fe.attrs.find(x=>x.k===k); if (a) a.n = e.target.value; renderFiVarsSoft(); }
+  renderFiPrev();
+});
+$('fi_vars').addEventListener('input', e => {
+  if (!fe) return; const t = e.target;
+  if (t.dataset.v){ (fe.ed[t.dataset.v] = fe.ed[t.dataset.v] || {})[t.dataset.k] = t.value; renderFiPrev(); if (t.dataset.k!=='v') return; renderFiVarsSoft(); }
+  else if (t.dataset.dvv){ fe.dscVar[t.dataset.dvv] = {valor: t.value==='' ? 0 : Number(t.value)}; renderFiPrev(); }
+});
+$('fi_vars').addEventListener('change', e => {
+  if (!fe) return; const t = e.target;
+  if (t.name==='fi_foto'){ fe.foto = t.value; renderFiPrev(); }
+  else if (t.dataset.dv){ const c = t.dataset.dv; if (t.value==='sin') fe.dscVar[c] = {sin:true}; else if (t.value==='otro') fe.dscVar[c] = {valor: Number(fe.dsc?.valor)||0}; else delete fe.dscVar[c]; renderFiVars(); renderFiPrev(); }
+  else if (t.dataset.v && t.dataset.k!=='v') renderFiVars();
+});
+$('fi_vars').addEventListener('click', e => {
+  const b = e.target.closest('[data-rm]'); if (!b || !fe) return;
+  fe.codes = fe.codes.filter(c=>c!==b.dataset.rm); delete fe.dscVar[b.dataset.rm]; renderFiVars(); renderFiPrev();
+});
+let fiaq; $('fi_add').addEventListener('input', () => { clearTimeout(fiaq); fiaq = setTimeout(() => {
+  const q = norm($('fi_add').value), terms = q ? q.split(/\s+/) : [], box = $('fi_addHits');
+  if (!terms.length || !fe){ box.hidden = true; return; }
+  const hits = ALL.filter(p => !fe.codes.includes(p.c) && terms.every(t=>norm([p.c,p.d,displayName(p),p.m].join(' ')).includes(t))).slice(0, 20);
+  box.hidden = false;
+  box.innerHTML = hits.map(p => `<button type="button" data-addc="${esc(p.c)}"><span class="r-main"><span class="name">${esc(displayName(p))}</span><span class="sub"><span class="code">${esc(p.c)}</span>${FI_OF.has(p.c)?' · ya está en otra ficha':''}</span></span><b>+</b></button>`).join('') || '<div class="hint" style="padding:8px">Sin resultados.</div>';
+}, 150); });
+$('fi_addHits').addEventListener('click', e => {
+  const b = e.target.closest('[data-addc]'); if (!b || !fe) return;
+  if (FI_OF.has(b.dataset.addc) && FI_OF.get(b.dataset.addc)!==fe.id){ toast('Ese producto ya está en otra ficha. Quítalo de allá primero.'); return; }
+  fe.codes.push(b.dataset.addc); $('fi_add').value=''; $('fi_addHits').hidden = true; renderFiVars(); renderFiPrev();
+});
+$('fiBoxIn').addEventListener('click', async e => {
+  const b = e.target.closest('button'); if (!b || !current) return;
+  if (b.dataset.fi){ const f = FICHAS.find(x=>x.id===b.dataset.fi); if (f) openFicha(f); }
+  else if (b.dataset.fisug && fiFillSheet.sug) openFicha(nuevaFicha(fiFillSheet.sug));
+  else if (b.dataset.finew) openFicha(nuevaFicha([current]));
+});
+$('fiIvaBtn').addEventListener('click', () => { $('iva_v').value = ivaRate(); $('iva_v').disabled = $('iva_save').disabled = !canWrite; $('ivaDlg').showModal(); });
+$('iva_cancel').addEventListener('click', () => $('ivaDlg').close());
+$('ivaForm').addEventListener('submit', async e => {
+  e.preventDefault(); const v = Number($('iva_v').value); if (!(v >= 0 && v < 100)) return;
+  try{ await db.collection('config').doc('tienda').update({iva:v, ivaUpd:new Date().toISOString()}); CFG.iva = v; $('ivaDlg').close(); toast(`IVA guardado: ${v}%`); renderFichas(); if (current) updateSheet(); }
+  catch(err){ toast('Solo el dueño de la tienda puede cambiar el IVA.'); }
+});
+
 // ---------- rutas ----------
 function route(){
   const h = location.hash.replace('#','');
@@ -2040,11 +2529,14 @@ function route(){
   if (h==='vender') return {view:'V'};
   if (h==='clientes') return {view:'C'};
   if (h==='categorias') return {view:'T'};
+  if (h==='vitrina') return {view:'F'};
   return {view:'P'};
 }
 function applyRoute(){
   const r = route();
-  $('viewP').hidden = r.view!=='P'; $('prodBar').hidden = r.view!=='P'; $('viewI').hidden = r.view!=='I'; $('viewV').hidden = r.view!=='V'; $('viewC').hidden = r.view!=='C'; $('viewT').hidden = r.view!=='T';
+  $('viewP').hidden = r.view!=='P'; $('prodBar').hidden = r.view!=='P'; $('viewI').hidden = r.view!=='I'; $('viewV').hidden = r.view!=='V'; $('viewC').hidden = r.view!=='C'; $('viewT').hidden = r.view!=='T'; $('viewF').hidden = r.view!=='F';
+  $('tabF').setAttribute('aria-current', r.view==='F'?'page':'false');
+  if (r.view==='F') renderFichas();
   $('tabT').setAttribute('aria-current', r.view==='T'?'page':'false');
   if (r.view==='T') renderTax();
   $('tabC').setAttribute('aria-current', r.view==='C'?'page':'false');
@@ -2272,6 +2764,13 @@ function showReadOnly(){ const n=$('notice'); n.hidden=false; n.textContent='Est
     VENTAS = snap.docs.map(d => ({id:d.id, ...JSON.parse(JSON.stringify(d.data()||{}))})).sort((a,b)=>String(b.t).localeCompare(String(a.t)));
     if (route().view==='V') renderVentas();
   }, lost);
+  db.collection('fichas').onSnapshot(snap => {
+    setFichas(snap.docs.map(d => ({id:d.id, ...JSON.parse(JSON.stringify(d.data()||{}))})));
+  }, lost);
+  db.collection('config').onSnapshot(snap => {
+    const t = snap.docs.find(x => x.id==='tienda'); CFG = t ? {iva:15, ...JSON.parse(JSON.stringify(t.data()||{}))} : {iva:15};
+    if (route().view==='F') renderFichas(); if (current) updateSheet();
+  }, () => {});
   db.collection('taxonomia').onSnapshot(snap => {
     const d = snap.docs.find(x => x.id==='arbol');
     setTax(d ? JSON.parse(JSON.stringify(d.data()||{})) : null);
