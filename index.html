@@ -1208,24 +1208,36 @@ async function createInv(e){
     toast('Inventario creado');
   }catch(err){ toast('No se pudo crear el inventario: '+(err.message||'')); }
 }
-// Conteo hecho fuera de la herramienta (Excel): {tipo:'conteo', nombre, conteos:{código: cantidad}}.
-// Crea un inventario abierto con esas cantidades ya contadas, para revisar diferencias y luego cerrarlo.
+// Conteo hecho fuera de la herramienta (Excel): {tipo:'conteo', id, nombre, conteos:{código: cantidad}, nuevos:[{cat, q, d, t, m, ...}]}.
+// Crea los productos nuevos (stock 0) y un inventario abierto con todo ya contado, para revisar diferencias y luego cerrarlo.
 async function loadCountFile(file){
   const msg = $('aArchivoMsg'); msg.hidden = false;
   try{
     const j = JSON.parse(await file.text());
-    if (!j || j.tipo!=='conteo' || !j.conteos) throw new Error('el archivo no es un conteo válido');
+    if (!j || j.tipo!=='conteo' || !(j.conteos || j.nuevos)) throw new Error('el archivo no es un conteo válido');
+    if (j.id && INVS.some(i => i.archivo===j.id)) throw new Error('este archivo ya se cargó antes');
     const t = new Date().toISOString(), codigos = [], sistema = {}, conteos = {}, faltan = [];
-    for (const [c, q] of Object.entries(j.conteos)){
+    const NEW_KEYS = ['d','t','m','mo','me','ma','co','d2','d5','k','v','b','p','sku','nota','dup'];
+    for (const n of (j.nuevos || [])){
+      const cat = CATS[n.cat] ? n.cat : 'SINC', code = nextCode(cat);
+      const item = {nuevo:true, e:'R', q:0, upd:t};
+      for (const k of NEW_KEYS) if (n[k] != null && n[k] !== '') item[k] = n[k];
+      localApply(cat, {[code]: item}); refresh();
+      await writeItems(cat, {[code]: item});
+      codigos.push(code); sistema[code] = 0; conteos[code] = {q: Math.max(0, Number(n.q)||0), t};
+    }
+    for (const [c, q] of Object.entries(j.conteos || {})){
       const p = BY.get(c); if (!p){ faltan.push(c); continue; }
       codigos.push(c); sistema[c] = p.q ?? 0; conteos[c] = {q: Math.max(0, Number(q)||0), t};
     }
     if (!codigos.length) throw new Error('ninguno de los códigos existe en el catálogo');
     const doc = {nombre: j.nombre || 'Conteo desde archivo', alcance:{tipo:'archivo', valor: file.name, cat:''},
       codigos, sistema, conteos, estado:'abierto', creado:t, por: await myId()};
+    if (j.id) doc.archivo = j.id;
     const ref = await db.collection('inventarios').add(doc);
     location.hash = 'inv-'+ref.id;
-    toast(`Inventario creado con ${codigos.length} productos contados` + (faltan.length ? ` (${faltan.length} códigos no existen)` : ''));
+    const nn = (j.nuevos||[]).length;
+    toast(`Inventario creado con ${codigos.length} productos contados` + (nn ? `, ${nn} productos nuevos` : '') + (faltan.length ? ` (${faltan.length} códigos no existen)` : ''));
     msg.hidden = true;
   }catch(err){ msg.textContent = 'No se pudo cargar el conteo: '+(err.message||err); }
 }
