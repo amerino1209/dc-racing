@@ -153,6 +153,74 @@ button.ghead:hover h3{color:var(--accent)}
 .x{border:0;background:transparent;font-size:1.6rem;line-height:1;padding:2px 8px;color:var(--muted)}
 .sh-body{flex:1;overflow:auto;padding:14px 16px;display:grid;gap:16px;align-content:start}
 .sh-foot{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;padding:12px 16px;border-top:1px solid var(--line);background:var(--surface-2)}
+/* Ficha por secciones: encabezado fijo (foto, nombre, PVP) + pestañas */
+.sh-head{display:grid;grid-template-columns:88px minmax(0,1fr) auto;gap:12px;align-items:start}
+.sh-head .photo{display:block}
+.sh-head .photo .big{width:88px;height:88px}
+.sh-id{display:grid;gap:4px;min-width:0}
+.sh-id h3{margin:0}
+.sh-pvp{display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}
+.sh-pvp b{font:700 1.45rem/1 var(--f-display);color:var(--accent);font-variant-numeric:tabular-nums}
+.sh-pvp s{color:var(--muted);font-size:.9rem}
+.sh-phact{display:flex;gap:6px;flex-wrap:wrap}
+.sh-tabs{display:flex;gap:2px;padding:0 10px;border-bottom:1px solid var(--line);background:var(--surface);overflow-x:auto;scrollbar-width:none}
+.sh-tabs::-webkit-scrollbar{display:none}
+.sh-tabs button{flex:1 0 auto;border:0;background:transparent;padding:11px 10px 9px;font:700 .86rem/1 var(--f-display);text-transform:uppercase;letter-spacing:.05em;color:var(--muted);border-bottom:3px solid transparent;white-space:nowrap;display:inline-flex;gap:6px;align-items:center;justify-content:center}
+.sh-tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent)}
+.sh-tabs .n{min-width:18px;padding:1px 5px;border-radius:9px;background:var(--line);color:var(--ink);font:600 .7rem/1.3 var(--f-body);letter-spacing:0}
+.sh-tabs .dot{width:8px;height:8px;border-radius:50%;background:transparent}
+.sh-tabs .dot.ag{background:var(--accent)} .sh-tabs .dot.bajo{background:var(--warn)} .sh-tabs .dot.ok{background:var(--ok)}
+.sh-pane{display:grid;gap:18px;align-content:start;min-width:0}
+#mkWrap select+input{margin-top:0}
+.vt-ficha{background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:10px 12px;display:grid;gap:8px;font-size:.9rem}
+.vt-ficha p{margin:0}
+.vt-prev{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap;font-size:.9rem}
+.vt-prev b{font:700 1.2rem/1 var(--f-display);font-variant-numeric:tabular-nums}
+.vt-prev s{color:var(--muted)}
+.stk{display:flex;justify-content:space-between;gap:12px;align-items:center;border:1.5px solid var(--line);border-radius:12px;padding:12px 14px;background:var(--surface-2)}
+.stk.ag{border-color:var(--accent);background:var(--accent-soft)}
+.stk.bajo{border-color:var(--warn);background:var(--warn-soft)}
+.stk.ok{border-color:var(--ok);background:var(--ok-soft)}
+.stk-main{display:flex;gap:8px;align-items:baseline}
+.stk-q{font:700 2.4rem/1 var(--f-display);font-variant-numeric:tabular-nums}
+.stk-lab{color:var(--muted);font-size:.85rem}
+.stk-side{display:grid;gap:6px;justify-items:end}
+.stk-badge{font:700 .85rem/1 var(--f-display);text-transform:uppercase;letter-spacing:.08em;padding:5px 10px;border-radius:999px;background:var(--surface);border:1.5px solid currentColor}
+.stk.ag .stk-badge{color:var(--accent)} .stk.bajo .stk-badge{color:var(--warn)} .stk.ok .stk-badge{color:var(--ok)}
+.stk-min{grid-template-columns:auto 72px;align-items:center;gap:8px}
+.stk-min input{padding:6px 8px!important;text-align:center}
+.pc{display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:.9rem}
+.pc input{width:72px;padding:7px 8px;border:1.5px solid var(--line);border-radius:7px;background:var(--surface);text-align:center}
+.pc .on{flex:1;min-width:0}
+.kx{display:grid;gap:12px;font-size:.84rem;font-variant-numeric:tabular-nums}
+.kx-sum{display:flex;gap:16px;flex-wrap:wrap;color:var(--muted)}
+.kx-sum b{color:var(--ink)}
+.kx-mes{border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.kx-mes summary{display:flex;justify-content:space-between;gap:10px;padding:8px 12px;background:var(--surface-2);cursor:pointer;font-weight:600;list-style:none}
+.kx-mes summary::-webkit-details-marker{display:none}
+.kx-mes summary .t{font:700 .9rem/1.2 var(--f-display);text-transform:uppercase;letter-spacing:.06em}
+.kx-tb{width:100%;border-collapse:collapse}
+.kx-tb th{font:600 .72rem/1 var(--f-body);text-transform:uppercase;letter-spacing:.06em;color:var(--muted);text-align:left;padding:6px 8px;border-bottom:1px solid var(--line)}
+.kx-tb td{padding:6px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+.kx-tb tr:last-child td{border-bottom:0}
+.kx-tb .num{text-align:right;white-space:nowrap}
+.kx-tb .in{color:var(--ok);font-weight:600} .kx-tb .out{color:var(--accent);font-weight:600}
+.kx-tb .doc{font:500 .78rem/1.2 var(--f-mono);color:var(--muted)}
+.kx-tb time{white-space:nowrap;color:var(--muted)}
+.nt-add{display:grid;gap:8px}
+.nt-act{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.nt-list{display:grid;gap:10px}
+.nt{border:1px solid var(--line);border-radius:10px;padding:10px 12px;display:grid;gap:4px}
+.nt-h{display:flex;justify-content:space-between;gap:8px;font-size:.8rem;color:var(--muted)}
+.nt-h b{color:var(--ink);font-weight:600}
+.nt p{margin:0;white-space:pre-wrap;overflow-wrap:anywhere}
+.nt.old{border-style:dashed}
+.pr-list{display:grid;gap:0}
+.pr-row{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line)}
+.pr-main{border:0;background:none;padding:0;text-align:left;display:grid;gap:2px;min-width:0;color:var(--ink)}
+.pr-main .name{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pr-row input{width:64px;padding:6px;border:1.5px solid var(--line);border-radius:7px;background:var(--surface);text-align:center}
+@media (max-width:460px){.sh-tabs{padding:0 4px}.sh-tabs button{padding:11px 6px 9px;font-size:.8rem}.sh-tabs .lg{display:none}.sh-head{grid-template-columns:64px minmax(0,1fr) auto}.sh-head .photo .big{width:64px;height:64px}.sh-pvp b{font-size:1.25rem}.stk{flex-wrap:wrap}}
 .orig{font-size:.84rem;color:var(--muted);background:var(--surface-2);border:1px dashed var(--line);border-radius:8px;padding:8px 10px}
 .orig b{color:var(--ink);font-weight:600}
 .photo{display:grid;grid-template-columns:120px minmax(0,1fr);gap:12px;align-items:center}
@@ -175,7 +243,8 @@ legend{font:700 .8rem/1 var(--f-display);text-transform:uppercase;letter-spacing
 label.f{display:grid;gap:4px;font-size:.8rem;color:var(--muted);font-weight:500;min-width:0}
 label.f input,label.f select,label.f textarea{padding:9px 10px;border:1.5px solid var(--line);border-radius:7px;background:var(--surface);color:var(--ink);font-size:.95rem;width:100%;min-width:0}
 label.f input:focus,label.f select:focus,label.f textarea:focus{border-color:var(--accent);outline:none}
-label.f.miss input{border-color:var(--accent);background:var(--accent-soft)}
+label.f.miss input,label.f.miss select{border-color:var(--accent);background:var(--accent-soft)}
+.lnk{border:0;background:none;padding:0;color:var(--accent);font:inherit;text-decoration:underline;cursor:pointer}
 .seg{display:flex;border:1.5px solid var(--line);border-radius:8px;overflow:hidden;flex-wrap:wrap}
 .seg button{flex:1;border:0;background:var(--surface);padding:9px 6px;font-weight:600;font-size:.88rem;color:var(--muted);min-width:0}
 .seg button+button{border-left:1.5px solid var(--line)}
@@ -724,11 +793,11 @@ label.chk.sm{font-size:.85rem}
         <fieldset>
           <legend>Descuento o promoción</legend>
           <div class="seg" role="group" aria-label="Tipo de descuento" id="fi_dTipo">
-            <button type="button" data-d="">Sin descuento</button><button type="button" data-d="%">Porcentaje</button><button type="button" data-d="$">Valor fijo</button>
+            <button type="button" data-d="">Sin descuento</button><button type="button" data-d="%">Porcentaje</button><button type="button" data-d="$">Valor fijo</button><button type="button" data-d="=">Precio de oferta</button>
           </div>
           <div class="grid2" id="fi_dBox">
             <label class="f" id="fi_dValW">Descuento <input id="fi_dVal" type="number" inputmode="decimal" min="0" step="0.01"></label>
-            <span></span>
+            <label class="f">Etiqueta <input id="fi_dEtq" list="dl_etq" placeholder="ej. Oferta, Liquidación"></label>
             <label class="f">Desde <input id="fi_dDesde" type="date"></label>
             <label class="f">Hasta <input id="fi_dHasta" type="date"></label>
           </div>
@@ -823,105 +892,152 @@ label.chk.sm{font-size:.85rem}
 <dialog id="zoom" aria-label="Foto ampliada"><img id="zoomImg" alt=""><button type="button" class="x" aria-label="Cerrar">✕</button><div class="cap" id="zoomCap"></div></dialog>
 <aside class="sheet" id="sheet" hidden aria-modal="true" role="dialog" aria-labelledby="shName">
   <div class="sh-head">
-    <div style="min-width:0">
+    <div class="photo">
+      <div class="big" id="phBig">Sin foto</div>
+    </div>
+    <div class="sh-id">
       <div class="r-top"><span class="code" id="shCode"></span><span id="shPills"></span></div>
       <h3 id="shName"></h3>
+      <div class="sh-pvp"><b id="shPvp">—</b><span class="hint" id="shPvpSub"></span></div>
+      <div class="sh-phact">
+        <label class="btn sm filebtn" id="phBtn"><span id="phBtnTxt">📷 Tomar foto</span><input id="phFile" type="file" accept="image/*" capture="environment"></label>
+        <label class="btn sm filebtn" id="phBtn2"><span>Galería</span><input id="phFile2" type="file" accept="image/*"></label>
+        <span class="hint" id="phHint"></span>
+      </div>
     </div>
     <button class="x" id="shClose" type="button" aria-label="Cerrar">×</button>
   </div>
+  <div class="sh-tabs" role="tablist" aria-label="Secciones de la ficha" id="shTabs">
+    <button type="button" role="tab" id="tb-info" aria-controls="pn-info" data-tab="info">Información</button>
+    <button type="button" role="tab" id="tb-vit" aria-controls="pn-vit" data-tab="vit">Vitrina<span class="lg"> virtual</span></button>
+    <button type="button" role="tab" id="tb-inv" aria-controls="pn-inv" data-tab="inv">Inventario <i class="dot" id="tbInvDot"></i></button>
+    <button type="button" role="tab" id="tb-not" aria-controls="pn-not" data-tab="not">Notas <span class="n" id="tbNotN" hidden></span></button>
+  </div>
   <form class="sh-body" id="form" autocomplete="off">
-    <div class="orig" id="shOrig"></div>
 
-    <div class="photo">
-      <div class="big" id="phBig">Sin foto</div>
-      <div class="act">
-        <label class="btn filebtn primary" id="phBtn"><span id="phBtnTxt">📷 Tomar foto</span><input id="phFile" type="file" accept="image/*" capture="environment"></label>
-        <label class="btn filebtn" id="phBtn2"><span>Elegir de la galería</span><input id="phFile2" type="file" accept="image/*"></label>
-        <span class="hint" id="phHint">Se comprime antes de subir (máx. 1200 px).</span>
-      </div>
+    <!-- Información de producto -->
+    <div class="sh-pane" role="tabpanel" id="pn-info" aria-labelledby="tb-info">
+      <div class="orig" id="shOrig"></div>
+      <fieldset>
+        <legend>Información de producto</legend>
+        <div class="grid2">
+          <label class="f" data-k="m" id="mkWrap">Marca
+            <select id="i_mk"></select>
+            <input id="i_m" list="dl_m">
+            <span class="hint" id="mkHint"></span>
+          </label>
+          <label class="f" data-k="p">Código de fábrica <input id="i_p" placeholder="Código del proveedor o SKU"></label>
+          <label class="f" data-k="b">Código de barras <span class="inrow"><input id="i_b" inputmode="numeric"><button class="btn icon" type="button" id="bScan" aria-label="Escanear código de barras"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 7V4h3M18 4h3v3M21 17v3h-3M6 20H3v-3M7 8v8M10 8v8M13 8v8M17 8v8"/></svg></button></span><span class="hint" id="bWarn" hidden></span></label>
+          <label class="f" data-k="t">Tipo de producto <input id="i_t" list="dl_t"></label>
+          <label class="f">Categoría interna (código) <select id="i_cat"></select></label>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Constructor de nombre</legend>
+        <div class="namebox"><span class="lab">Nombre del producto</span><span class="val" id="nameOut"></span></div>
+        <p class="hint">El nombre se arma con el tipo y la marca de arriba más estos campos.</p>
+        <div class="grid2">
+          <label class="f" data-k="mo">Modelo <input id="i_mo"></label>
+          <label class="f" data-k="me">Medida <input id="i_me" placeholder="ej. 20x1 1/8, 31,8mm, M"></label>
+          <label class="f" data-k="ma">Material <input id="i_ma" list="dl_ma"></label>
+          <label class="f" data-k="co">Color <input id="i_co" list="dl_co"></label>
+          <label class="f" data-k="d2">Detalle 2 <input id="i_d2"></label>
+          <label class="f" data-k="d5">Detalle extra <input id="i_d5" placeholder="ej. kit (3pcs), delantero"></label>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Precios</legend>
+        <div class="grid2">
+          <label class="f" data-k="k">Costo (USD) <input id="i_k" type="number" inputmode="decimal" step="0.01" min="0"></label>
+          <label class="f" data-k="v">PVP con IVA (USD) <input id="i_v" type="number" inputmode="decimal" step="0.01" min="0"></label>
+        </div>
+        <div class="kpi" id="kpi"></div>
+      </fieldset>
     </div>
 
-    <fieldset>
-      <legend>Conteo físico</legend>
-      <div class="seg" role="group" aria-label="Estado" id="segEst">
-        <button type="button" class="I" data-e="I">Inventariado</button>
-        <button type="button" class="P" data-e="P">Por pedir</button>
-        <button type="button" class="R" data-e="R">Por revisar</button>
+    <!-- Vitrina virtual -->
+    <div class="sh-pane" role="tabpanel" id="pn-vit" aria-labelledby="tb-vit" hidden>
+      <div class="vt-ficha" id="fiBoxIn"></div>
+      <fieldset>
+        <legend>Vitrina virtual</legend>
+        <label class="f">Categoría de vitrina <select id="i_cx"></select></label>
+        <label class="f">Descripción adicional <textarea id="v_desc" rows="3" placeholder="Qué es, para qué sirve, materiales, compatibilidad"></textarea></label>
+        <label class="chk"><input type="checkbox" id="v_pub"> Publicar en la vitrina</label>
+        <p class="hint" id="vtHint"></p>
+      </fieldset>
+      <fieldset>
+        <legend>Promoción</legend>
+        <div class="seg" role="group" aria-label="Tipo de promoción" id="v_dTipo">
+          <button type="button" data-d="">Sin promoción</button><button type="button" data-d="%">Descuento %</button><button type="button" data-d="$">Descuento $</button><button type="button" data-d="=">Precio de oferta</button>
+        </div>
+        <div class="grid2" id="v_dBox" hidden>
+          <label class="f" id="v_dValW">Descuento <input id="v_dVal" type="number" inputmode="decimal" min="0" step="0.01"></label>
+          <label class="f">Etiqueta <input id="v_dEtq" list="dl_etq" placeholder="ej. Oferta, Liquidación"></label>
+          <label class="f">Desde <input id="v_dDesde" type="date"></label>
+          <label class="f">Hasta <input id="v_dHasta" type="date"></label>
+        </div>
+        <div class="vt-prev" id="vtPrev"></div>
+      </fieldset>
+    </div>
+
+    <!-- Inventario -->
+    <div class="sh-pane" role="tabpanel" id="pn-inv" aria-labelledby="tb-inv" hidden>
+      <div class="stk" id="stkBox">
+        <div class="stk-main"><span class="stk-q" id="stkQ">0</span><span class="stk-lab">en stock</span></div>
+        <div class="stk-side">
+          <span class="stk-badge" id="stkBadge"></span>
+          <label class="f stk-min">Stock mínimo <input id="i_smin" type="number" inputmode="numeric" min="0" step="1" placeholder="1"></label>
+        </div>
       </div>
-      <div class="grid2">
+      <div class="pc" id="pcBox"></div>
+
+      <fieldset>
+        <legend>Conteo físico</legend>
+        <div class="seg" role="group" aria-label="Estado" id="segEst">
+          <button type="button" class="I" data-e="I">Inventariado</button>
+          <button type="button" class="P" data-e="P">Por pedir</button>
+          <button type="button" class="R" data-e="R">Por revisar</button>
+        </div>
         <label class="f">Cantidad
           <div class="stepper"><button type="button" id="qm" aria-label="Restar uno">−</button><input id="i_q" type="number" inputmode="numeric" min="0" step="1"><button type="button" id="qp" aria-label="Sumar uno">+</button></div>
         </label>
-        <label class="f">Categoría <select id="i_cat"></select></label>
-      </div>
-      <div class="grid2" id="txFicha" hidden>
-        <label class="f">Categoría en la vitrina <select id="i_cx"></select></label>
-        <label class="f">Marca del catálogo <select id="i_mk"></select></label>
-      </div>
-      <div class="motivo" id="motivoBox" hidden>
-        <p id="motivoTxt">El stock cambió. ¿Por qué?</p>
-        <div class="seg" role="group" aria-label="Motivo del cambio de stock" id="segMot">
-          <button type="button" data-m="Conteo">Nuevo conteo</button>
-          <button type="button" data-m="Ingreso">Ingreso</button>
-          <button type="button" data-m="Venta">Venta</button>
-          <button type="button" data-m="Ajuste">Ajuste</button>
+        <div class="motivo" id="motivoBox" hidden>
+          <p id="motivoTxt">El stock cambió. ¿Por qué?</p>
+          <div class="seg" role="group" aria-label="Motivo del cambio de stock" id="segMot">
+            <button type="button" data-m="Conteo">Nuevo conteo</button>
+            <button type="button" data-m="Ingreso">Ingreso</button>
+            <button type="button" data-m="Venta">Venta</button>
+            <button type="button" data-m="Ajuste">Ajuste</button>
+          </div>
+          <label class="f" id="docWrap" hidden>N.º de orden o factura de compra (opcional) <input id="i_doc" placeholder="ej. OC-0012 o 001-001-000123"></label>
         </div>
-      </div>
-      <span class="hint" id="qInfo"></span>
-    </fieldset>
+        <span class="hint" id="qInfo"></span>
+      </fieldset>
 
-    <fieldset>
-      <legend>Constructor de nombre</legend>
-      <div class="namebox"><span class="lab">Nombre del producto</span><span class="val" id="nameOut"></span></div>
-      <div class="grid2">
-        <label class="f" data-k="t">Tipo de producto <input id="i_t" list="dl_t"></label>
-        <label class="f" data-k="m">Marca <input id="i_m" list="dl_m"></label>
-        <label class="f" data-k="mo">Modelo <input id="i_mo"></label>
-        <label class="f" data-k="me">Medida <input id="i_me" placeholder="ej. 20x1 1/8, 31,8mm, M"></label>
-        <label class="f" data-k="ma">Material <input id="i_ma" list="dl_ma"></label>
-        <label class="f" data-k="co">Color <input id="i_co" list="dl_co"></label>
-        <label class="f" data-k="d2">Detalle 2 <input id="i_d2"></label>
-        <label class="f" data-k="d5">Detalle extra <input id="i_d5" placeholder="ej. kit (3pcs), delantero"></label>
-      </div>
-    </fieldset>
+      <fieldset>
+        <legend>Kardex</legend>
+        <div class="kx" id="hist"><span class="hint">Sin movimientos registrados.</span></div>
+      </fieldset>
 
-    <fieldset>
-      <legend>Precios</legend>
-      <div class="grid2">
-        <label class="f" data-k="k">Costo (USD) <input id="i_k" type="number" inputmode="decimal" step="0.01" min="0"></label>
-        <label class="f" data-k="v">Precio de venta (USD) <input id="i_v" type="number" inputmode="decimal" step="0.01" min="0"></label>
-      </div>
-      <div class="kpi" id="kpi"></div>
-    </fieldset>
+      <fieldset id="brgBox" hidden>
+        <legend>Compras a BRG Store (histórico)</legend>
+        <div class="brg" id="brg"></div>
+      </fieldset>
+    </div>
 
-    <fieldset>
-      <legend>Códigos</legend>
-      <div class="grid2">
-        <label class="f" data-k="b">Código de barras <span class="inrow"><input id="i_b" inputmode="numeric"><button class="btn icon" type="button" id="bScan" aria-label="Escanear código de barras"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 7V4h3M18 4h3v3M21 17v3h-3M6 20H3v-3M7 8v8M10 8v8M13 8v8M17 8v8"/></svg></button></span><span class="hint" id="bWarn" hidden></span></label>
-        <label class="f" data-k="p">Código proveedor <input id="i_p"></label>
-        <label class="f" data-k="sku">SKU <input id="i_sku"></label>
-      </div>
-    </fieldset>
-
-    <fieldset id="fiBox">
-      <legend>Vitrina</legend>
-      <div id="fiBoxIn"></div>
-    </fieldset>
-
-    <fieldset id="brgBox" hidden>
-      <legend>Compras a BRG Store</legend>
-      <div class="brg" id="brg"></div>
-    </fieldset>
-
-    <fieldset>
-      <legend>Notas</legend>
-      <label class="f"><textarea id="i_nota" rows="2" placeholder="Ej. revisar duplicado con PEDA-014, falta número de huecos"></textarea></label>
-    </fieldset>
-
-    <fieldset>
-      <legend>Historial de stock</legend>
-      <div class="hist" id="hist"><span class="hint">Sin movimientos registrados.</span></div>
-    </fieldset>
+    <!-- Notas -->
+    <div class="sh-pane" role="tabpanel" id="pn-not" aria-labelledby="tb-not" hidden>
+      <fieldset>
+        <legend>Notas</legend>
+        <div class="nt-add" id="ntAdd">
+          <label class="f">Nueva nota <textarea id="nt_txt" rows="3" placeholder="Ej. revisar duplicado con PEDA-014, falta número de huecos"></textarea></label>
+          <div class="nt-act"><span class="hint">Se guarda al instante con tu nombre, la fecha y la hora.</span><button class="btn primary sm" type="button" id="nt_btn">Agregar nota</button></div>
+        </div>
+        <div class="nt-list" id="ntList"></div>
+      </fieldset>
+    </div>
   </form>
   <div class="sh-foot">
     <span class="hint" id="shWho" style="margin-right:auto;align-self:center"></span>
@@ -933,6 +1049,7 @@ label.chk.sm{font-size:.85rem}
 </aside>
 
 <datalist id="dl_t"></datalist><datalist id="dl_m"></datalist><datalist id="dl_ma"></datalist><datalist id="dl_co"></datalist>
+<datalist id="dl_etq"><option value="Oferta"></option><option value="Liquidación"></option><option value="Black Friday"></option><option value="Últimas unidades"></option><option value="Nuevo"></option></datalist>
 <div class="toast" id="toast" hidden></div>
 
 <div class="scan-bg" id="scanBg" hidden>
@@ -1306,41 +1423,65 @@ function renderBrg(code){
 }
 
 // ---------- ficha ----------
-function open(code){
+// ---------- ficha: encabezado + pestañas (Información, Vitrina virtual, Inventario, Notas) ----------
+const SH_TABS = ['info','vit','inv','not'];
+let shTab = 'info'; try{ const t = localStorage.getItem('dcr-shtab'); if (SH_TABS.includes(t)) shTab = t; }catch(_){}
+let notUnsub = null, NOTAS = [], vt = null, MYID = null;
+let PROP = new Map();          // propuesta de compra: código -> {c, q, t, por, autor}
+const STOCK_MIN = 1;           // stock mínimo cuando el producto no tiene uno propio
+const sminOf = p => (p.smin == null || p.smin === '' || isNaN(p.smin)) ? STOCK_MIN : Number(p.smin);
+function nivel(p){ const q = Number(p.q) || 0; if (q <= 0) return ['ag','Agotado']; if (q <= sminOf(p)) return ['bajo','Stock bajo']; return ['ok','Óptimo']; }
+const sugQ = p => Math.max(1, sminOf(p) * 2 - Math.max(0, Number(p.q) || 0));
+function setTab(t){
+  shTab = t; try{ localStorage.setItem('dcr-shtab', t); }catch(_){}
+  for (const x of SH_TABS){ const b = $('tb-'+x); b.setAttribute('aria-selected', x===t); b.tabIndex = x===t ? 0 : -1; $('pn-'+x).hidden = x!==t; }
+  $('form').scrollTop = 0;
+}
+function open(code, tab){
   const p = BY.get(code); if(!p) return;
   current = p; draft = {...p}; motivo = null;
   $('shCode').textContent = p.c;
   $('shOrig').innerHTML = p.d ? `Descripción original: <b>${esc(p.d)}</b>${p.f?` · fila ${p.f} del Excel`:''}` : (p.dupDe ? `Producto duplicado de <b>${esc(p.dupDe)}</b>. Cambia lo que sea distinto y guarda.` : 'Producto creado en la herramienta.');
-  ['q','t','m','mo','me','ma','co','d2','d5','k','v','b','p','sku','nota'].forEach(k => { $('i_'+k).value = p[k] ?? ''; });
+  ['q','t','m','mo','me','ma','co','d2','d5','k','v','b','smin'].forEach(k => { $('i_'+k).value = p[k] ?? ''; });
+  $('i_p').value = p.p || p.sku || '';
+  $('i_doc').value = ''; $('nt_txt').value = '';
   $('i_cat').value = pref(p.c);
-  txFillFicha(p); fiFillSheet(p);
+  txFillFicha(p); vtLoad(p);
   if (p.arch) $('shOrig').insertAdjacentHTML('afterbegin', `<div class="arch-note"><span class="pill arch">Archivado</span> el ${esc(new Date(p.arch).toLocaleDateString('es-EC'))}${p.archMot?` · ${esc(ARCH_MOT[p.archMot]||p.archMot)}`:''}${p.archNota?` · ${esc(p.archNota)}`:''}. No aparece en ventas, inventarios ni en la vitrina.</div>`);
   fillDatalists(pref(p.c));
   setEstado(p.e||'R'); setMotivo(null);
   $('qInfo').textContent = p.qAt ? `Último cambio de stock: ${fdate(p.qAt)}${p.qMot?` (${MOT[p.qMot]||p.qMot})`:''}` : 'Sin cambios de stock registrados en la herramienta.';
-  renderPhoto(); updateSheet(); loadHistory(p.c); renderBrg(p.c);
+  renderPhoto(); updateSheet(); loadHistory(p.c); loadNotas(p.c); renderBrg(p.c);
   $('shWho').textContent = p.ver ? `Verificado el ${new Date(p.verAt).toLocaleDateString('es-EC')}` : 'Pendiente de verificar';
   const ro = !canWrite;
   $('form').querySelectorAll('input,select,textarea,.seg button,.stepper button').forEach(el=>el.disabled=ro);
+  $('ntAdd').hidden = ro || !db;
   $('shSave').disabled = $('shVerify').disabled = ro; $('shDup').hidden = ro;
   $('shArch').hidden = ro; $('shArch').textContent = p.arch ? 'Restaurar' : 'Archivar';
   $('phBtn').hidden = $('phBtn2').hidden = ro || !assets;
   $('bScan').hidden = ro;
+  renderPc();
+  setTab(assignCode && !ro ? 'info' : (tab || shTab));
   if (assignCode && !ro){
     const prev = p.b; $('i_b').value = assignCode; endAssign(); updateSheet();
     toast(prev && !sameCode(prev, $('i_b').value) ? `Código asignado (reemplaza ${prev}). Pulsa Guardar.` : 'Código asignado. Pulsa Guardar.');
   }
   $('bg').hidden=false; $('sheet').hidden=false;
-  setTimeout(()=>$('i_q').focus({preventScroll:true}), 50);
+  if (shTab==='inv' && !ro) setTimeout(()=>$('i_q').focus({preventScroll:true}), 50);
 }
-function close(){ $('bg').hidden=true; $('sheet').hidden=true; current=null; draft=null; if(histUnsub){histUnsub();histUnsub=null;} }
+function close(){
+  $('bg').hidden=true; $('sheet').hidden=true; current=null; draft=null; vt=null;
+  if(histUnsub){histUnsub();histUnsub=null;} if(notUnsub){notUnsub();notUnsub=null;}
+}
 function readForm(){
-  ['t','m','mo','me','ma','co','d2','d5','b','p','sku','nota'].forEach(k => draft[k] = $('i_'+k).value.trim());
-  ['q','k','v'].forEach(k => { const v=$('i_'+k).value; draft[k] = v==='' ? null : Number(v); });
+  ['t','m','mo','me','ma','co','d2','d5','b','p'].forEach(k => draft[k] = $('i_'+k).value.trim());
+  // "Código de fábrica" muestra el código proveedor o, si no hay, el SKU: si no se tocó, no se copia
+  if (!current.p && draft.p === String(current.sku ?? '').trim()) draft.p = current.p ?? '';
+  ['q','k','v','smin'].forEach(k => { const v=$('i_'+k).value; draft[k] = v==='' ? null : Number(v); });
   if (TAX){ ['cx','mk'].forEach(k => { const v=$('i_'+k).value; if (v || draft[k]) draft[k] = v; }); }
 }
 function setEstado(e){ draft.e=e; $('segEst').querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed', b.dataset.e===e)); }
-function setMotivo(m){ motivo=m; $('segMot').querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed', b.dataset.m===m)); }
+function setMotivo(m){ motivo=m; $('segMot').querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed', b.dataset.m===m)); $('docWrap').hidden = m!=='Ingreso'; }
 function qChanged(){ return (draft.q ?? null) !== (current.q ?? null); }
 function updateSheet(){
   readForm();
@@ -1348,7 +1489,7 @@ function updateSheet(){
   const out=$('nameOut'); out.textContent = n || 'Completa tipo, marca, medida, material y color'; out.classList.toggle('empty', !n);
   $('shName').textContent = n || draft.d || 'Sin nombre';
   const miss = new Set(missing({...draft, c: $('i_cat').value+'-0'}));
-  document.querySelectorAll('label.f[data-k]').forEach(l => {
+  $('sheet').querySelectorAll('label.f[data-k]').forEach(l => {
     const label={m:'Marca',me:'Medida/modelo',ma:'Material',co:'Color',b:'Código de barras',k:'Costo',v:'Venta'}[l.dataset.k];
     l.classList.toggle('miss', !!label && miss.has(label));
   });
@@ -1360,7 +1501,166 @@ function updateSheet(){
   const k=draft.k, v=draft.v;
   const mg = (v>0 && k!=null) ? Math.round((v-k)/v*100) : null;
   $('kpi').innerHTML = `<span>Margen <b>${mg==null?'—':mg+'%'}</b></span><span>Ganancia por unidad <b>$${(v!=null&&k!=null)?fmt(v-k):'—'}</b></span><span>Stock a venta <b>$${fmt((draft.q||0)*(v||0))}</b></span><span>Precio sin IVA <b>${v!=null?'$'+fmt(sinIva(v)):'—'}</b></span>`;
+  // encabezado: PVP (con la promoción si está activa)
+  const pv = vt ? precioVar({dsc: vtRead().dsc, dscVar: vt.f?.dscVar || {}}, {...draft, c: current.c}) : {pct:0};
+  $('shPvp').textContent = v!=null ? money(v) : 'Sin PVP';
+  $('shPvpSub').innerHTML = v!=null ? `PVP con IVA · sin IVA ${money(sinIva(v))}${pv.pct?` · <span class="pill dup">Promo ${money(pv.final)} (−${pv.pct}%)</span>`:''}` : '';
+  // indicador de stock
+  const [lv, lt] = nivel(draft);
+  $('stkBox').className = 'stk ' + lv; $('stkQ').textContent = int(draft.q ?? 0); $('stkBadge').textContent = lt;
+  $('i_smin').placeholder = String(STOCK_MIN);
+  $('tbInvDot').className = 'dot ' + lv; $('tbInvDot').title = lt;
+  const pq = $('pc_q'); if (pq && document.activeElement !== pq && !pq.dataset.touched) pq.value = sugQ(draft);
   $('shPills').innerHTML = `<span class="pill ${draft.e}">${EST[draft.e]}</span>${current.ver?' <span class="pill v">Verificado</span>':''}`;
+  if (vt) renderVtPrev();
+}
+function renderPc(){
+  const box = $('pcBox'); if (!current) return;
+  if (!db){ box.innerHTML = ''; return; }
+  const e = PROP.get(current.c);
+  if (e) box.innerHTML = `<span class="on">🛒 En la propuesta de compra: <b>${int(e.q)} und</b>${e.t?` <span class="hint">· añadido ${esc(ago(e.t))}${e.autor?` por ${esc(e.autor)}`:''}</span>`:''}</span>${canWrite?'<button class="btn sm" type="button" data-pc="del">Quitar</button>':''}<button class="btn sm" type="button" data-pc="go">Ver propuesta</button>`;
+  else box.innerHTML = canWrite ? `<span class="on">Re-stockear: pedir <input id="pc_q" type="number" min="1" step="1" inputmode="numeric" value="${sugQ(current)}" aria-label="Unidades a pedir"> und</span><button class="btn sm${nivel(current)[0]!=='ok'?' primary':''}" type="button" data-pc="add">Añadir a propuesta de compra</button>` : '';
+}
+async function pcAction(act){
+  if (!current || !db) return;
+  const c = current.c;
+  try{
+    if (act==='add'){
+      const q = Math.max(1, Math.round(Number($('pc_q')?.value) || 1));
+      const me = user && user.me ? await user.me().catch(()=>null) : null;
+      await db.collection('propuesta').doc(c).set({c, q, t:new Date().toISOString(), por: await myId(), autor: me?.name || me?.email || ''});
+      toast(`${c} añadido a la propuesta de compra (${q} und)`);
+    } else if (act==='del'){ await db.collection('propuesta').doc(c).delete(); toast('Quitado de la propuesta de compra'); }
+    else if (act==='go'){ close(); location.hash = 'compras'; }
+  }catch(err){ toast('No se pudo: '+(err && err.message || '')); }
+}
+
+// ----- vitrina virtual dentro de la ficha: descripción, publicación y promoción viven en la ficha de vitrina -----
+const normD = d => (d && d.tipo) ? {tipo:d.tipo, valor:(d.valor==null || d.valor==='') ? null : Number(d.valor), desde:d.desde||'', hasta:d.hasta||'', etq:d.etq||''} : null;
+function fichaOf(c){ const id = FI_OF.get(c); return id ? (FICHAS.find(x=>x.id===id) || null) : null; }
+function vtLoad(p){
+  const f = fichaOf(p.c);
+  vt = {f, desc: f?.desc || '', pub: !!f?.pub, dsc: normD(f?.dsc), tipo: ''};
+  $('v_desc').value = vt.desc; $('v_pub').checked = vt.pub;
+  const d = vt.dsc || {};
+  $('v_dVal').value = d.valor ?? ''; $('v_dEtq').value = d.etq || ''; $('v_dDesde').value = d.desde || ''; $('v_dHasta').value = d.hasta || '';
+  setVTipo(d.tipo || '');
+  fiFillSheet(p);
+}
+// si la ficha cambia por fuera (p. ej. se guardó el diálogo de la ficha) y aquí no hay ediciones, se recarga
+function vtSync(){ if (!current || !vt) return; if (!vtChanged()) vtLoad(current); else { vt.f = fichaOf(current.c); fiFillSheet(current); } updateSheet(); }
+function setVTipo(t){
+  if (!vt) return; vt.tipo = t;
+  $('v_dTipo').querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed', b.dataset.d===t));
+  $('v_dBox').hidden = !t;
+  $('v_dValW').firstChild.textContent = t==='%' ? 'Descuento (%) ' : t==='=' ? 'Precio de oferta con IVA (USD) ' : 'Descuento (USD) ';
+}
+function vtRead(){
+  const t = vt.tipo;
+  return {desc: $('v_desc').value.trim(), pub: $('v_pub').checked,
+    dsc: t ? {tipo:t, valor: $('v_dVal').value==='' ? null : Number($('v_dVal').value), desde: $('v_dDesde').value||'', hasta: $('v_dHasta').value||'', etq: $('v_dEtq').value.trim()} : null};
+}
+function vtChanged(){ const r = vtRead(); return r.desc!==vt.desc || r.pub!==vt.pub || JSON.stringify(normD(r.dsc))!==JSON.stringify(vt.dsc); }
+function dscError(d, v){
+  if (!d) return '';
+  if (!(Number(d.valor) > 0)) return d.tipo==='=' ? 'Escribe el precio de oferta o elige “Sin promoción”.' : 'Escribe el valor del descuento o elige “Sin promoción”.';
+  if (d.tipo==='%' && d.valor >= 100) return 'El porcentaje debe ser menor que 100.';
+  if (d.tipo==='=' && v != null && d.valor >= v) return 'El precio de oferta debe ser menor que el PVP.';
+  if (d.desde && d.hasta && d.hasta < d.desde) return 'La fecha final de la promoción es anterior a la inicial.';
+  return '';
+}
+function renderVtPrev(){
+  const r = vtRead(), f = vt.f, nv = f ? (f.codes||[]).length : 1;
+  const pv = precioVar({dsc: r.dsc, dscVar: f?.dscVar || {}}, {...draft, c: current.c});
+  const st = dscEstado(r.dsc);
+  const est = !r.dsc ? '' : st==='activo' ? `Activa ahora${r.dsc.hasta?` hasta el ${fday2(r.dsc.hasta)}`:''}.` : st==='futuro' ? `Empieza el ${fday2(r.dsc.desde)}.` : st==='vencido' ? `Terminó el ${fday2(r.dsc.hasta)}.` : '';
+  const err = dscError(r.dsc, draft.v);
+  $('vtPrev').innerHTML = !r.dsc ? '<span class="hint">Sin promoción: el cliente paga el PVP.</span>'
+    : `<span>El cliente paga</span>${pv.pct?`<s>${money(pv.v)}</s> `:''}<b>${money(pv.pct ? pv.final : pv.v)}</b>${pv.pct?`<span class="pill dup">−${pv.pct}%</span>`:''}${r.dsc.etq?`<span class="pill new">${esc(r.dsc.etq)}</span>`:''}<span class="hint">${esc(err || est)}</span>`;
+  $('vtHint').textContent = f ? (nv > 1 ? `La descripción, la publicación y la promoción son de la ficha “${f.n}”: se aplican a sus ${nv} variantes.` : '')
+    : 'Este producto todavía no está en una ficha de la vitrina. Si escribes una descripción, una promoción o lo publicas, al guardar se crea una ficha solo con él.';
+}
+async function vtSave(code, r, cxChanged, f, dr){
+  const now = new Date().toISOString(), uid = await myId();
+  const p = BY.get(code);
+  const cx = p && TAX ? (catOf(p) || '') : undefined;
+  if (f){
+    const d = {desc:r.desc, pub:r.pub, dsc:r.dsc, upd:now, por:uid};
+    if (cxChanged && cx !== undefined) d.cx = cx;
+    await db.collection('fichas').doc(f.id).update(d);
+  } else if (r.desc || r.pub || r.dsc){
+    const nf = nuevaFicha([p || {...dr, c: code}]);
+    await db.collection('fichas').add({...nf, desc:r.desc, pub:r.pub, dsc:r.dsc, creado:now, upd:now, por:uid});
+  }
+}
+
+// ----- kardex: ingresos y egresos del producto, agrupados por mes y año -----
+function docOf(m){
+  if (m.oc) return `Orden de compra ${m.oc}`;
+  if (m.venta) return `${m.motivo==='Anulacion' ? 'Venta anulada' : 'Venta'} N.º ${String(m.venta).slice(-6).toUpperCase()}`;
+  if (m.inv) return m.nombre || '';
+  if (m.doc) return `Doc. ${m.doc}`;
+  return '';
+}
+function loadHistory(code){
+  const box=$('hist');
+  if (histUnsub){ histUnsub(); histUnsub = null; }
+  if (!db){ box.innerHTML='<span class="hint">El kardex se guarda al abrir la herramienta con tu cuenta.</span>'; return; }
+  box.innerHTML='<span class="hint">Cargando kardex…</span>';
+  histUnsub = db.collection('movimientos').where('codes','array-contains',code).onSnapshot(snap => {
+    const rows = [];
+    snap.docs.forEach(d => { const m=d.data(); (m.items||[]).forEach(it => { if (it.c===code) rows.push({t:m.t, motivo:m.motivo, doc:docOf(m), nota:m.nota, a:it.a ?? 0, d:it.d ?? 0}); }); });
+    renderKardex(rows);
+  }, () => { box.innerHTML='<span class="hint">No se pudo cargar el kardex.</span>'; });
+}
+function renderKardex(rows){
+  const box = $('hist');
+  const pie = '<p class="hint">Las órdenes de compra aparecerán aquí con su número cuando se active el módulo de Compras. Mientras tanto, al registrar un ingreso puedes anotar el número de la orden o factura.</p>';
+  if (!rows.length){ box.innerHTML = '<span class="hint">Sin movimientos registrados todavía. Aquí aparecerán las ventas, ingresos, ajustes e inventarios de este producto.</span>' + pie; return; }
+  rows.sort((a,b)=> String(b.t).localeCompare(String(a.t)));
+  let ing = 0, egr = 0; const meses = new Map();
+  for (const r of rows){
+    const dif = r.d - r.a; if (dif > 0) ing += dif; else egr -= dif;
+    const dt = new Date(r.t), key = `${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}`;
+    if (!meses.has(key)) meses.set(key, {dt, rows:[], ing:0, egr:0});
+    const g = meses.get(key); g.rows.push(r); if (dif > 0) g.ing += dif; else g.egr -= dif;
+  }
+  const dia = iso => { const d = new Date(iso); return d.toLocaleDateString('es-EC',{day:'2-digit',month:'short'})+' '+d.toLocaleTimeString('es-EC',{hour:'2-digit',minute:'2-digit'}); };
+  let i = 0;
+  box.innerHTML = `<div class="kx-sum"><span><b>${int(rows.length)}</b> movimientos</span><span>Ingresos <b class="in">+${int(ing)}</b></span><span>Egresos <b class="out">−${int(egr)}</b></span><span>Saldo actual <b>${int(rows[0].d)}</b></span></div>`
+    + [...meses.values()].map(g => `<details class="kx-mes"${i++ < 3 ? ' open' : ''}><summary><span class="t">${esc(cap(g.dt.toLocaleDateString('es-EC',{month:'long',year:'numeric'})))}</span><span>${g.ing?`<span class="in">+${int(g.ing)}</span>`:''}${g.ing&&g.egr?' · ':''}${g.egr?`<span class="out">−${int(g.egr)}</span>`:''}${!g.ing&&!g.egr?'<span class="hint">sin cambio</span>':''}</span></summary>
+      <table class="kx-tb"><thead><tr><th>Fecha</th><th>Movimiento</th><th class="num">Ingreso</th><th class="num">Egreso</th><th class="num">Saldo</th></tr></thead><tbody>
+      ${g.rows.map(r => { const dif = r.d - r.a; return `<tr><td><time>${esc(dia(r.t))}</time></td><td>${esc(MOT[r.motivo]||r.motivo||'')}${r.doc?`<br><span class="doc">${esc(r.doc)}</span>`:''}</td><td class="num in">${dif>0?'+'+int(dif):''}</td><td class="num out">${dif<0?'−'+int(-dif):''}</td><td class="num">${int(r.d)}</td></tr>`; }).join('')}
+      </tbody></table></details>`).join('') + pie;
+}
+
+// ----- notas de los usuarios, con fecha y hora automáticas -----
+function loadNotas(code){
+  if (notUnsub){ notUnsub(); notUnsub = null; }
+  NOTAS = []; renderNotas();
+  if (!db) return;
+  notUnsub = db.collection('notas').where('c','==',code).onSnapshot(snap => {
+    NOTAS = snap.docs.map(d => ({id:d.id, ...d.data()})).sort((a,b)=>String(b.t).localeCompare(String(a.t)));
+    renderNotas();
+  }, () => { $('ntList').innerHTML = '<span class="hint">No se pudieron cargar las notas.</span>'; });
+}
+function renderNotas(){
+  if (!current) return;
+  const old = current.nota ? `<div class="nt old"><div class="nt-h"><b>Nota anterior</b><span>sin fecha</span></div><p>${esc(current.nota)}</p></div>` : '';
+  $('ntList').innerHTML = NOTAS.map(n => `<div class="nt"><div class="nt-h"><b>${esc(n.autor || 'Usuario')}</b><span>${esc(fdate(n.t))}${canWrite && n.por && n.por===MYID ? ` · <button type="button" class="lnk" data-ntdel="${esc(n.id)}">Borrar</button>` : ''}</span></div><p>${esc(n.txt)}</p></div>`).join('') + old
+    || '<span class="hint">Todavía no hay notas para este producto.</span>';
+  const n = NOTAS.length + (current.nota ? 1 : 0);
+  $('tbNotN').hidden = !n; $('tbNotN').textContent = n;
+}
+async function addNota(){
+  const txt = $('nt_txt').value.trim(); if (!txt || !current || !db || !canWrite) return;
+  $('nt_btn').disabled = true;
+  try{
+    const me = user && user.me ? await user.me().catch(()=>null) : null;
+    await db.collection('notas').add({c: current.c, txt, t: new Date().toISOString(), por: await myId(), autor: me?.name || me?.email || 'Usuario'});
+    $('nt_txt').value = ''; toast('Nota agregada');
+  }catch(e){ toast('No se pudo guardar la nota: '+(e && e.message || '')); }
+  $('nt_btn').disabled = false;
 }
 function renderPhoto(){
   const b=$('phBig');
@@ -1368,7 +1668,8 @@ function renderPhoto(){
     b.classList.toggle('zoomable', !!src); if (src){ b.setAttribute('role','button'); b.tabIndex=0; b.title='Toca para ampliar'; } else { b.removeAttribute('role'); b.removeAttribute('tabindex'); b.title=''; } };
   show(); if (needXL(draft)) loadFor(draft).then(show);
   $('phBtnTxt').textContent = (draft.foto||draft.fx) ? '📷 Tomar otra foto' : '📷 Tomar foto';
-  $('phHint').textContent = draft.foto ? 'Foto tomada en la herramienta.' : draft.fx ? 'Foto sacada del Excel. Puedes reemplazarla.' : 'Se comprime antes de subir (máx. 1200 px).';
+  $('phHint').textContent = '';
+  $('phBtn').title = draft.foto ? 'Foto tomada en la herramienta' : draft.fx ? 'Foto sacada del Excel. Puedes reemplazarla.' : 'Se comprime antes de subir (máx. 1200 px)';
 }
 function fillDatalists(p){
   const same = ALL.filter(x=>pref(x.c)===p);
@@ -1379,22 +1680,6 @@ function fillDatalists(p){
   $('dl_ma').innerHTML = o(uniq(ALL.map(x=>x.ma)));
   $('dl_co').innerHTML = o(uniq(ALL.map(x=>x.co)));
 }
-function loadHistory(code){
-  const box=$('hist');
-  if (!db){ box.innerHTML='<span class="hint">El historial se guarda al abrir la herramienta desde Claude.</span>'; return; }
-  box.innerHTML='<span class="hint">Cargando historial…</span>';
-  if (histUnsub) histUnsub();
-  histUnsub = db.collection('movimientos').where('codes','array-contains',code).onSnapshot(snap => {
-    const rows = [];
-    snap.docs.forEach(d => { const m=d.data(); (m.items||[]).forEach(it => { if (it.c===code) rows.push({t:m.t, motivo:m.motivo, nombre:m.nombre, nota:m.nota, a:it.a, d:it.d}); }); });
-    rows.sort((a,b)=> String(b.t).localeCompare(String(a.t)));
-    box.innerHTML = rows.length ? rows.slice(0,30).map(r => {
-      const dif=(r.d||0)-(r.a||0);
-      return `<div><time>${esc(fdate(r.t))}</time><span class="m">${esc(MOT[r.motivo]||r.motivo)}${r.nombre?': '+esc(r.nombre):''}</span><b>${r.a??0} → ${r.d??0} (${dif>0?'+':''}${dif})</b></div>`;
-    }).join('') : '<span class="hint">Sin movimientos registrados.</span>';
-  }, () => { box.innerHTML='<span class="hint">No se pudo cargar el historial.</span>'; });
-}
-
 // ---------- guardar ----------
 function nextCode(p){
   let max = 0;
@@ -1428,13 +1713,18 @@ async function logMoves(motivoKey, items, extra){
   }
 }
 async function myId(){ try { return user ? await user.id() : null; } catch(_){ return null; } }
-const FIELDS = ['e','q','t','m','mo','me','ma','co','d2','d5','k','v','b','p','sku','nota','foto','cx','mk'];
+const FIELDS = ['e','q','t','m','mo','me','ma','co','d2','d5','k','v','b','p','sku','nota','foto','cx','mk','smin'];
 async function save(verify){
   if (!db){ toast('No hay conexión con la base de datos: los cambios no se guardaron.'); return; }
   readForm();
   const old = current, now = new Date().toISOString(), uid = await myId();
   const stockMove = qChanged();
-  if (stockMove && !motivo){ $('motivoBox').scrollIntoView({block:'center',behavior:'smooth'}); toast('Elige el motivo del cambio de stock.'); return; }
+  if (stockMove && !motivo){ setTab('inv'); $('motivoBox').scrollIntoView({block:'center',behavior:'smooth'}); toast('Elige el motivo del cambio de stock.'); return; }
+  const vr = vt ? vtRead() : null, vtCh = !!vr && vtChanged();
+  const dErr = vtCh ? dscError(vr.dsc, draft.v) : '';
+  if (dErr){ setTab('vit'); toast(dErr); return; }
+  const docN = motivo==='Ingreso' ? $('i_doc').value.trim() : '';
+  const vtF = vt?.f || null, dr = {...draft}, cxCh = (draft.cx ?? '') !== (old.cx ?? '') && !!vtF;
   const patch = {};
   for (const k of FIELDS) if ((draft[k] ?? '') !== (old[k] ?? '')) patch[k] = draft[k] ?? '';
   patch.n = buildName(draft); patch.upd = now; if (uid) patch.por = uid;
@@ -1442,7 +1732,7 @@ async function save(verify){
   if (stockMove){ patch.qAt = now; patch.qMot = mot; }
   if (verify){ patch.ver = true; patch.verAt = now; }
   const newCat = $('i_cat').value, oldCat = pref(old.c);
-  const qNew = draft.q ?? 0, nota = draft.nota;
+  const qNew = draft.q ?? 0;
   try {
     let code = old.c;
     if (newCat !== oldCat){
@@ -1460,7 +1750,8 @@ async function save(verify){
       await writeItems(oldCat, {[old.c]: patch});
       toast(verify ? `${old.c} verificado` : `${old.c} guardado`);
     }
-    if (stockMove) await logMoves(mot, [{c:code, a:old.q ?? 0, d:qNew}], nota ? {nota} : null);
+    if (stockMove) await logMoves(mot, [{c:code, a:old.q ?? 0, d:qNew}], docN ? {doc: docN} : null);
+    if (vtCh || cxCh) await vtSave(code, vr, cxCh, vtF, dr);
   } catch(e){
     if (e && e.code==='invalid_argument'){ canWrite=false; showReadOnly(); }
     toast('No se pudo guardar: ' + (e && e.message || 'error desconocido'));
@@ -1472,7 +1763,7 @@ function newProduct(barcode){
   const item = {nuevo:true, e:'I', q:0, upd:new Date().toISOString()};
   if (typeof barcode === 'string' && barcode) item.b = barcode;
   localApply(cat, {[code]: item}); refresh();
-  open(code);
+  open(code, 'info');
   writeItems(cat, {[code]: item}).catch(e=>toast('No se pudo crear: '+(e.message||'')));
 }
 // ---------- archivar ----------
@@ -1545,7 +1836,7 @@ function duplicateProduct(){
   item.n = buildName(item);
   close();
   localApply(cat, {[code]: item}); refresh();
-  open(code);
+  open(code, 'info');
   toast(`Creado ${code} como copia de ${src.c}`);
   writeItems(cat, {[code]: item}).catch(e=>toast('No se pudo crear la copia: '+(e.message||'')));
 }
@@ -2051,11 +2342,18 @@ function mkOptions(sel, cur, first){
   sel.value = cur || '';
 }
 function txFillFicha(p){
-  $('txFicha').hidden = !TAX;
-  if (!TAX) return;
+  // Marca: con el catálogo de marcas cargado se elige de la lista (sirve también para la vitrina) y su nombre entra al constructor
+  $('i_mk').hidden = !TAX; $('i_m').hidden = !!TAX;
+  if (!TAX){ $('mkHint').textContent = ''; $('i_cx').innerHTML = '<option value="">Primero carga las categorías en Marcas y categorías</option>'; return; }
   const dc = TX.pref.get(pref(p.c)), dm = TX.alias.get(mkey(p.m));
   catOptions($('i_cx'), p.cx && TX.cat.has(p.cx) ? p.cx : '', dc ? `Según el código: ${catPath(dc)}` : 'Sin categoría');
-  mkOptions($('i_mk'), p.mk && TX.mk.has(p.mk) ? p.mk : '', dm ? `Según el texto de marca: ${TX.mk.get(dm).n}` : 'Sin marca');
+  mkOptions($('i_mk'), p.mk && TX.mk.has(p.mk) ? p.mk : '', dm ? `${TX.mk.get(dm).n} (según el texto de marca)` : (p.m ? `Sin marca del catálogo (texto: ${p.m})` : 'Sin marca'));
+  mkHintUpd();
+}
+function mkHintUpd(){
+  if (!TAX || !current) return;
+  const sel = $('i_mk').value, txt = $('i_m').value.trim();
+  $('mkHint').textContent = !sel && txt && !TX.alias.get(mkey(txt)) ? `“${txt}” no está en el catálogo de marcas: créala en Marcas y categorías o elige una de la lista.` : '';
 }
 async function saveTax(msg){
   if (!db || !canWrite){ toast('No tienes permiso para guardar.'); return false; }
@@ -2340,10 +2638,17 @@ $('tx_logoF').addEventListener('change', async e => {
   try{ const r = await assets.upload(f); txLogo = r.id; showLogo(); }catch(err){ toast('No se pudo subir el logo'); showLogo(); }
 });
 $('tx_logoX').addEventListener('click', () => { txLogo = ''; showLogo(); });
-['i_cx','i_mk'].forEach(id => $(id).addEventListener('change', () => { if (current) updateSheet(); }));
+$('i_cx').addEventListener('change', () => { if (current) updateSheet(); });
+$('i_mk').addEventListener('change', () => {
+  if (!current) return;
+  const m = TX.mk.get($('i_mk').value);
+  $('i_m').value = m ? m.n : (current.m ?? '');   // el nombre de la marca elegida entra al constructor de nombre
+  mkHintUpd(); updateSheet();
+});
 
 // ---------- vitrina: fichas con variantes, IVA y descuentos ----------
-// Firestore: fichas/{id} = {n, mk, cx, desc, attrs:[{k,n}], codes:[código], foto:código, dsc:{tipo:'%'|'$', valor, desde, hasta}|null,
+// Firestore: fichas/{id} = {n, mk, cx, desc, attrs:[{k,n}], codes:[código], foto:código, dsc:{tipo:'%'|'$'|'=', valor, desde, hasta, etq}|null,
+//   (tipo '=' es precio de oferta: valor = precio final con IVA; etq = etiqueta opcional, p. ej. "Liquidación")
 //   dscVar:{código:{sin:true}|{valor}}, pub, creado, upd, por}. config/tienda = {iva}.
 // El precio de cada variante es el precio de venta del producto (v), con IVA incluido. Los valores de las opciones
 // (medida, color…) son los campos del producto, así no hay dos lugares donde corregirlos.
@@ -2357,7 +2662,7 @@ function setFichas(list){
   FICHAS = list; FI_OF = new Map();
   for (const f of FICHAS) for (const c of (f.codes||[])) if (!FI_OF.has(c)) FI_OF.set(c, f.id);
   if (route().view==='F') renderFichas();
-  if (current) fiFillSheet(current);
+  if (current) vtSync();
 }
 function dscEstado(d){
   if (!d || !d.tipo || !(Number(d.valor) > 0)) return 'no';
@@ -2372,7 +2677,7 @@ function precioVar(f, p){
   if (dscEstado(d)!=='activo' || (o && o.sin)) return {v, final:v, pct:0};
   const valor = o && o.valor != null ? Number(o.valor) : Number(d.valor);
   if (!(valor > 0) || !v) return {v, final:v, pct:0};
-  const final = Math.max(0, Math.round((d.tipo==='%' ? v*(1-valor/100) : v - valor) * 100) / 100);
+  const final = Math.max(0, Math.round((d.tipo==='%' ? v*(1-valor/100) : d.tipo==='=' ? Math.min(v, valor) : v - valor) * 100) / 100);
   return {v, final, pct: Math.round((1 - final/v) * 100)};
 }
 const fiProds = f => (f.codes||[]).map(c=>BY.get(c)).filter(Boolean);
@@ -2488,7 +2793,7 @@ function openFicha(f){
   if (TAX){ mkOptions($('fi_mk'), fe.mk, 'Sin marca'); catOptions($('fi_cx'), fe.cx, 'Sin categoría'); }
   else { $('fi_mk').innerHTML = '<option value="">Primero carga las marcas</option>'; $('fi_cx').innerHTML = '<option value="">Primero carga las categorías</option>'; }
   const d = fe.dsc || {};
-  $('fi_dVal').value = d.valor ?? ''; $('fi_dDesde').value = d.desde || ''; $('fi_dHasta').value = d.hasta || '';
+  $('fi_dVal').value = d.valor ?? ''; $('fi_dEtq').value = d.etq || ''; $('fi_dDesde').value = d.desde || ''; $('fi_dHasta').value = d.hasta || '';
   setDTipo(d.tipo || '');
   $('fi_del').hidden = !f.id || !canWrite; $('fi_del').textContent = 'Deshacer ficha';
   $('fi_add').value = ''; $('fi_addHits').hidden = true;
@@ -2502,11 +2807,11 @@ function setDTipo(t){
   fe.dsc = t ? {...(fe.dsc||{}), tipo:t} : (fe.dsc ? {...fe.dsc, tipo:''} : null);
   $('fi_dTipo').querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed', b.dataset.d===t));
   $('fi_dBox').hidden = !t;
-  $('fi_dValW').firstChild.textContent = t==='%' ? 'Descuento (%) ' : 'Descuento (USD) ';
+  $('fi_dValW').firstChild.textContent = t==='%' ? 'Descuento (%) ' : t==='=' ? 'Precio de oferta con IVA (USD) ' : 'Descuento (USD) ';
 }
 function readDsc(){
   const t = fe.dsc?.tipo || '';
-  fe.dsc = t ? {tipo:t, valor: $('fi_dVal').value==='' ? null : Number($('fi_dVal').value), desde:$('fi_dDesde').value||'', hasta:$('fi_dHasta').value||''} : null;
+  fe.dsc = t ? {tipo:t, valor: $('fi_dVal').value==='' ? null : Number($('fi_dVal').value), desde:$('fi_dDesde').value||'', hasta:$('fi_dHasta').value||'', etq:$('fi_dEtq').value.trim()} : null;
 }
 const fval = (c, k) => (fe.ed[c] && k in fe.ed[c]) ? fe.ed[c][k] : (BY.get(c)?.[k] ?? '');
 const fprod = c => ({...BY.get(c), ...(fe.ed[c]||{})});
@@ -2534,7 +2839,7 @@ function renderFiVars(){
           <label class="f">Precio con IVA <input type="number" inputmode="decimal" min="0" step="0.01" data-v="${esc(c)}" data-k="v" value="${esc(fval(c,'v'))}" ${canWrite?'':'disabled'}></label>
           <span class="fi-siniva">Sin IVA <b>${money(sinIva(p.v))}</b>${pv.pct?`<br>Cliente paga <b>${money(pv.final)}</b>`:''}</span>
           ${tipo ? `<label class="f">Descuento de esta variante <select data-dv="${esc(c)}" ${canWrite?'':'disabled'}><option value="">Igual que la ficha</option><option value="sin" ${o.sin?'selected':''}>Sin descuento</option><option value="otro" ${o.valor!=null?'selected':''}>Otro valor</option></select></label>
-          ${o.valor!=null?`<label class="f">Valor (${tipo==='%'?'%':'USD'}) <input type="number" inputmode="decimal" min="0" step="0.01" data-dvv="${esc(c)}" value="${esc(o.valor)}" ${canWrite?'':'disabled'}></label>`:''}` : ''}
+          ${o.valor!=null?`<label class="f">${tipo==='='?'Precio de oferta (USD)':`Valor (${tipo==='%'?'%':'USD'})`} <input type="number" inputmode="decimal" min="0" step="0.01" data-dvv="${esc(c)}" value="${esc(o.valor)}" ${canWrite?'':'disabled'}></label>`:''}` : ''}
         </div>
       </div>
     </div>`;
@@ -2564,7 +2869,7 @@ function renderFiPrev(){
     <div class="fi-prev-tx">
       ${mk?`<span class="sys">${esc(mk)}</span>`:''}
       <b class="fi-prev-n">${esc($('fi_n').value || 'Sin nombre')}</b>
-      <span class="fi-prev-p">${pv.pct?`<s>${money(pv.v)}</s> `:''}<b>${money(pv.final)}</b>${pv.pct?` <span class="pill dup">−${pv.pct}%</span>`:''}</span>
+      <span class="fi-prev-p">${pv.pct?`<s>${money(pv.v)}</s> `:''}<b>${money(pv.final)}</b>${pv.pct?` <span class="pill dup">−${pv.pct}%</span>`:''}${pv.pct && fe.dsc?.etq?` <span class="pill new">${esc(fe.dsc.etq)}</span>`:''}</span>
       <span class="sys">IVA incluido</span>
       ${chips}
       ${$('fi_desc').value.trim()?`<p class="fi-prev-d">${esc($('fi_desc').value.trim())}</p>`:''}
@@ -2580,7 +2885,7 @@ async function saveFicha(e){
   if (!fe.codes.length){ toast('La ficha necesita al menos una variante.'); return; }
   const otra = fe.codes.find(c => FI_OF.has(c) && FI_OF.get(c)!==fe.id);
   if (otra){ toast(`${otra} ya está en otra ficha.`); return; }
-  if (fe.dsc && !(Number(fe.dsc.valor) > 0)){ toast('Escribe el valor del descuento o elige “Sin descuento”.'); return; }
+  if (fe.dsc && !(Number(fe.dsc.valor) > 0)){ toast(fe.dsc.tipo==='=' ? 'Escribe el precio de oferta o elige “Sin descuento”.' : 'Escribe el valor del descuento o elige “Sin descuento”.'); return; }
   if (fe.dsc && fe.dsc.tipo==='%' && fe.dsc.valor >= 100){ toast('El porcentaje debe ser menor que 100.'); return; }
   if (fe.dsc && fe.dsc.desde && fe.dsc.hasta && fe.dsc.hasta < fe.dsc.desde){ toast('La fecha final es anterior a la inicial.'); return; }
   const now = new Date().toISOString(), uid = await myId();
@@ -2613,14 +2918,17 @@ async function delFicha(){
 }
 function fiFillSheet(p){
   const box = $('fiBoxIn'); if (!box) return;
-  const fid = FI_OF.get(p.c), f = fid && FICHAS.find(x=>x.id===fid);
+  const f = fichaOf(p.c);
+  fiFillSheet.sug = null;
   if (f){
-    box.innerHTML = `<p>Parte de la ficha <b>${esc(f.n)}</b> (${int((f.codes||[]).length)} ${(f.codes||[]).length===1?'variante':'variantes'})${f.pub?' · publicada':''}.</p><div class="filters"><button class="btn sm" type="button" data-fi="${esc(f.id)}">Abrir ficha</button></div>`;
+    const n = (f.codes||[]).length;
+    box.innerHTML = `<p>Parte de la ficha <b>${esc(f.n)}</b> (${int(n)} ${n===1?'variante':'variantes'})${f.pub?' · <span class="pill I">Publicada</span>':' · <span class="pill R">Sin publicar</span>'}.</p><div class="filters"><button class="btn sm" type="button" data-fi="${esc(f.id)}">Abrir ficha completa</button><span class="hint">Nombre en la vitrina, variantes y foto principal.</span></div>`;
   } else {
     const sug = p.t && p.mo ? sugerencias().find(ps => ps.some(x=>x.c===p.c)) : null;
-    box.innerHTML = `<p class="hint">Este producto no está en ninguna ficha de la vitrina.</p>${canWrite?`<div class="filters">${sug?`<button class="btn sm ok" type="button" data-fisug="1">Crear ficha con ${int(sug.length)} productos parecidos</button>`:''}<button class="btn sm" type="button" data-finew="1">Crear ficha solo con este</button></div>`:''}`;
     fiFillSheet.sug = sug;
+    box.innerHTML = canWrite && sug ? `<p>Hay ${int(sug.length - 1)} ${sug.length===2?'producto parecido':'productos parecidos'} que podrían ir en la misma ficha (por ejemplo, otras medidas o colores).</p><div class="filters"><button class="btn sm ok" type="button" data-fisug="1">Crear ficha con ${int(sug.length)} productos</button></div>` : '';
   }
+  box.hidden = !box.innerHTML;
 }
 
 // ---------- eventos ----------
@@ -2650,7 +2958,7 @@ $('fi_x').addEventListener('click', () => $('fiDlg').close());
 $('fi_del').addEventListener('click', delFicha);
 $('fiDlg').addEventListener('close', () => { fe = null; if (route().view==='F') renderFichas(); });
 $('fi_dTipo').addEventListener('click', e => { const b = e.target.closest('button'); if (!b || !fe) return; setDTipo(b.dataset.d); renderFiVars(); renderFiPrev(); });
-['fi_dVal','fi_dDesde','fi_dHasta','fi_n','fi_desc'].forEach(id => $(id).addEventListener('input', () => { if (fe){ renderFiPrev(); if (id==='fi_dVal') renderFiVarsSoft(); } }));
+['fi_dVal','fi_dEtq','fi_dDesde','fi_dHasta','fi_n','fi_desc'].forEach(id => $(id).addEventListener('input', () => { if (fe){ renderFiPrev(); if (id==='fi_dVal') renderFiVarsSoft(); } }));
 $('fi_mk').addEventListener('change', () => fe && renderFiPrev());
 function renderFiVarsSoft(){ clearTimeout(renderFiVarsSoft.t); renderFiVarsSoft.t = setTimeout(()=>{ const a = document.activeElement?.id; renderFiVars(); if (a) $(a)?.focus(); }, 400); }
 $('fi_attrs').addEventListener('input', e => {
@@ -2710,12 +3018,44 @@ const SOON = {
   compras: ['Compras', 'Llega en la fase 3 del plan.', ['Compras locales e importaciones con proveedor','Gastos de flete, seguro, aranceles, agente aduanero y transporte repartidos por valor FOB, peso o unidades','Costo unitario final y costo promedio al recibir en bodega','Proveedores con historial (incluido el historial de compras a BRG que ya ves en cada producto)']],
   informes: ['Informes', 'Llega en la fase 3 del plan. Mientras tanto puedes exportar el catálogo a CSV desde Productos → Filtros.', ['Productos más vendidos','Utilidad por producto y por periodo','Stock bajo y productos sin movimiento','Ventas por forma de pago y por vendedor']],
 };
+// Propuesta de compra: productos marcados desde la pestaña Inventario de la ficha para re-stockear
+function propRows(){ return [...PROP.values()].map(e => ({e, p: BY.get(e.c)})).sort((a,b)=>String(a.e.c).localeCompare(String(b.e.c))); }
+function renderCompras(){
+  const [, d, items] = SOON.compras, rows = propRows();
+  const und = rows.reduce((s,r)=>s+(Number(r.e.q)||0),0), costo = rows.reduce((s,r)=>s+(Number(r.e.q)||0)*(Number(r.p?.k)||0),0);
+  $('soonBody').innerHTML = `<h4>Propuesta de compra</h4>
+    <p class="sub">Productos que marcaste desde la ficha (pestaña Inventario) para volver a pedir.</p>
+    ${rows.length ? `<div class="pr-list">${rows.map(({e,p}) => { const lv = p ? nivel(p) : ['ag','']; return `<div class="pr-row">
+        <button type="button" class="pr-main" data-open="${esc(e.c)}"><span class="name">${esc(p ? displayName(p) : e.c)}</span><span class="sub"><span class="code">${esc(e.c)}</span> · stock ${int(p?.q ?? 0)}${lv[1]?` · ${esc(lv[1].toLowerCase())}`:''}${p?.k!=null?` · costo ${money(p.k)}`:''}</span></button>
+        <input type="number" min="1" step="1" inputmode="numeric" value="${esc(e.q)}" data-prq="${esc(e.c)}" aria-label="Unidades a pedir de ${esc(e.c)}" ${canWrite?'':'disabled'}>
+        ${canWrite?`<button class="btn sm" type="button" data-prdel="${esc(e.c)}">Quitar</button>`:''}</div>`; }).join('')}</div>
+      <div class="kpi"><span><b>${int(rows.length)}</b> productos</span><span><b>${int(und)}</b> unidades</span><span>Costo estimado <b>${money(costo)}</b></span></div>
+      <div class="filters"><button class="btn sm" type="button" data-prcsv="1">Descargar CSV</button></div>`
+    : '<p class="hint">Todavía no hay productos. Abre un producto, ve a la pestaña Inventario y pulsa “Añadir a propuesta de compra”.</p>'}
+    <h4 style="margin-top:14px">Lo que viene en Compras</h4><p class="sub">${esc(d)}</p><ul>${items.map(i=>`<li>${esc(i)}</li>`).join('')}</ul>`;
+}
+$('soonBody').addEventListener('click', async e => {
+  const o = e.target.closest('[data-open]'); if (o){ open(o.dataset.open, 'inv'); return; }
+  const d = e.target.closest('[data-prdel]'); if (d && db){ try{ await db.collection('propuesta').doc(d.dataset.prdel).delete(); }catch(err){ toast('No se pudo quitar'); } return; }
+  if (e.target.closest('[data-prcsv]')){
+    const q = v => `"${String(v ?? '').replace(/"/g,'""')}"`;
+    const lines = [['Código','Producto','Código de fábrica','Stock','Stock mínimo','Pedir','Costo','Total'].map(q).join(',')]
+      .concat(propRows().map(({e,p}) => [e.c, p ? displayName(p) : '', p ? (p.p || p.sku || '') : '', p?.q ?? 0, p ? sminOf(p) : '', e.q, p?.k ?? '', p?.k!=null ? (Number(p.k)*Number(e.q)).toFixed(2) : ''].map(q).join(',')));
+    const data = '\ufeff' + lines.join('\n'), filename = `propuesta-compra-${hoyStr()}.csv`;
+    if (downloads) await downloads.save({filename, data}); else { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([data],{type:'text/csv'})); a.download = filename; a.click(); }
+  }
+});
+$('soonBody').addEventListener('change', async e => {
+  const c = e.target.dataset.prq; if (!c || !db) return;
+  const q = Math.max(1, Math.round(Number(e.target.value)||1));
+  try{ await db.collection('propuesta').doc(c).update({q}); }catch(err){ toast('No se pudo cambiar la cantidad'); }
+});
 function navRoute(r){
   for (const [k, [id]] of Object.entries(SECS)) $(id).setAttribute('aria-current', r.view===k ? 'page' : 'false');
   $('tabK').setAttribute('aria-current', r.soon==='compras' ? 'page' : 'false');
   $('tabR').setAttribute('aria-current', r.soon==='informes' ? 'page' : 'false');
   $('curSec').textContent = r.soon ? SOON[r.soon][0] : (SECS[r.view]?.[1] || '');
-  if (r.view==='X'){ const [t, d, items] = SOON[r.soon]; $('soonT').textContent = t; $('soonBody').innerHTML = `<p class="sub">${esc(d)}</p><ul>${items.map(i=>`<li>${esc(i)}</li>`).join('')}</ul>`; }
+  if (r.view==='X'){ const [t, d, items] = SOON[r.soon]; $('soonT').textContent = t; $('soonBody').innerHTML = `<p class="sub">${esc(d)}</p><ul>${items.map(i=>`<li>${esc(i)}</li>`).join('')}</ul>`; if (r.soon==='compras') renderCompras(); }
   if (r.view==='A') renderAjustes();
   sideOpen(false);
 }
@@ -2877,6 +3217,23 @@ $('phBig').addEventListener('keydown', e => { if (e.key==='Enter' || e.key===' '
 $('zoom').addEventListener('click', () => $('zoom').close());
 $('zoom').addEventListener('cancel', e => e.stopPropagation());
 $('form').addEventListener('input', updateSheet);
+$('shTabs').addEventListener('click', e => { const b = e.target.closest('[data-tab]'); if (b) setTab(b.dataset.tab); });
+$('shTabs').addEventListener('keydown', e => {
+  if (e.key!=='ArrowRight' && e.key!=='ArrowLeft') return;
+  const i = SH_TABS.indexOf(shTab), n = SH_TABS[(i + (e.key==='ArrowRight' ? 1 : SH_TABS.length-1)) % SH_TABS.length];
+  setTab(n); $('tb-'+n).focus(); e.preventDefault();
+});
+$('v_dTipo').addEventListener('click', e => { const b = e.target.closest('button'); if (!b || !vt) return; setVTipo(b.dataset.d); updateSheet(); if (b.dataset.d) $('v_dVal').focus(); });
+$('i_m').addEventListener('input', mkHintUpd);
+$('pcBox').addEventListener('input', e => { if (e.target.id==='pc_q') e.target.dataset.touched = '1'; });
+$('pcBox').addEventListener('click', e => { const b = e.target.closest('[data-pc]'); if (b) pcAction(b.dataset.pc); });
+$('nt_btn').addEventListener('click', addNota);
+$('nt_txt').addEventListener('keydown', e => { if (e.key==='Enter' && (e.ctrlKey || e.metaKey)){ e.preventDefault(); addNota(); } });
+$('ntList').addEventListener('click', async e => {
+  const b = e.target.closest('[data-ntdel]'); if (!b || !db) return;
+  if (!b.dataset.arm){ b.dataset.arm = '1'; b.textContent = '¿Seguro? Toca otra vez'; setTimeout(()=>{ if (b.isConnected){ delete b.dataset.arm; b.textContent = 'Borrar'; } }, 4000); return; }
+  try{ await db.collection('notas').doc(b.dataset.ntdel).delete(); toast('Nota borrada'); }catch(err){ toast('No se pudo borrar: '+(err && err.message || '')); }
+});
 $('form').addEventListener('submit', e => e.preventDefault());
 $('i_cat').addEventListener('change', ()=>{ fillDatalists($('i_cat').value); updateSheet(); });
 $('segEst').querySelectorAll('button').forEach(b => b.addEventListener('click', ()=>{ setEstado(b.dataset.e); updateSheet(); }));
@@ -3012,6 +3369,12 @@ function showReadOnly(){ const n=$('notice'); n.hidden=false; n.textContent='Est
     const d = snap.docs.find(x => x.id==='arbol');
     setTax(d ? JSON.parse(JSON.stringify(d.data()||{})) : null);
   }, lost);
+  myId().then(x => { MYID = x; if (current) renderNotas(); });
+  db.collection('propuesta').onSnapshot(snap => {
+    PROP = new Map(snap.docs.map(d => [d.id, {id:d.id, ...JSON.parse(JSON.stringify(d.data()||{}))}]));
+    if (current) renderPc();
+    if (route().soon==='compras') renderCompras();
+  }, () => {});
   db.collection('clientes').onSnapshot(snap => {
     CLIS = snap.docs.map(d => ({id:d.id, ...JSON.parse(JSON.stringify(d.data()||{}))}));
     const r = route(); if (r.view==='C') renderClientes(); if (r.view==='V') renderCliPick();
