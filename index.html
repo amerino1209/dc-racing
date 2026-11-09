@@ -341,6 +341,15 @@ label.f.miss input,label.f.miss select{border-color:var(--accent);background:var
 .cli-card:hover{border-color:var(--muted)}
 dialog.dlg{border:0;border-radius:14px;padding:0;width:min(560px,calc(100% - 24px));max-height:calc(100% - 24px);background:var(--surface);color:var(--ink);box-shadow:var(--shadow)}
 dialog.dlg::backdrop{background:rgba(10,12,16,.5)}
+dialog.imp-dlg{width:min(760px,calc(100% - 24px))}
+.imp-list{max-height:min(46vh,420px);overflow:auto;border:1px solid var(--line);border-radius:10px}
+.imp-list .hint{padding:10px 12px;margin:0}
+.imp-tb{font-size:.84rem}
+.imp-tb thead th{position:sticky;top:0;background:var(--surface)}
+.imp-tb td.old{color:var(--muted);text-decoration:line-through}
+.imp-tb td{overflow-wrap:anywhere}
+.imp-warn{margin:0;padding-left:18px;max-height:140px;overflow:auto}
+#impSum p{margin:0 0 6px}
 .dlg form{display:grid;gap:12px;padding:16px}
 .dlg h3{margin:0;font:700 1.25rem/1 var(--f-display);text-transform:uppercase;letter-spacing:.04em}
 .dlg .acts{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
@@ -538,7 +547,9 @@ label.chk.sm{font-size:.85rem}
         <label class="chk"><input type="checkbox" id="fBrg"> Comprado a BRG</label>
         <button class="btn sm" id="btnClear" type="button">Limpiar filtros</button>
         <button class="btn sm" id="btnArchAll" type="button" hidden>Archivar esta lista</button>
-        <button class="btn sm" id="btnExport" type="button" hidden>Exportar CSV</button>
+        <button class="btn sm" id="btnExport" type="button" hidden title="Exporta la lista filtrada (o todo) para editarla en Excel">Exportar Excel</button>
+        <button class="btn sm" id="btnExportCsv" type="button" hidden title="Todas las columnas, para revisar o respaldar">Exportar CSV</button>
+        <label class="btn sm filebtn" id="btnImport" hidden title="Sube el Excel o CSV editado"><span>Importar cambios</span><input id="impFile" type="file" accept=".xlsx,.xls,.csv,.ods,text/csv"></label>
       </div>
     </div>
   </div>
@@ -818,6 +829,17 @@ label.chk.sm{font-size:.85rem}
     </div>
   </form>
 </dialog>
+<dialog class="dlg imp-dlg" id="impDlg" aria-labelledby="impT">
+  <form method="dialog" id="impForm">
+    <h3 id="impT">Importar cambios en masa</h3>
+    <div id="impSum"></div>
+    <label class="chk" id="imp_stockW"><input type="checkbox" id="imp_stock"> Incluir cambios de cantidad (stock) <span class="hint" id="imp_stockN"></span></label>
+    <label class="chk"><input type="checkbox" id="imp_clear"> Las celdas vacías borran el dato</label>
+    <ul class="hint warn imp-warn" id="impWarn" hidden></ul>
+    <div class="imp-list" id="impList"></div>
+    <div class="acts"><button class="btn" type="button" id="imp_cancel">Cancelar</button><button class="btn ok" type="button" id="imp_ok">Aplicar</button></div>
+  </form>
+</dialog>
 <dialog class="dlg" id="archDlg" aria-labelledby="archT">
   <form id="archForm" style="display:grid;gap:12px;padding:16px">
     <h3 id="archT" style="margin:0;font:700 1.25rem/1 var(--f-display);text-transform:uppercase">Archivar producto</h3>
@@ -1073,7 +1095,7 @@ label.chk.sm{font-size:.85rem}
 (() => {
 const $ = id => document.getElementById(id);
 const EST = {I:'Inventariado', P:'Por pedir', R:'Por revisar'};
-const MOT = {Conteo:'Nuevo conteo', Ingreso:'Ingreso de mercadería', Venta:'Venta', Ajuste:'Ajuste', Inventario:'Inventario', Alta:'Producto nuevo', Anulacion:'Venta anulada'};
+const MOT = {Conteo:'Nuevo conteo', Ingreso:'Ingreso de mercadería', Venta:'Venta', Ajuste:'Ajuste', Inventario:'Inventario', Alta:'Producto nuevo', Anulacion:'Venta anulada', Importacion:'Importación desde archivo'};
 const NAME_KEYS = ['t','m','mo','me','d2','ma','co','d5'];
 const COMP = [['cat','Categoría'],['m','Marca'],['me','Medida/modelo'],['ma','Material'],['co','Color'],['b','Código de barras'],['k','Costo'],['v','Venta'],['foto','Foto']];
 const PAGE = 150;
@@ -1599,6 +1621,7 @@ function docOf(m){
   if (m.oc) return `Orden de compra ${m.oc}`;
   if (m.venta) return `${m.motivo==='Anulacion' ? 'Venta anulada' : 'Venta'} N.º ${String(m.venta).slice(-6).toUpperCase()}`;
   if (m.inv) return m.nombre || '';
+  if (m.imp) return m.nombre ? `Archivo ${m.nombre}` : '';
   if (m.doc) return `Doc. ${m.doc}`;
   return '';
 }
@@ -2294,6 +2317,230 @@ async function exportCsv(){
   }
   try{ await downloads.save({filename:`inventario_dc_racing_${new Date().toISOString().slice(0,10)}.csv`, data:'﻿'+lines.join('\r\n')}); }
   catch(e){ toast('La descarga se canceló o no está disponible.'); }
+}
+// ---------- cambios en masa: exportar a Excel, editar y volver a importar ----------
+// El archivo se identifica por "Código interno". Solo se importan las columnas editables; las demás son informativas.
+const XLSX_URL = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+let xlsxP = null;
+function loadXlsx(){
+  if (window.XLSX) return Promise.resolve(window.XLSX);
+  return xlsxP || (xlsxP = new Promise((ok, ko) => {
+    const s = document.createElement('script'); s.src = XLSX_URL;
+    s.onload = () => ok(window.XLSX); s.onerror = () => { xlsxP = null; s.remove(); ko(new Error('No se pudo cargar el lector de Excel. Revisa la conexión a internet.')); };
+    document.head.appendChild(s);
+  }));
+}
+// [clave, encabezado, tipo, otros nombres aceptados]; tipo 'ro' = solo informativo
+const MASS_COLS = [
+  ['c','Código interno','key'],
+  ['n','Nombre (se calcula, no se importa)','ro',['Nombre']],
+  ['cat','Categoría interna (no se importa)','ro',['Categoría']],
+  ['t','Tipo de producto','txt',['Tipo']],
+  ['m','Marca','txt'],
+  ['mo','Modelo','txt'],
+  ['me','Medida','txt'],
+  ['d2','Detalle 2','txt'],
+  ['ma','Material','txt'],
+  ['co','Color','txt'],
+  ['d5','Detalle extra','txt'],
+  ['b','Código de barras','txt'],
+  ['p','Código de fábrica','txt',['Código proveedor','Código de proveedor']],
+  ['sku','SKU','txt'],
+  ['k','Costo','num',['Costo (USD)']],
+  ['v','PVP con IVA','num',['PVP','Venta','Precio de venta','Precio de venta (USD)']],
+  ['q','Cantidad (stock)','int',['Cantidad','Stock']],
+  ['smin','Stock mínimo','int'],
+  ['e','Estado','est'],
+  ['cx','Categoría vitrina','cx'],
+  ['arch','Archivado (no se importa)','ro',['Archivado']],
+  ['d','Descripción original (no se importa)','ro',['Descripción original']],
+];
+const MASS_LABEL = Object.fromEntries(MASS_COLS.map(([k,h]) => [k, h.replace(/\s*\(.*\)$/,'')]));
+function massValue(p, k){
+  if (k==='n') return buildName(p) || p.d || '';
+  if (k==='cat') return CATS[pref(p.c)] || pref(p.c);
+  if (k==='e') return EST[p.e] || '';
+  if (k==='cx') return TAX && p.cx && TX.cat.has(p.cx) ? catPath(p.cx) : '';
+  if (k==='arch') return p.arch ? `${ARCH_MOT[p.archMot]||'Sí'} ${String(p.arch).slice(0,10)}` : '';
+  if (k==='p') return p.p || p.sku || '';
+  return p[k] ?? '';
+}
+const massRows = () => { const f = filtered(); return f.length ? f : ALL; };
+async function exportXlsx(){
+  const btn = $('btnExport'); btn.disabled = true; const t0 = btn.textContent; btn.textContent = 'Preparando…';
+  try{
+    const X = await loadXlsx(), rows = massRows();
+    const aoa = [MASS_COLS.map(c => c[1])];
+    for (const p of rows) aoa.push(MASS_COLS.map(([k,,ty]) => { const v = massValue(p, k); return (ty==='num'||ty==='int') && v!=='' && v!=null ? Number(v) : String(v ?? ''); }));
+    const ws = X.utils.aoa_to_sheet(aoa);
+    ws['!cols'] = MASS_COLS.map(([k]) => ({wch: {c:10, n:38, cat:22, d:40, cx:34, b:16}[k] || 14}));
+    ws['!autofilter'] = {ref: X.utils.encode_range({s:{r:0,c:0}, e:{r:aoa.length-1, c:MASS_COLS.length-1}})};
+    const ins = X.utils.aoa_to_sheet([
+      ['Cómo hacer cambios en masa'],
+      [''],
+      ['1. Cambia los datos en la hoja Productos. No cambies la columna "Código interno": con ella se reconoce cada producto.'],
+      ['2. Las columnas que dicen "no se importa" son solo de referencia.'],
+      ['3. Puedes borrar las columnas que no vayas a cambiar y también las filas de productos que no toques.'],
+      ['4. Guarda el archivo (Excel o CSV) y en Productos pulsa "Importar cambios". Antes de aplicar verás cada cambio.'],
+      ['5. Una celda vacía no cambia nada, salvo que marques "Las celdas vacías borran el dato" al importar.'],
+      ['6. Los cambios de "Cantidad (stock)" solo se aplican si los marcas al importar, y quedan en el kardex como "Importación desde archivo".'],
+      [`Estado: ${Object.values(EST).join(', ')}.`],
+      ['Categoría vitrina: escribe la ruta completa tal como aparece (por ejemplo "Componentes › Dirección › Alzas y espaciadores") o solo el último nombre si no se repite.'],
+    ]);
+    ins['!cols'] = [{wch:120}];
+    const wb = X.utils.book_new(); X.utils.book_append_sheet(wb, ws, 'Productos'); X.utils.book_append_sheet(wb, ins, 'Instrucciones');
+    const data = new Blob([X.write(wb, {bookType:'xlsx', type:'array'})], {type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+    await downloads.save({filename:`productos_dc_racing_${hoyStr()}.xlsx`, data});
+    toast(`${int(rows.length)} productos exportados${rows.length < ALL.length ? ' (los de la lista filtrada)' : ''}`);
+  }catch(e){ toast(e && e.message || 'No se pudo exportar.'); }
+  btn.disabled = false; btn.textContent = t0;
+}
+// CSV: se respeta el separador y la codificación con que lo guarde Excel (UTF-8 o Windows)
+function parseCsv(text){
+  const first = text.split(/\r?\n/, 1)[0] || '';
+  const sep = [';', '\t', ','].map(s => [s, first.split(s).length]).sort((a,b)=>b[1]-a[1])[0][0];
+  const rows = []; let row = [], cell = '', q = false;
+  for (let i = 0; i < text.length; i++){
+    const ch = text[i];
+    if (q){ if (ch==='"'){ if (text[i+1]==='"'){ cell += '"'; i++; } else q = false; } else cell += ch; continue; }
+    if (ch==='"') q = true;
+    else if (ch===sep){ row.push(cell); cell = ''; }
+    else if (ch==='\n' || ch==='\r'){ if (ch==='\r' && text[i+1]==='\n') i++; row.push(cell); rows.push(row); row = []; cell = ''; }
+    else cell += ch;
+  }
+  if (cell !== '' || row.length){ row.push(cell); rows.push(row); }
+  return rows;
+}
+async function readMassFile(file){
+  if (/\.(xlsx|xls|xlsm|ods)$/i.test(file.name)){
+    const X = await loadXlsx();
+    const wb = X.read(await file.arrayBuffer(), {type:'array'});
+    const name = wb.SheetNames.find(n => norm(n)==='productos') || wb.SheetNames[0];
+    return X.utils.sheet_to_json(wb.Sheets[name], {header:1, raw:true, defval:''});
+  }
+  const buf = await file.arrayBuffer();
+  let text; try { text = new TextDecoder('utf-8', {fatal:true}).decode(buf); } catch(_) { text = new TextDecoder('windows-1252').decode(buf); }
+  return parseCsv(text.replace(/^﻿/, ''));
+}
+function parseNum(raw){
+  if (typeof raw === 'number') return raw;
+  let s = String(raw).replace(/[$\s]/g, '');
+  if (s.includes(',') && s.includes('.')) s = s.lastIndexOf(',') > s.lastIndexOf('.') ? s.replace(/\./g,'').replace(',', '.') : s.replace(/,/g,'');
+  else s = s.replace(',', '.');
+  const n = Number(s); return s !== '' && isFinite(n) ? n : NaN;
+}
+let MASS = null;   // {file, rows, idx, ...} análisis en curso
+function massAnalyze(){
+  const {rows, cols} = MASS, opts = {stock: $('imp_stock').checked, clear: $('imp_clear').checked};
+  const cxBy = new Map();
+  if (TAX){ const leaf = new Map(); for (const id of TX.cat.keys()){ cxBy.set(norm(catPath(id)), id); const n = norm(TX.cat.get(id).n); leaf.set(n, leaf.has(n) ? null : id); } for (const [n, id] of leaf) if (id && !cxBy.has(n)) cxBy.set(n, id); }
+  const map = {}, changes = [], warn = [], unknown = [], seen = new Map();
+  let stockN = 0, clearN = 0;
+  for (let r = 1; r < rows.length; r++){
+    const row = rows[r]; if (!row || row.every(v => String(v ?? '').trim()==='')) continue;
+    const code = String(row[cols.c] ?? '').trim().toUpperCase();
+    if (!code){ warn.push(`Fila ${r+1}: sin código interno, se omite.`); continue; }
+    const p = BY.get(code); if (!p){ unknown.push(code); continue; }
+    if (seen.has(code)) warn.push(`${code} aparece dos veces (filas ${seen.get(code)} y ${r+1}): vale la última.`);
+    seen.set(code, r+1);
+    const patch = {};
+    for (const [k, ty] of MASS.edit){
+      const raw = row[cols[k]], str = raw==null ? '' : String(raw).trim();
+      const cur = k==='p' ? (p.p || '') : (p[k] ?? '');
+      if (str===''){
+        if (!opts.clear || cur==='' || cur==null || k==='q' || k==='e') continue;
+        if (k==='p' && !p.p) continue;
+        patch[k] = (ty==='num'||ty==='int') ? null : ''; clearN++; continue;
+      }
+      let val;
+      if (ty==='txt') val = typeof raw==='number' ? String(raw) : str.replace(/\s+/g,' ');
+      else if (ty==='num' || ty==='int'){
+        val = parseNum(raw);
+        if (isNaN(val) || val < 0){ warn.push(`${code}: "${str}" no es un número válido en ${MASS_LABEL[k]}.`); continue; }
+        val = ty==='int' ? Math.round(val) : Math.round(val*100)/100;
+      } else if (ty==='est'){
+        val = Object.keys(EST).find(e => norm(EST[e])===norm(str) || norm(e)===norm(str));
+        if (!val){ warn.push(`${code}: estado "${str}" no existe (usa ${Object.values(EST).join(', ')}).`); continue; }
+      } else if (ty==='cx'){
+        if (!TAX){ continue; }
+        val = cxBy.get(norm(str.replace(/\s*[›>\/]\s*/g, ' › ')));
+        if (!val){ warn.push(`${code}: no encontré la categoría de vitrina "${str}".`); continue; }
+      }
+      const same = (ty==='num'||ty==='int') ? (cur!=='' && cur!=null && Number(cur)===val) : String(cur ?? '').trim()===String(val);
+      if (same) continue;
+      if (k==='q'){ stockN++; if (!opts.stock) continue; }
+      patch[k] = val;
+    }
+    if (patch.b){ const otro = ALL.find(x => x.c!==code && sameCode(x.b, patch.b)); if (otro) warn.push(`${code}: el código de barras ${patch.b} ya lo tiene ${otro.c}.`); }
+    if ('m' in patch && TAX){ const id = TX.alias.get(mkey(patch.m)) || ''; if ((p.mk||'') !== id) patch.mk = id; }
+    const keys = Object.keys(patch); if (!keys.length) continue;
+    map[code] = patch;
+    for (const k of keys) if (k!=='mk') changes.push({c:code, k, a: k==='p' ? (p.p||'') : p[k], d: patch[k]});
+  }
+  MASS.res = {map, changes, warn, unknown, stockN, clearN};
+  massRender();
+}
+function massShow(k, v){
+  if (v==null || v==='') return '—';
+  if (k==='e') return EST[v] || v;
+  if (k==='cx') return TAX && TX.cat.has(v) ? catPath(v) : v;
+  if (k==='k' || k==='v') return money(v);
+  return String(v);
+}
+function massRender(){
+  const {map, changes, warn, unknown, stockN} = MASS.res, n = Object.keys(map).length;
+  const ign = MASS.ignored.length ? `<p class="hint">Columnas que no se importan: ${esc(MASS.ignored.join(', '))}.</p>` : '';
+  $('impSum').innerHTML = `<p><b>${esc(MASS.file)}</b> · ${int(MASS.rows.length-1)} filas · ${int(MASS.edit.length)} columnas editables.</p>${ign}
+    <div class="kpi"><span><b>${int(n)}</b> productos cambian</span><span><b>${int(changes.length)}</b> datos</span>${unknown.length?`<span><b>${int(unknown.length)}</b> códigos no existen</span>`:''}${warn.length?`<span><b>${int(warn.length)}</b> avisos</span>`:''}</div>`;
+  $('imp_stockW').hidden = !MASS.edit.some(([k]) => k==='q');
+  $('imp_stockN').textContent = stockN ? `(${int(stockN)} ${stockN===1?'producto cambia':'productos cambian'})` : '(sin diferencias)';
+  const lim = 300;
+  $('impList').innerHTML = changes.length ? `<table class="kx-tb imp-tb"><thead><tr><th>Código</th><th>Dato</th><th>Antes</th><th>Después</th></tr></thead><tbody>${changes.slice(0, lim).map(ch => `<tr><td class="code">${esc(ch.c)}</td><td>${esc(MASS_LABEL[ch.k]||ch.k)}</td><td class="old">${esc(massShow(ch.k, ch.a))}</td><td><b>${esc(massShow(ch.k, ch.d))}</b></td></tr>`).join('')}</tbody></table>${changes.length > lim ? `<p class="hint">…y ${int(changes.length - lim)} cambios más.</p>` : ''}`
+    : '<p class="hint">No hay diferencias con lo que ya está guardado.</p>';
+  const w = [...(unknown.length ? [`Estos códigos no existen y se omiten: ${unknown.slice(0, 30).join(', ')}${unknown.length > 30 ? '…' : ''}`] : []), ...warn];
+  $('impWarn').hidden = !w.length; $('impWarn').innerHTML = w.slice(0, 60).map(x => `<li>${esc(x)}</li>`).join('') + (w.length > 60 ? `<li>…y ${int(w.length - 60)} avisos más.</li>` : '');
+  $('imp_ok').disabled = !n || !canWrite; $('imp_ok').textContent = n ? `Aplicar cambios a ${int(n)} ${n===1?'producto':'productos'}` : 'Nada que aplicar';
+}
+async function massOpen(file){
+  if (!db || !canWrite){ toast('No tienes permiso para guardar cambios.'); return; }
+  try{
+    const rows = await readMassFile(file);
+    if (!rows.length) throw new Error('el archivo está vacío');
+    const head = rows[0].map(h => norm(String(h ?? '').replace(/\s*\(.*\)\s*$/, '')));
+    const cols = {}, edit = [], ignored = [];
+    head.forEach((h, i) => {
+      if (!h) return;
+      const col = MASS_COLS.find(([, n, , al]) => [n, ...(al||[])].some(x => norm(x.replace(/\s*\(.*\)\s*$/, ''))===h));
+      if (!col){ ignored.push(String(rows[0][i])); return; }
+      if (col[0] in cols) return;
+      cols[col[0]] = i;
+      if (col[2]==='ro') ignored.push(String(rows[0][i])); else if (col[2]!=='key') edit.push([col[0], col[2]]);
+    });
+    if (!('c' in cols)) throw new Error('falta la columna "Código interno". Usa el archivo que sale de "Exportar Excel".');
+    if (!edit.length) throw new Error('no hay columnas que se puedan importar.');
+    MASS = {file: file.name, rows, cols, edit, ignored};
+    $('imp_stock').checked = false; $('imp_clear').checked = false;
+    massAnalyze();
+    $('impDlg').showModal();
+  }catch(e){ toast('No se pudo leer el archivo: ' + (e && e.message || e)); }
+}
+async function massApply(){
+  if (!MASS || !MASS.res || !db) return;
+  const {map} = MASS.res, codes = Object.keys(map); if (!codes.length) return;
+  const b = $('imp_ok'); b.disabled = true; b.textContent = 'Guardando…';
+  const now = new Date().toISOString(), moves = [];
+  for (const c of codes){
+    const p = BY.get(c), patch = map[c];
+    if ('q' in patch){ moves.push({c, a: p.q ?? 0, d: patch.q}); patch.qAt = now; patch.qMot = 'Importacion'; }
+    patch.n = buildName({...p, ...patch});
+  }
+  try{
+    await patchMany(map);
+    if (moves.length) await logMoves('Importacion', moves, {nombre: MASS.file, imp: true});
+    await db.collection('importaciones').add({t: now, archivo: MASS.file, productos: codes.length, datos: MASS.res.changes.length, stock: moves.length, por: await myId()}).catch(()=>{});
+    $('impDlg').close();
+    toast(`Listo: ${int(codes.length)} productos actualizados${moves.length ? `, ${int(moves.length)} con cambio de stock` : ''}.`);
+  }catch(e){ toast('Se detuvo al guardar: ' + (e && e.message || '')); b.disabled = false; massRender(); }
 }
 
 // ---------- categorías y marcas (taxonomía de la vitrina) ----------
@@ -3255,7 +3502,14 @@ const syncFiltBtn = () => { const n=activeFilters(); $('btnFilt').textContent = 
 $('btnFilt').addEventListener('click', ()=>{ const o=$('filtersBox').classList.toggle('open'); $('btnFilt').setAttribute('aria-expanded', o); });
 document.querySelectorAll('#filtersBox select, #filtersBox input').forEach(el=>el.addEventListener('change', syncFiltBtn));
 $('btnClear').addEventListener('click', syncFiltBtn);
-$('btnExport').addEventListener('click', exportCsv);
+$('btnExport').addEventListener('click', exportXlsx);
+$('btnExportCsv').addEventListener('click', exportCsv);
+$('impFile').addEventListener('change', e => { const f = e.target.files[0]; e.target.value = ''; if (f) massOpen(f); });
+$('imp_stock').addEventListener('change', massAnalyze);
+$('imp_clear').addEventListener('change', massAnalyze);
+$('imp_cancel').addEventListener('click', () => $('impDlg').close());
+$('imp_ok').addEventListener('click', massApply);
+$('impDlg').addEventListener('close', () => { MASS = null; });
 // inventarios
 document.querySelectorAll('#invForm .seg button').forEach(b => b.addEventListener('click', ()=>{
   alcance=b.dataset.a; document.querySelectorAll('#invForm .seg button').forEach(x=>x.setAttribute('aria-pressed', x===b)); updateInvForm();
@@ -3338,9 +3592,10 @@ function showReadOnly(){ const n=$('notice'); n.hidden=false; n.textContent='Est
   if (!window.claude || !window.claude.use) { const n=$('notice'); n.hidden=false; n.textContent='Abre la herramienta desde Claude para guardar cambios.'; $('btnNew').hidden=true; canWrite=false; return; }
   const [d, u, a, dl] = await Promise.all(['db','user','assets','downloads'].map(n=>window.claude.use(n).catch(()=>null)));
   db=d; user=u; assets=a; downloads=dl;
-  if (downloads) $('btnExport').hidden=false;
+  if (downloads) $('btnExport').hidden = $('btnExportCsv').hidden = false;
   if (!db){ canWrite=false; showReadOnly(); return; }
   if (user && user.can){ const w = await Promise.resolve(user.can('data.write')).catch(()=>null); if (w===false){ canWrite=false; showReadOnly(); } }
+  $('btnImport').hidden = !canWrite;
   const lost = () => { const n=$('notice'); n.hidden=false; n.textContent='Se perdió la conexión con la base de datos. Recarga la página para seguir guardando.'; };
   db.collection('cambios').onSnapshot(snap => {
     const next = {}; docExists = new Set();
