@@ -110,6 +110,11 @@ button.ghead:hover h3{color:var(--accent)}
 .vsw button[aria-pressed="true"]{background:var(--ink);color:var(--surface)}
 .list.mosaic{grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px}
 .list.mosaic .ghead,.list.mosaic .empty{grid-column:1 / -1}
+button.ghead.gsub{margin-top:6px;padding:5px 2px 3px 18px;border-bottom:1px solid var(--line)}
+.ghead.gsub h4{margin:0;font:700 .9rem/1 var(--f-display);text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+.ghead.gsub h4::before{content:"";display:inline-block;width:.38em;height:.38em;margin:0 .55em .12em .1em;border:solid currentColor;border-width:0 2px 2px 0;transform:rotate(45deg);transition:transform .15s}
+.ghead.gsub[aria-expanded="false"] h4::before{transform:rotate(-45deg)}
+button.ghead.gsub:hover h4{color:var(--accent)}
 .tile{display:flex;flex-direction:column;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:0;overflow:hidden;text-align:left;color:var(--ink);min-width:0}
 .tile:hover{border-color:var(--muted)}
 .tile.ver{box-shadow:inset 0 4px 0 var(--ok);border-left-width:1px}
@@ -1400,6 +1405,12 @@ function setVista(v){
 let gClosed = new Set(), lastGroups = [];
 try{ gClosed = new Set(JSON.parse(localStorage.getItem('dcr-gcerrados')||'[]')); }catch(_){}
 const saveGClosed = () => { try{ localStorage.setItem('dcr-gcerrados', JSON.stringify([...gClosed])); }catch(_){} };
+function marcaLabel(p){
+  const id = TAX ? marcaOf(p) : null;
+  if (id) return TX.mk.get(id).n;
+  const t = String(p.m ?? '').trim();
+  return t ? cap(t.replace(/\s+/g,' ').toLowerCase()) : 'Sin marca';
+}
 function renderList(){
   const item = vista==='mosaico' ? tileHtml : rowHtml;
   let rows = filtered(); const cat=$('fCat').value;
@@ -1426,7 +1437,19 @@ function renderList(){
     if (abierto && n >= shown) continue;
     const u = ps.reduce((s,p)=>s+(p.q||0),0), v = ps.filter(p=>p.ver).length;
     html += `<button type="button" class="ghead" data-g="${esc(lab)}" aria-expanded="${abierto}"><h3>${esc(lab)}</h3><span>${int(ps.length)} productos · ${int(u)} und · ${int(v)} verificados</span></button>`;
-    if (abierto) for (const p of ps){ if (n++ >= shown) break; html += item(p); }
+    if (!abierto) continue;
+    // dentro de cada tipo, subgrupos por marca (marca del catálogo si existe; si no, el texto de marca)
+    const gm = new Map();
+    for (const p of ps){ const m = marcaLabel(p); if (!gm.has(m)) gm.set(m, []); gm.get(m).push(p); }
+    const marcas = [...gm].sort((a,b)=> a[0]==='Sin marca' ? 1 : b[0]==='Sin marca' ? -1 : a[0].localeCompare(b[0],'es'));
+    for (const [mk, mps] of marcas){
+      if (n >= shown) break;
+      const key = lab + '\u0001' + mk, ab2 = buscando || !gClosed.has(key);
+      const u2 = mps.reduce((s,p)=>s+(p.q||0),0);
+      html += `<button type="button" class="ghead gsub" data-g="${esc(key)}" aria-expanded="${ab2}"><h4>${esc(mk)}</h4><span>${int(mps.length)} ${mps.length===1?'producto':'productos'} · ${int(u2)} und</span></button>`;
+      if (ab2) for (const p of mps){ if (n++ >= shown) break; html += item(p); }
+      else visibles -= mps.length;
+    }
   }
   $('gOpenAll').hidden = $('gCloseAll').hidden = buscando;
   list.innerHTML = html; loadThumbs(list);
