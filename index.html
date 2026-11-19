@@ -241,7 +241,12 @@ main{min-height:60vh}
 .gal{display:grid;gap:10px;align-content:start}
 @media (min-width:860px){ .gal{position:sticky;top:150px} }
 .gal .main{position:relative;aspect-ratio:1;border:1px solid var(--line);border-radius:14px;background:#fff;overflow:hidden;display:grid;place-items:center}
-.gal .main img{width:100%;height:100%;object-fit:contain;padding:6%}
+.gal .main img{width:100%;height:100%;object-fit:contain;padding:6%;grid-area:1/1}
+.gal .main:focus-visible{outline-offset:3px}
+.gnav{position:absolute;top:50%;z-index:2;width:44px;height:44px;margin-top:-22px;border:1px solid var(--line);border-radius:999px;background:rgba(255,255,255,.92);color:var(--ink);display:grid;place-items:center;box-shadow:var(--shadow-s);transition:background .15s}
+.gnav:hover{background:#fff;border-color:var(--ink)}
+.gnav.prev{left:10px}.gnav.next{right:10px}
+.gcount{position:absolute;right:10px;bottom:10px;z-index:2;padding:4px 9px;border-radius:999px;background:rgba(13,13,15,.72);color:#fff;font-size:.8rem;font-weight:600;font-variant-numeric:tabular-nums}
 .thumbs{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding:2px}
 .thumbs::-webkit-scrollbar{display:none}
 .thumbs button{flex:none;width:68px;height:68px;border:1.5px solid var(--line);border-radius:10px;background:#fff;padding:4px;display:grid;place-items:center;overflow:hidden}
@@ -318,6 +323,8 @@ body.has-sticky footer{padding-bottom:76px}
   <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7.5"/><path d="m20.5 20.5-4.2-4.2"/></symbol>
   <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></symbol>
   <symbol id="i-down" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
+  <symbol id="i-left" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></symbol>
+  <symbol id="i-right" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></symbol>
   <symbol id="i-filter" viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></symbol>
   <symbol id="i-chat" viewBox="0 0 24 24"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/><path d="M8.5 10.5c.3 1.6 2.4 3.8 4.5 4.3l1.3-1.2 2 1"/></symbol>
   <symbol id="i-share" viewBox="0 0 24 24"><path d="M4 12v7a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7M16 6l-4-4-4 4M12 2v13"/></symbol>
@@ -500,7 +507,8 @@ const io = 'IntersectionObserver' in window ? new IntersectionObserver(es => es.
 function pintarFoto(el){
   const code = el.dataset.ft; if (!code) return;
   fotoDe(code).then(src => {
-    if (!src || el.dataset.ft !== code) { el.classList.add('empty'); return; }
+    if (el.dataset.ft !== code) return;
+    if (!src) { el.classList.add('empty'); return; }
     let img = el.querySelector('img');
     if (!img){ img = document.createElement('img'); img.alt = el.dataset.alt || ''; img.decoding = 'async'; el.appendChild(img); }
     img.src = src; el.classList.remove('empty');
@@ -775,7 +783,7 @@ function reabrir(){
 }
 
 // ---------- ficha de producto ----------
-let SEL = [], FT_VISTA = '';
+let SEL = [], FT_VISTA = '', FTS = [];
 function renderProd(r){
   const it = BYID.get(r.id);
   if (!it){
@@ -795,7 +803,10 @@ function renderProd(r){
   const ruta = it.ruta;
   $('view').innerHTML = `<ol class="crumbs"><li><a href="#/">Inicio</a></li>${ruta.map(c => `<li><a href="${catHref(c.id)}">${esc(c.n)}</a></li>`).join('')}</ol>
     <article class="pd" id="pd">
-      <div class="gal"><div class="main ph${it.ft?'':' empty'}" id="galMain" ${it.ft?`data-ft="${esc(it.ft)}" data-alt="${esc(it.n)}"`:''}></div><div class="thumbs" id="thumbs"></div></div>
+      <div class="gal"><div class="main ph${it.ft?'':' empty'}" id="galMain" ${it.ft?`data-ft="${esc(it.ft)}" data-alt="${esc(it.n)}"`:''}>
+          <button class="gnav prev" type="button" id="galPrev" aria-label="Foto anterior" hidden>${ico('left')}</button>
+          <button class="gnav next" type="button" id="galNext" aria-label="Foto siguiente" hidden>${ico('right')}</button>
+          <span class="gcount" id="galN" hidden></span></div><div class="thumbs" id="thumbs"></div></div>
       <div class="pi">
         <div>${it.mkN ? `<a class="mk" href="${href({m:[it.mk]})}">${esc(it.mkN)}</a>` : ''}<h1>${esc(it.n)}</h1></div>
         <div id="pPrecio"></div>
@@ -810,10 +821,24 @@ function renderProd(r){
     ${relHtml(it)}`;
   document.body.classList.add('has-sticky');
   // miniaturas: foto principal + fotos de cada opción
-  const fts = [...new Set([it.ft, ...vs.filter(v => v.ft).map(v => v.c)].filter(Boolean))];
+  FTS = [...new Set([it.ft, ...(it.gal || []), ...vs.filter(v => v.ft).map(v => v.c)].filter(Boolean))];
+  const fts = FTS;
   $('thumbs').innerHTML = fts.length > 1 ? fts.map(c => `<button type="button" aria-label="Ver foto" aria-pressed="${c===it.ft}" data-thumb="${esc(c)}"><span class="ph" data-ft="${esc(c)}" style="display:contents"></span></button>`).join('') : '';
   $('thumbs').querySelectorAll('[data-ft]').forEach(pintarFoto);
   $('thumbs').addEventListener('click', e => { const b = e.target.closest('[data-thumb]'); if (b) verFoto(b.dataset.thumb); });
+  // galería: flechas, deslizar con el dedo y teclado
+  const paso = d => { if (FTS.length < 2) return; const i = FTS.indexOf(FT_VISTA); verFoto(FTS[(i + d + FTS.length) % FTS.length]); };
+  $('galPrev').addEventListener('click', () => paso(-1)); $('galNext').addEventListener('click', () => paso(1));
+  $('galPrev').hidden = $('galNext').hidden = FTS.length < 2;
+  let x0 = null, y0 = 0;
+  $('galMain').addEventListener('touchstart', e => { x0 = e.touches[0].clientX; y0 = e.touches[0].clientY; }, {passive:true});
+  $('galMain').addEventListener('touchend', e => {
+    if (x0 == null) return; const dx = e.changedTouches[0].clientX - x0, dy = e.changedTouches[0].clientY - y0; x0 = null;
+    if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) paso(dx < 0 ? 1 : -1);
+  });
+  $('galMain').tabIndex = FTS.length > 1 ? 0 : -1;
+  $('galMain').addEventListener('keydown', e => { if (e.key === 'ArrowRight') paso(1); else if (e.key === 'ArrowLeft') paso(-1); });
+  contarFoto();
   pintarFoto($('galMain'));
   observarFotos(document.querySelector('.rel') || document.createElement('div'));
   $('pAttrs').addEventListener('click', e => {
@@ -843,8 +868,10 @@ window.addEventListener('scroll', () => { if (!stT) stT = requestAnimationFrame(
 function verFoto(code){
   if (!code) return;
   FT_VISTA = code; const m = $('galMain'); m.dataset.ft = code; m.dataset.alt = BYID.get(route().id)?.n || ''; pintarFoto(m);
-  $('thumbs').querySelectorAll('[data-thumb]').forEach(b => b.setAttribute('aria-pressed', b.dataset.thumb === code));
+  $('thumbs').querySelectorAll('[data-thumb]').forEach(b => { const on = b.dataset.thumb === code; b.setAttribute('aria-pressed', on); if (on) b.scrollIntoView({block:'nearest', inline:'nearest'}); });
+  contarFoto();
 }
+function contarFoto(){ const n = $('galN'); if (!n) return; n.hidden = FTS.length < 2; n.textContent = `${FTS.indexOf(FT_VISTA) + 1} / ${FTS.length}`; }
 function elegida(it){ const vs = it.vs || []; return SEL.every(s => s != null) ? vs.find(v => v.o.every((o, j) => o === SEL[j])) || null : null; }
 function pintarOpciones(it, vari){
   const vs = it.vs || [];

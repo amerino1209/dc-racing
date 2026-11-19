@@ -432,6 +432,13 @@ dialog.fi-dlg{width:min(1100px,calc(100% - 16px))}
 .fi-attr{display:grid;grid-template-columns:minmax(120px,auto) minmax(0,1fr);gap:8px;align-items:center}
 .fi-attr input[type=text]{min-height:44px;border:1.5px solid var(--line);border-radius:8px;padding:8px 10px;background:var(--surface);min-width:0}
 .fi-vars{display:grid;gap:8px}
+.fi-gal{display:flex;flex-wrap:wrap;gap:8px}
+.fi-gal-it{position:relative;width:96px;display:grid;gap:4px}
+.fi-gal-it .ph{width:96px;height:96px;border:1px solid var(--line);border-radius:10px;background:#fff;overflow:hidden;display:grid;place-items:center;color:var(--muted);font-size:.8rem}
+.fi-gal-it .ph img{width:100%;height:100%;object-fit:contain}
+.fi-gal-row{display:flex;gap:4px}
+.fi-gal-row .btn{flex:1;min-width:0;min-height:40px;padding:4px 0;font-size:.8rem}
+.fi-gal-add{width:96px;height:96px;border:1.5px dashed var(--line);border-radius:10px;justify-content:center;text-align:center;white-space:normal;font-size:.85rem;padding:6px}
 .fi-var{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--line);border-radius:10px;padding:8px;background:var(--surface-2);min-width:0}
 .fi-var-main{flex:1;min-width:0;display:grid;gap:4px}
 .fi-var-top{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
@@ -803,6 +810,12 @@ label.chk.sm{font-size:.85rem}
           <p class="hint warn" id="fi_varWarn" hidden></p>
           <label class="f">Agregar variante <input id="fi_add" type="search" placeholder="Código o nombre del producto"></label>
           <div class="hits" id="fi_addHits" hidden></div>
+        </fieldset>
+        <fieldset>
+          <legend>Galería: más fotos del producto</legend>
+          <p class="hint">Además de la foto de cada variante, puedes sumar hasta 8 fotos (detalles, otros ángulos, la pieza montada). En la vitrina salen justo después de la foto principal.</p>
+          <div class="fi-gal" id="fi_gal"></div>
+          <p class="hint" id="fi_galMsg" role="status"></p>
         </fieldset>
       </div>
       <div class="fi-col">
@@ -3010,13 +3023,14 @@ function pubArmar(){
       if (ov && ov.sin) v.dv = {sin:true}; else if (ov && ov.valor != null && ov.valor !== '') v.dv = {valor:Number(ov.valor)};
       return v;
     });
+    const gal = (Array.isArray(f.gal) ? f.gal : []).filter(Boolean).slice(0, 8).map(id => { fotos['g-'+id] = 'f:'+id; return 'g-'+id; });
     const main = BY.get(f.foto);
     const ft = (main && !main.arch && fotos[main.c]) ? main.c : (vs.find(v => v.ft)?.c || '');
     const cx = TAX ? (TX.cat.has(f.cx) ? f.cx : (catOf(ps[0]) || '')) : '';
     const mk = TAX ? (TX.mk.has(f.mk) ? f.mk : (marcaOf(ps[0]) || '')) : '';
     if (cx) for (let c = TX.cat.get(cx); c; c = c.padre ? TX.cat.get(c.padre) : null) catUso.add(c.id);
     if (mk) mkUso.add(mk);
-    items.push({id:f.id, n:f.n || fiNombreSugerido(ps), mk, cx, desc:f.desc||'', attrs:attrs.map(a => ({k:a.k, n:a.n || (ATTR_KEYS.find(x => x[0]===a.k)||[])[1] || a.k})), vs, ft,
+    items.push({id:f.id, n:f.n || fiNombreSugerido(ps), mk, cx, desc:f.desc||'', attrs:attrs.map(a => ({k:a.k, n:a.n || (ATTR_KEYS.find(x => x[0]===a.k)||[])[1] || a.k})), vs, ft, gal,
                 dsc:pubDsc(f.dsc), upd:f.upd || f.creado || ''});
   }
   items.sort((a,b) => String(b.upd).localeCompare(String(a.upd)));
@@ -3071,7 +3085,7 @@ async function pubRun(force){
     PUB.fase = 'Revisando fotos…'; pubPintar();
     await pubFotos(fotos);
     // las fotos que no se pudieron subir no se anuncian
-    for (const it of items){ for (const v of it.vs) if (v.ft && !PUB.idx[v.c]) delete v.ft; if (it.ft && !PUB.idx[it.ft]) it.ft = it.vs.find(v => v.ft)?.c || ''; }
+    for (const it of items){ for (const v of it.vs) if (v.ft && !PUB.idx[v.c]) delete v.ft; if (it.ft && !PUB.idx[it.ft]) it.ft = it.vs.find(v => v.ft)?.c || ''; it.gal = it.gal.filter(g => PUB.idx[g]); if (!it.ft && it.gal.length) it.ft = it.gal[0]; if (!it.gal.length) delete it.gal; }
     const h = pubHash(JSON.stringify([items, cats, marcas, tienda]));
     PUB.n = items.length;
     if (h !== PUB.h || force){
@@ -3174,7 +3188,8 @@ function openFicha(f){
   $('fi_add').value = ''; $('fi_addHits').hidden = true;
   $('fiForm').querySelectorAll('input,select,textarea,.seg button').forEach(el => el.disabled = !canWrite);
   $('fi_save').hidden = !canWrite;
-  renderFiAttrs(); renderFiVars(); renderFiPrev();
+  fe.gal = Array.isArray(fe.gal) ? fe.gal : []; $('fi_galMsg').textContent = '';
+  renderFiAttrs(); renderFiVars(); renderFiPrev(); renderFiGal();
   $('fiDlg').showModal();
 }
 function setDTipo(t){
@@ -3253,6 +3268,39 @@ function renderFiPrev(){
     <p class="hint">Las opciones agotadas se ven apagadas; el cliente nunca ve cantidades.</p>`;
   loadThumbs($('fi_prev'));
 }
+// ----- galería de la ficha: fotos extra (ids de la colección fotos), en orden -----
+const GAL_MAX = 8;
+function renderFiGal(){
+  if (!fe) return;
+  const g = fe.gal || [];
+  $('fi_gal').innerHTML = g.map((id, i) => `<div class="fi-gal-it"><span class="ph" data-gal="${esc(id)}">…</span>${canWrite ? `<span class="fi-gal-row">
+      <button class="btn sm" type="button" data-gmv="${i}" data-dir="-1" aria-label="Mover foto ${i+1} a la izquierda" ${i===0?'disabled':''}>‹</button>
+      <button class="btn sm" type="button" data-grm="${i}" aria-label="Quitar foto ${i+1}">Quitar</button>
+      <button class="btn sm" type="button" data-gmv="${i}" data-dir="1" aria-label="Mover foto ${i+1} a la derecha" ${i===g.length-1?'disabled':''}>›</button></span>` : ''}</div>`).join('')
+    + (canWrite && g.length < GAL_MAX ? `<label class="btn filebtn fi-gal-add"><span>+ Agregar fotos</span><input id="fi_galFile" type="file" accept="image/*" multiple></label>` : '')
+    + (!g.length && !canWrite ? '<span class="hint">Sin fotos extra.</span>' : '');
+  $('fi_gal').querySelectorAll('[data-gal]').forEach(el => {
+    const id = el.dataset.gal, put = u => { el.innerHTML = u ? `<img alt="" src="${esc(u)}">` : 'Sin foto'; };
+    const now = fotoUrl(id); if (now && window.fotoPeek) put(now); else if (window.fotoGet) window.fotoGet(id).then(put); else put(now);
+  });
+}
+$('fi_gal').addEventListener('click', e => {
+  if (!fe) return;
+  const rm = e.target.closest('[data-grm]'), mv = e.target.closest('[data-gmv]');
+  if (rm){ fe.gal.splice(+rm.dataset.grm, 1); renderFiGal(); }
+  else if (mv){ const i = +mv.dataset.gmv, j = i + Number(mv.dataset.dir); if (j < 0 || j >= fe.gal.length) return; [fe.gal[i], fe.gal[j]] = [fe.gal[j], fe.gal[i]]; renderFiGal(); }
+});
+$('fi_gal').addEventListener('change', async e => {
+  if (e.target.id !== 'fi_galFile' || !fe || !assets) return;
+  const files = [...e.target.files].slice(0, GAL_MAX - (fe.gal||[]).length); e.target.value = '';
+  const msg = $('fi_galMsg'); let ok = 0, fallo = 0;
+  for (const f of files){
+    msg.textContent = `Subiendo foto ${ok + fallo + 1} de ${files.length}…`;
+    try{ const b = await compress(f); const r = await assets.upload(b, {type: b.type || 'image/jpeg'}); if (!fe) return; (fe.gal ||= []).push(r.id); ok++; renderFiGal(); }
+    catch(_){ fallo++; }
+  }
+  msg.textContent = (ok ? `${ok} ${ok===1?'foto lista':'fotos listas'}. Se guardan al pulsar Guardar ficha.` : '') + (fallo ? ` ${fallo} no se ${fallo===1?'pudo':'pudieron'} subir; usa JPG o PNG.` : '');
+});
 async function saveFicha(e){
   e.preventDefault(); if (!fe || !db || !canWrite) return;
   readDsc();
@@ -3266,7 +3314,7 @@ async function saveFicha(e){
   const now = new Date().toISOString(), uid = await myId();
   const doc = {n, mk:$('fi_mk').value||'', cx:$('fi_cx').value||'', desc:$('fi_desc').value.trim(), attrs:fe.attrs, codes:fe.codes,
     foto: fe.codes.includes(fe.foto) ? fe.foto : fe.codes[0], dsc: fe.dsc, dscVar: Object.fromEntries(Object.entries(fe.dscVar).filter(([c])=>fe.codes.includes(c))),
-    pub: $('fi_pub').checked, upd:now, por:uid, creado: fe.creado || now};
+    gal: (fe.gal||[]).slice(0, GAL_MAX), pub: $('fi_pub').checked, upd:now, por:uid, creado: fe.creado || now};
   const map = {};
   for (const [c, ch] of Object.entries(fe.ed)){
     const p = BY.get(c); if (!p) continue; const patch = {};
