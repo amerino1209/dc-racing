@@ -743,7 +743,8 @@ label.chk.sm{font-size:.85rem}
         <div class="pick" id="aPick" hidden></div>
         <div class="kpi" id="aResumen"></div>
         <div class="filters"><button class="btn primary" type="submit" id="aCrear">Crear inventario</button>
-          <label class="btn filebtn" id="aArchivoBtn" title="Archivo de conteo preparado por Claude a partir del Excel"><span>Cargar conteo desde archivo</span><input id="aArchivo" type="file" accept=".json,application/json"></label></div>
+          <label class="btn filebtn" id="aArchivoBtn" title="Excel o CSV con el código interno y la cantidad contada (también acepta el archivo de conteo preparado por Claude)"><span>Cargar conteo desde Excel</span><input id="aArchivo" type="file" accept=".xlsx,.xls,.xlsm,.ods,.csv,text/csv,.json,application/json"></label>
+          <button class="btn" type="button" id="aPlantilla" hidden title="Excel con los productos elegidos arriba (o todos) y una columna para la cantidad contada">Descargar plantilla de conteo</button></div>
         <p class="hint" id="aArchivoMsg" hidden></p>
       </form>
       <div class="catbar"><h2>Inventarios abiertos</h2></div>
@@ -856,6 +857,17 @@ label.chk.sm{font-size:.85rem}
     <ul class="hint warn imp-warn" id="impWarn" hidden></ul>
     <div class="imp-list" id="impList"></div>
     <div class="acts"><button class="btn" type="button" id="imp_cancel">Cancelar</button><button class="btn ok" type="button" id="imp_ok">Aplicar</button></div>
+  </form>
+</dialog>
+<dialog class="dlg imp-dlg" id="cntDlg" aria-labelledby="cntT">
+  <form method="dialog" id="cntForm">
+    <h3 id="cntT">Ajuste de inventario desde archivo</h3>
+    <div id="cntSum"></div>
+    <label class="f">Nombre del inventario <input id="cnt_nombre" maxlength="120"></label>
+    <ul class="hint warn imp-warn" id="cntWarn" hidden></ul>
+    <div class="imp-list" id="cntList"></div>
+    <p class="hint">El stock todavía no cambia. Se crea un inventario abierto con estas cantidades: ahí revisas y pulsas <b>Cerrar y aplicar al stock</b>. La cantidad contada reemplaza al stock del sistema.</p>
+    <div class="acts"><button class="btn" type="button" id="cnt_cancel">Cancelar</button><button class="btn ok" type="button" id="cnt_ok">Crear inventario</button></div>
   </form>
 </dialog>
 <dialog class="dlg" id="archDlg" aria-labelledby="archT">
@@ -1948,6 +1960,7 @@ function updateInvForm(){
   $('aResumen').innerHTML = ps.length ? `<span><b>${int(ps.length)}</b> productos</span><span><b>${int(ps.reduce((s,p)=>s+(p.q||0),0))}</b> unidades en sistema</span>` : '<span>Elige qué vas a contar.</span>';
   $('aCrear').disabled = !ps.length || !db || !canWrite;
   $('aArchivoBtn').hidden = !db || !canWrite;
+  $('aPlantilla').hidden = !downloads;
 }
 async function createInv(e){
   e.preventDefault();
@@ -1967,6 +1980,7 @@ async function createInv(e){
 // Crea los productos nuevos (stock 0) y un inventario abierto con todo ya contado, para revisar diferencias y luego cerrarlo.
 async function loadCountFile(file){
   const msg = $('aArchivoMsg'); msg.hidden = false;
+  if (!/\.json$/i.test(file.name)){ msg.textContent = 'Leyendo '+file.name+'…'; return countSheetOpen(file); }
   try{
     const j = JSON.parse(await file.text());
     if (!j || j.tipo!=='conteo' || !(j.conteos || j.nuevos)) throw new Error('el archivo no es un conteo válido');
@@ -1995,6 +2009,110 @@ async function loadCountFile(file){
     toast(`Inventario creado con ${codigos.length} productos contados` + (nn ? `, ${nn} productos nuevos` : '') + (faltan.length ? ` (${faltan.length} códigos no existen)` : ''));
     msg.hidden = true;
   }catch(err){ msg.textContent = 'No se pudo cargar el conteo: '+(err.message||err); }
+}
+// ---------- ajuste de inventario desde Excel/CSV ----------
+// Cualquier hoja con una columna de código (Código interno, REF INTERNA, código de barras…) y otra de cantidad contada.
+// Celda de cantidad vacía = no se contó. Si un código se repite, las cantidades se suman (contado en dos lugares).
+const CNT_CODE = ['codigo interno','ref interna','referencia interna','ref','referencia','codigo','cod','code'];
+const CNT_ALT = ['codigo de barras','barcode','barras','sku','codigo de fabrica','codigo proveedor','codigo de proveedor'];
+const CNT_QTY = ['cantidad contada','conteo','contado','contada','conteo fisico','cantidad fisica','cantidad real','stock real','nuevo stock','cantidad que se aplicara','cantidad','cant','stock','existencia','existencias','unidades','und','qty'];
+const hNorm = h => norm(String(h ?? '').replace(/\s*\(.*\)\s*$/, '')).replace(/[.:]/g,'').replace(/\s+/g,' ');
+function cntFindHeader(rows){
+  for (let r = 0; r < Math.min(rows.length, 15); r++){
+    const h = (rows[r]||[]).map(hNorm);
+    const pick = list => { for (const n of list){ const i = h.indexOf(n); if (i >= 0) return i; } return -1; };
+    let code = pick(CNT_CODE), alt = false;
+    if (code < 0){ code = pick(CNT_ALT); alt = code >= 0; }
+    const qty = pick(CNT_QTY.filter(n => !/sistema/.test(n)));
+    if (code >= 0 && qty >= 0 && !/sistema/.test(h[qty])) return {r, code, qty, alt, desc: h.findIndex(x => /^descripcion|^producto|^nombre/.test(x))};
+  }
+  return null;
+}
+async function countReadBook(file){
+  if (/\.csv$/i.test(file.name)) return [{name: file.name, rows: await readMassFile(file)}];
+  const X = await loadXlsx();
+  const wb = X.read(await file.arrayBuffer(), {type:'array', cellStyles:false, cellHTML:false, cellFormula:false});
+  return wb.SheetNames.map(n => ({name: n, rows: X.utils.sheet_to_json(wb.Sheets[n], {header:1, raw:true, defval:''})}));
+}
+let CNT = null;
+async function countSheetOpen(file){
+  const msg = $('aArchivoMsg');
+  try{
+    const sheets = await countReadBook(file);
+    let sh = null, hd = null;
+    const pref = sheets.slice().sort((a,b) => (/conteo|contad|inventario/i.test(b.name)?1:0) - (/conteo|contad|inventario/i.test(a.name)?1:0));
+    for (const s of pref){ const h = cntFindHeader(s.rows); if (h){ sh = s; hd = h; break; } }
+    if (!sh) throw new Error('no encontré una columna de código (Código interno o REF INTERNA) junto con una de cantidad (Cantidad contada, Conteo o CANT) en las primeras filas.');
+    const rows = sh.rows, q = {}, rowOf = {}, warn = [], unknown = [], sinCodigo = [], dups = new Set();
+    let vacias = 0;
+    for (let r = hd.r + 1; r < rows.length; r++){
+      const row = rows[r] || [], rawC = String(row[hd.code] ?? '').trim(), rawQ = row[hd.qty], sq = String(rawQ ?? '').trim();
+      if (!rawC && sq === '') continue;
+      if (!rawC){ sinCodigo.push(`Fila ${r+1}${hd.desc>=0 && row[hd.desc] ? ': '+String(row[hd.desc]).trim().slice(0,60) : ''} (${sq} und)`); continue; }
+      if (/^ok$/i.test(rawC)) continue;
+      if (sq === ''){ vacias++; continue; }
+      const p = hd.alt ? findByCode(rawC) : (BY.get(rawC.toUpperCase()) || findByCode(rawC));
+      if (!p){ unknown.push(rawC); continue; }
+      const n = parseNum(rawQ);
+      if (isNaN(n) || n < 0){ warn.push(`Fila ${r+1} (${p.c}): "${sq}" no es una cantidad válida, se omite.`); continue; }
+      const v = Math.round(n);
+      if (v !== n) warn.push(`Fila ${r+1} (${p.c}): ${sq} se redondea a ${v}.`);
+      if (p.c in q){ dups.add(p.c); q[p.c] += v; } else { q[p.c] = v; rowOf[p.c] = r+1; }
+    }
+    if (dups.size) warn.unshift(`${dups.size} ${dups.size===1?'código aparece':'códigos aparecen'} más de una vez y se sumaron sus cantidades: ${[...dups].slice(0,20).join(', ')}${dups.size>20?'…':''}.`);
+    const codes = Object.keys(q);
+    if (!codes.length) throw new Error(unknown.length ? `ninguno de los ${unknown.length} códigos del archivo existe en el catálogo.` : 'no hay filas con código y cantidad.');
+    const diffs = codes.map(c => ({c, a: BY.get(c).q ?? 0, d: q[c]})).filter(x => x.a !== x.d).sort((x,y) => Math.abs(y.d-y.a) - Math.abs(x.d-x.a));
+    const id = `xls:${file.name}:${file.size}:${file.lastModified}`;
+    const antes = INVS.find(i => i.archivo === id && i.estado !== 'descartado');
+    if (antes) warn.unshift(`Este mismo archivo ya se cargó en el inventario "${antes.nombre}" (${fdate(antes.creado)}).`);
+    CNT = {file: file.name, id, sheet: sh.name, head: rows[hd.r], hd, q, diffs, warn, unknown, sinCodigo, vacias};
+    countRender();
+    $('cnt_nombre').value = 'Ajuste ' + file.name.replace(/\.[^.]+$/, '');
+    msg.hidden = true;
+    $('cntDlg').showModal();
+  }catch(e){ msg.hidden = false; msg.textContent = 'No se pudo cargar el conteo: ' + (e && e.message || e); }
+}
+function countRender(){
+  const {q, diffs, warn, unknown, sinCodigo, vacias, hd, head} = CNT, n = Object.keys(q).length;
+  const falt = diffs.reduce((s,x) => s + Math.max(0, x.a-x.d), 0), sob = diffs.reduce((s,x) => s + Math.max(0, x.d-x.a), 0);
+  $('cntSum').innerHTML = `<p><b>${esc(CNT.file)}</b>${CNT.sheet!==CNT.file?` · hoja "${esc(CNT.sheet)}"`:''} · código: <b>${esc(head[hd.code])}</b> · cantidad: <b>${esc(head[hd.qty])}</b></p>
+    <div class="kpi"><span><b>${int(n)}</b> productos contados</span><span><b>${int(diffs.length)}</b> con diferencia</span><span><b>${int(n-diffs.length)}</b> cuadran</span>${falt?`<span>faltan <b>${int(falt)}</b> und</span>`:''}${sob?`<span>sobran <b>${int(sob)}</b> und</span>`:''}${unknown.length?`<span><b>${int(unknown.length)}</b> códigos no existen</span>`:''}${vacias?`<span><b>${int(vacias)}</b> sin cantidad (no se tocan)</span>`:''}</div>`;
+  const lim = 300;
+  $('cntList').innerHTML = diffs.length ? `<table class="kx-tb imp-tb"><thead><tr><th>Código</th><th>Producto</th><th>Sistema</th><th>Contado</th><th>Dif.</th></tr></thead><tbody>${diffs.slice(0, lim).map(x => { const d = x.d - x.a; return `<tr><td class="code">${esc(x.c)}</td><td>${esc(displayName(BY.get(x.c)))}</td><td class="old">${int(x.a)}</td><td><b>${int(x.d)}</b></td><td><span class="delta ${d<0?'neg':'pos'}">${d>0?'+':''}${d}</span></td></tr>`; }).join('')}</tbody></table>${diffs.length > lim ? `<p class="hint">…y ${int(diffs.length - lim)} diferencias más.</p>` : ''}`
+    : '<p class="hint">Todas las cantidades cuadran con el sistema.</p>';
+  const w = [...warn, ...(unknown.length ? [`Estos códigos no existen y se omiten: ${unknown.slice(0, 30).join(', ')}${unknown.length > 30 ? '…' : ''}`] : []),
+    ...(sinCodigo.length ? [`${sinCodigo.length} ${sinCodigo.length===1?'fila tiene':'filas tienen'} cantidad pero no código y se omiten: ${sinCodigo.slice(0, 15).join('; ')}${sinCodigo.length > 15 ? '…' : ''}`] : [])];
+  $('cntWarn').hidden = !w.length; $('cntWarn').innerHTML = w.slice(0, 60).map(x => `<li>${esc(x)}</li>`).join('') + (w.length > 60 ? `<li>…y ${int(w.length - 60)} avisos más.</li>` : '');
+  $('cnt_ok').disabled = !canWrite; $('cnt_ok').textContent = `Crear inventario con ${int(n)} ${n===1?'producto':'productos'}`;
+}
+async function countCreate(){
+  if (!CNT || !db) return;
+  const b = $('cnt_ok'); b.disabled = true; b.textContent = 'Creando…';
+  const t = new Date().toISOString(), codigos = Object.keys(CNT.q), sistema = {}, conteos = {};
+  for (const c of codigos){ sistema[c] = BY.get(c)?.q ?? 0; conteos[c] = {q: CNT.q[c], t}; }
+  const doc = {nombre: $('cnt_nombre').value.trim() || 'Ajuste desde archivo', alcance:{tipo:'archivo', valor: CNT.file, cat:''},
+    codigos, sistema, conteos, estado:'abierto', creado:t, por: await myId(), archivo: CNT.id};
+  try{
+    const ref = await db.collection('inventarios').add(doc);
+    $('cntDlg').close();
+    location.hash = 'inv-'+ref.id;
+    $('icFilter').value = 'diff';
+    toast(`Inventario creado: ${int(codigos.length)} productos, ${int(CNT.diffs.length)} con diferencia. Revisa y pulsa "Cerrar y aplicar al stock".`);
+  }catch(e){ toast('No se pudo crear el inventario: '+(e.message||'')); b.disabled = false; countRender(); }
+}
+async function countTemplate(){
+  const btn = $('aPlantilla'); btn.disabled = true;
+  try{
+    const X = await loadXlsx(), sel = scopeProducts(), ps = (sel.length ? sel : ALL.filter(p => !p.arch));
+    const aoa = [['Código interno','Producto','Marca','Stock en sistema','Cantidad contada'], ...ps.map(p => [p.c, displayName(p), p.m || '', p.q ?? 0, ''])];
+    const ws = X.utils.aoa_to_sheet(aoa); ws['!cols'] = [{wch:11},{wch:48},{wch:16},{wch:10},{wch:12}];
+    const wb = X.utils.book_new(); X.utils.book_append_sheet(wb, ws, 'Conteo');
+    const data = new Blob([X.write(wb, {bookType:'xlsx', type:'array'})], {type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+    await downloads.save({filename:`conteo_${hoyStr()}.xlsx`, data});
+    toast(`Plantilla con ${int(ps.length)} productos. Llena "Cantidad contada" y cárgala con "Cargar conteo desde Excel"; las filas vacías no se tocan.`);
+  }catch(e){ toast(e && e.message || 'No se pudo descargar la plantilla.'); }
+  btn.disabled = false;
 }
 function invStats(inv){
   const cods = inv.codigos||[], cn = inv.conteos||{};
@@ -3697,6 +3815,10 @@ let ta; $('aBusca').addEventListener('input', ()=>{ clearTimeout(ta); ta=setTime
 $('aPick').addEventListener('change', e => { const c=e.target.dataset.c; if(!c) return; e.target.checked ? picked.add(c) : picked.delete(c); updateInvForm(); });
 $('invForm').addEventListener('submit', createInv);
 $('aArchivo').addEventListener('change', e => { const f=e.target.files[0]; e.target.value=''; if (f) loadCountFile(f); });
+$('aPlantilla').addEventListener('click', countTemplate);
+$('cnt_cancel').addEventListener('click', () => $('cntDlg').close());
+$('cnt_ok').addEventListener('click', countCreate);
+$('cntDlg').addEventListener('close', () => { CNT = null; });
 $('icFilter').addEventListener('change', ()=>renderCount());
 $('icList').addEventListener('click', e => {
   const b=e.target.closest('button[data-act]'); if(!b) return;
